@@ -597,6 +597,17 @@
                     <input type="text" id="nisnPiket" name="nisnPiket" readonly placeholder="Otomatis terisi">
                 </div>
                 <div class="form-group">
+                    <label for="hariPiketSiswa">Hari Piket</label>
+                    <select id="hariPiketSiswa" name="hariPiketSiswa" required>
+                        <option value="">Pilih Hari</option>
+                        <option value="SENIN">SENIN</option>
+                        <option value="SELASA">SELASA</option>
+                        <option value="RABU">RABU</option>
+                        <option value="KAMIS">KAMIS</option>
+                        <option value="JUMAT">JUMAT</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="kelasPiket">Kelas</label>
                     <select id="kelasPiket" name="kelasPiket" required>
                         <option value="">Pilih Kelas</option>
@@ -900,6 +911,7 @@
         const siswaDropdownList = document.getElementById('siswaDropdownList');
         const nisnInput = document.getElementById('nisnPiket');
         const kelasSelect = document.getElementById('kelasPiket');
+        const hariPiketSelect = document.getElementById('hariPiketSiswa');
 
         // Data Cache
         let siswaDataCache = [];
@@ -912,6 +924,17 @@
                 if(namaSiswaInput) namaSiswaInput.value = '';
                 if(namaSiswaHidden) namaSiswaHidden.value = '';
                 if(siswaDropdownList) siswaDropdownList.innerHTML = '';
+                
+                // Set default hari ke hari ini jika sesuai (Senin-Jumat)
+                if (hariPiketSelect) {
+                    const now = new Date();
+                    const hari = now.toLocaleDateString('id-ID', { weekday: 'long' }).toUpperCase();
+                    if (['SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT'].includes(hari)) {
+                        hariPiketSelect.value = hari;
+                    } else {
+                        hariPiketSelect.value = "";
+                    }
+                }
                 
                 await loadSiswaOptions();
                 await loadKelasOptions();
@@ -1017,13 +1040,24 @@
             nisnInput.value = siswa.nisn; // Auto-fill NISN
             siswaDropdownList.classList.remove('show');
 
-            // Generate ID Piket
-            const now = new Date();
-            const hari = now.toLocaleDateString('id-ID', { weekday: 'long' }).toUpperCase();
+            generateIdPiket();
+        }
+
+        // Generate ID Piket otomatis saat siswa dipilih atau hari diubah
+        function generateIdPiket() {
+            const nama = namaSiswaHidden.value;
+            const nisn = nisnInput.value;
+            const hari = hariPiketSelect ? hariPiketSelect.value : '';
             const idPiketInput = document.getElementById('idPiketSiswa');
-            if (idPiketInput) {
-                idPiketInput.value = `ID_${hari}-${siswa.nama_siswa}/${siswa.nisn}`;
+
+            if (idPiketInput && nama && nisn && hari) {
+                idPiketInput.value = `ID_${hari}-${nama}/${nisn}`;
             }
+        }
+
+        // Event listener untuk perubahan hari agar ID ikut berubah
+        if (hariPiketSelect) {
+            hariPiketSelect.addEventListener('change', generateIdPiket);
         }
 
         // --- Load Data Piket Siswa (Tabel Petugas Piket Umum Siswa) ---
