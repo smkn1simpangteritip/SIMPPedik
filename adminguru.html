@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Guru - SMKN 1 Simpang Teritip</title>
+    <!-- Font Awesome untuk Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase JS SDK -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --sidebar-bg: #2c3e50;
+            --sidebar-text: #ecf0f1;
+            --sidebar-hover: #34495e;
+            --header-height: 60px;
+            --sidebar-width: 260px;
+            --bg-light: #f4f6f9;
+            --navbar-bg: #dc2626; /* Warna Merah untuk Navbar */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Navbar (Custom Red) --- */
+        .navbar {
+            height: var(--header-height);
+            background-color: var(--navbar-bg); /* Menggunakan warna merah */
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1002;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .menu-toggle {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: white; /* Icon putih agar kontras dengan merah */
+            margin-right: 1rem;
+            background: none;
+            border: none;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+            width: auto;
+            background-color: white; /* Background putih untuk logo agar terlihat jelas */
+            border-radius: 50%;
+            padding: 2px;
+        }
+
+        .navbar-brand span {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: white; /* Teks putih */
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(-100%);
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding-top: 1rem;
+            list-style: none;
+        }
+
+        .menu-item {
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            transition: background 0.2s;
+            justify-content: space-between;
+        }
+
+        .menu-link:hover, .menu-link.active {
+            background-color: var(--sidebar-hover);
+            border-left: 4px solid var(--navbar-bg); /* Border merah sesuai navbar */
+        }
+
+        .menu-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu-icon {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Sidebar Footer */
+        .sidebar-footer {
+            padding: 20px;
+            background-color: rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .admin-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--navbar-bg); /* Merah */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .admin-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .admin-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            margin-top: var(--header-height);
+            margin-left: 0;
+            padding: 2rem;
+            flex: 1;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease;
+        }
+
+        .sidebar.active ~ .main-content {
+            margin-left: 0;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-info h3 { font-size: 2rem; margin-bottom: 5px; color: #333; }
+        .stat-info p { color: #777; font-size: 0.9rem; }
+        .stat-icon { font-size: 2.5rem; opacity: 0.2; }
+
+        /* Footer */
+        .main-footer {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 0.85rem;
+            border-top: 1px solid #eee;
+            margin-top: 20px;
+        }
+
+        /* Overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand span {
+                font-size: 1rem;
+            }
+        }
+
+        /* --- Modal Styles --- */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background-color: white; width: 90%; max-width: 400px; padding: 30px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: slideDown 0.3s ease; text-align: center; }
+        @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <a href="#" class="navbar-brand">
+            <img src="" alt="Logo Sekolah" style="display: none;">
+            <span></span>
+        </a>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <ul class="sidebar-menu">
+            <li class="menu-item">
+                <a href="adminguru.html" class="menu-link active">
+                    <div class="menu-content">
+                        <i class="fas fa-home menu-icon"></i>
+                        <span>Dashboard</span>
+                    </div>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="#" class="menu-link" id="piketLink">
+                    <div class="menu-content">
+                        <i class="fas fa-calendar-check menu-icon"></i>
+                        <span>Piket Harian</span>
+                    </div>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="guruwali.html" class="menu-link">
+                    <div class="menu-content">
+                        <i class="fas fa-user-tie menu-icon"></i>
+                        <span>Guru Wali</span>
+                    </div>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="walikelas.html" class="menu-link">
+                    <div class="menu-content">
+                        <i class="fas fa-chalkboard-teacher menu-icon"></i>
+                        <span>Walikelas</span>
+                    </div>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <div class="menu-content">
+                        <i class="fas fa-user-graduate menu-icon"></i>
+                        <span>Pembinaan Siswa</span>
+                    </div>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <div class="menu-content">
+                        <i class="fas fa-book-reader menu-icon"></i>
+                        <span>Kasus Belajar</span>
+                    </div>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <div class="menu-content">
+                        <i class="fas fa-file-alt menu-icon"></i>
+                        <span>Laporan</span>
+                    </div>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <div class="menu-content">
+                        <i class="fas fa-database menu-icon"></i>
+                        <span>Backup dan Reset</span>
+                    </div>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="index.html" class="menu-link" onclick="return confirm('Apakah Anda yakin ingin keluar?');">
+                    <div class="menu-content">
+                        <i class="fas fa-sign-out-alt menu-icon"></i>
+                        <span>Log Out</span>
+                    </div>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Sidebar Footer -->
+        <div class="sidebar-footer">
+            <div class="admin-avatar">G</div> 
+            <div class="admin-info">
+                <div class="admin-name">Admin Guru</div>
+                <div style="font-size: 0.75rem; color: #bdc3c7;">Online</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Overlay untuk Mobile -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+            <div style="background: white; padding: 10px 20px; border-radius: 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); color: #555; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 10px;">
+                <i class="far fa-clock" style="color: var(--navbar-bg);"></i>
+                <span id="liveDateTime"></span>
+            </div>
+        </div>
+        <div class="dashboard-card">
+            <h2 id="welcomeHeading">Selamat Datang, Admin Guru!</h2>
+            <p style="color: #666; margin-top: 10px;">Ini adalah halaman dashboard khusus untuk pengelolaan data guru dan kesiswaan.</p>
+        </div>
+
+        <!-- Container Biodata Guru -->
+        <div class="dashboard-card" id="biodataContainer" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                <h3 style="margin: 0; color: #333; font-size: 1.2rem;">
+                    <i class="fas fa-id-card" style="color: var(--navbar-bg); margin-right: 10px;"></i>
+                    Biodata Guru
+                </h3>
+                <button id="btnUpdateProfil" style="background-color: #3b82f6; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; transition: background 0.2s;"><i class="fas fa-edit"></i> Update Profil</button>
+            </div>
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start;">
+                <div style="flex: 0 0 auto; width: 120px; text-align: center;">
+                    <img id="bioPhoto" src="" alt="Foto Guru" style="width: 120px; height: 120px; object-fit: cover; border-radius: 10px; border: 3px solid #eee; background: #f0f0f0;">
+                </div>
+                <div style="flex: 1; min-width: 250px;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 8px 0; width: 140px; color: #666; font-weight: 600;">Nama Lengkap</td>
+                            <td style="padding: 8px 0; color: #333;">: <span id="bioNama">-</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666; font-weight: 600;">NIP</td>
+                            <td style="padding: 8px 0; color: #333;">: <span id="bioNip">-</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666; font-weight: 600;">Mata Pelajaran</td>
+                            <td style="padding: 8px 0; color: #333;">: <span id="bioMapel">-</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666; font-weight: 600;">No. Telepon</td>
+                            <td style="padding: 8px 0; color: #333;">: <span id="bioTlp">-</span></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Container Preview Piket Bulan Ini -->
+        <div class="dashboard-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                <h3 style="margin: 0; color: #333; font-size: 1.2rem;">
+                    <i class="fas fa-calendar-alt" style="color: var(--navbar-bg); margin-right: 10px;"></i>
+                    Piket Bulan Ini: <span id="piketMonthDisplay" style="font-weight: 700; color: var(--primary-color);"></span>
+                </h3>
+                <a href="piketharin.html" style="background-color: #3b82f6; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; transition: opacity 0.2s;"><i class="fas fa-eye"></i> Lihat Detail</a>
+            </div>
+            <div class="stats-grid" style="margin-bottom: 0;">
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3 id="countPetugasHariIni">0</h3>
+                        <p>Petugas Piket Hari Ini</p>
+                    </div>
+                    <i class="fas fa-user-clock stat-icon" style="color: #3b82f6;"></i>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3 id="countMelaksanakan">0</h3>
+                        <p>Melaksanakan Tugas</p>
+                    </div>
+                    <i class="fas fa-check-circle stat-icon" style="color: #10b981;"></i>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3 id="countTidakMelaksanakan">0</h3>
+                        <p>Tidak Melaksanakan</p>
+                    </div>
+                    <i class="fas fa-times-circle stat-icon" style="color: #ef4444;"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stats Cards (Contoh Placeholder) -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>45</h3>
+                    <p>Guru Aktif</p>
+                </div>
+                <i class="fas fa-chalkboard-teacher stat-icon" style="color: var(--navbar-bg);"></i>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>12</h3>
+                    <p>Wali Kelas</p>
+                </div>
+                <i class="fas fa-user-tie stat-icon" style="color: #2ecc71;"></i>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>5</h3>
+                    <p>Kasus Siswa</p>
+                </div>
+                <i class="fas fa-exclamation-circle stat-icon" style="color: #f1c40f;"></i>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="main-footer">
+            <p>&copy; 2024 SMK Negeri 1 Simpang Teritip. All rights reserved.</p>
+            <p>Dikembangkan oleh Tim IT Sekolah.</p>
+        </footer>
+    </main>
+
+    <!-- Modal Akses Ditolak -->
+    <div id="accessDeniedModal" class="modal">
+        <div class="modal-content">
+            <div style="margin-bottom: 20px;">
+                <i class="fas fa-ban" style="font-size: 4rem; color: #ef4444;"></i>
+            </div>
+            <h3 style="color: #333; margin-bottom: 10px;">Akses Ditolak</h3>
+            <p style="color: #666; margin-bottom: 25px;">Maaf, anda tidak memiliki tugas tambahan sebagai guru piket.</p>
+            <button onclick="document.getElementById('accessDeniedModal').classList.remove('active')" style="background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: 600; width: 100%;">Tutup</button>
+        </div>
+    </div>
+
+    <!-- Modal Update Profil -->
+    <div id="updateProfilModal" class="modal">
+        <div class="modal-content" style="text-align: left; max-width: 500px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                <h3 style="margin: 0; font-size: 1.3rem; color: #333;">Update Profil</h3>
+                <span id="closeUpdateModal" style="cursor: pointer; font-size: 1.5rem; color: #888;">&times;</span>
+            </div>
+            <form id="updateProfilForm">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #555;">Nama Lengkap</label>
+                    <input type="text" id="editNama" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #555;">NIP</label>
+                    <input type="text" id="editNip" readonly style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; background-color: #f3f4f6; cursor: not-allowed;">
+                    <small style="color: #888;">NIP tidak dapat diubah.</small>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #555;">Mata Pelajaran</label>
+                    <input type="text" id="editMapel" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #555;">No. Telepon</label>
+                    <input type="text" id="editTlp" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #555;">Foto Profil</label>
+                    <input type="file" id="editPhoto" accept="image/*" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    <small style="color: #888;">Upload foto baru untuk mengganti.</small>
+                    <div id="editPhotoPreviewContainer" style="margin-top: 10px; display: none; text-align: center;">
+                        <img id="editPhotoPreview" src="" alt="Preview Foto" style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 1px solid #ddd; padding: 5px;">
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <button type="button" id="cancelUpdateBtn" style="padding: 10px 20px; background: #e5e7eb; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px; font-weight: 600; color: #4b5563;">Batal</button>
+                    <button type="submit" id="saveUpdateBtn" style="padding: 10px 20px; background: #3b82f6; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; color: white;">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- Supabase Integration for Navbar ---
+        const supabaseUrl = 'https://mjvobqfcoutazqcovtlp.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdm9icWZjb3V0YXpxY292dGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzEwMzYsImV4cCI6MjA4NjE0NzAzNn0.jz6JaC9mMTMhLVhXSh1OCnFWDPZ0Cy2tUnHEmWxAR8o';
+        
+        let supabaseClient;
+        if (typeof supabase !== 'undefined') {
+            supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+            async function loadSchoolIdentity() {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('identitassekolah')
+                        .select('nama_sekolah, logo')
+                        .limit(1)
+                        .single();
+                    
+                    if (data) {
+                        if (data.nama_sekolah) {
+                            document.querySelector('.navbar-brand span').textContent = data.nama_sekolah;
+                        }
+                        if (data.logo) {
+                            const img = document.querySelector('.navbar-brand img');
+                            img.src = data.logo;
+                            img.style.display = 'block';
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error loading school identity:", err);
+                }
+            }
+            document.addEventListener('DOMContentLoaded', loadSchoolIdentity);
+        }
+
+        // Toggle Sidebar (Mobile)
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        menuToggle.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+
+        // --- Load Data Guru dari Sesi Login ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const session = JSON.parse(sessionStorage.getItem('guru_session'));
+            
+            if (session) {
+                // Update Nama di Sidebar
+                const adminNameEl = document.querySelector('.admin-name');
+                if (adminNameEl) adminNameEl.textContent = session.nama;
+
+                // Update Welcome Heading
+                const welcomeHeading = document.getElementById('welcomeHeading');
+                if (welcomeHeading) welcomeHeading.textContent = `Selamat Datang, ${session.nama}!`;
+
+                // Update Avatar jika ada foto
+                const adminAvatarEl = document.querySelector('.admin-avatar');
+                if (session.photo && adminAvatarEl) {
+                    adminAvatarEl.innerHTML = `<img src="${session.photo}" alt="Foto" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+                    adminAvatarEl.style.backgroundColor = 'transparent';
+                } else if (adminAvatarEl) {
+                    adminAvatarEl.textContent = session.nama.charAt(0).toUpperCase();
+                }
+            }
+        });
+
+        // --- Fitur Jam & Tanggal Berjalan ---
+        function updateLiveTime() {
+            const now = new Date();
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            document.getElementById('liveDateTime').textContent = `${now.toLocaleDateString('id-ID', dateOptions)} | ${now.toLocaleTimeString('id-ID', timeOptions).replace(/\./g, ':')} WIB`;
+        }
+        setInterval(updateLiveTime, 1000);
+        updateLiveTime();
+
+        // --- Validasi Akses Piket Harian ---
+        const piketLink = document.getElementById('piketLink');
+        const accessDeniedModal = document.getElementById('accessDeniedModal');
+
+        if (piketLink) {
+            piketLink.addEventListener('click', async (e) => {
+                e.preventDefault();
+                
+                const session = JSON.parse(sessionStorage.getItem('guru_session'));
+                if (!session || !session.nama) {
+                    alert('Sesi tidak valid. Silakan login ulang.');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                const namaGuru = session.nama;
+
+                try {
+                    // Validasi: Cek apakah nama guru ada di tabel gurupiket (kolom piket1, piket2, atau piket3)
+                    const { data, error } = await supabaseClient
+                        .from('gurupiket')
+                        .select('id')
+                        .or(`piket1.eq."${namaGuru}",piket2.eq."${namaGuru}",piket3.eq."${namaGuru}"`)
+                        .limit(1);
+
+                    if (error) throw error;
+
+                    if (data && data.length > 0) {
+                        window.location.href = 'piketharin.html';
+                    } else {
+                        accessDeniedModal.classList.add('active');
+                    }
+                } catch (err) {
+                    console.error('Error checking piket access:', err);
+                    alert('Terjadi kesalahan saat memvalidasi akses.');
+                }
+            });
+        }
+
+        // --- Load Statistik Piket Bulan Ini ---
+        async function loadPiketStats() {
+            const now = new Date();
+            
+            // 1. Set Bulan Display
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            const currentMonthName = monthNames[now.getMonth()];
+            const currentYear = now.getFullYear();
+            const displayEl = document.getElementById('piketMonthDisplay');
+            if(displayEl) displayEl.textContent = `${currentMonthName} ${currentYear}`;
+
+            // 2. Count Petugas Piket Hari Ini (datapiketsiswa)
+            // ID Format: ID_HARI-... (e.g. ID_SENIN-...)
+            const days = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'];
+            const todayName = days[now.getDay()];
+            
+            try {
+                const { count, error } = await supabaseClient
+                    .from('datapiketsiswa')
+                    .select('*', { count: 'exact', head: true })
+                    .ilike('id_piket', `ID_${todayName}%`);
+                
+                if (!error) {
+                    const countEl = document.getElementById('countPetugasHariIni');
+                    if(countEl) countEl.textContent = count || 0;
+                }
+            } catch (err) {
+                console.error("Error counting petugas:", err);
+            }
+
+            // 3. Count Riwayat Piket Bulan Ini (jurnalpiket)
+            try {
+                // First day of month
+                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+                // Last day of month
+                const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+
+                const { data, error } = await supabaseClient
+                    .from('jurnalpiket')
+                    .select('status')
+                    .gte('tanggal', startOfMonth)
+                    .lte('tanggal', endOfMonth);
+
+                if (!error && data) {
+                    const melaksanakan = data.filter(d => d.status === 'Ya').length;
+                    const tidakMelaksanakan = data.filter(d => d.status === 'Tidak').length;
+
+                    const elYa = document.getElementById('countMelaksanakan');
+                    const elTidak = document.getElementById('countTidakMelaksanakan');
+                    
+                    if(elYa) elYa.textContent = melaksanakan;
+                    if(elTidak) elTidak.textContent = tidakMelaksanakan;
+                }
+            } catch (err) {
+                console.error("Error counting jurnal:", err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadPiketStats);
+
+        let currentGuruData = null; // Variabel global untuk menyimpan data guru
+
+        // --- Load Biodata Guru ---
+        async function loadGuruBiodata() {
+            const session = JSON.parse(sessionStorage.getItem('guru_session'));
+            if (!session || !session.nama) return;
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('dataguru')
+                    .select('id_guru, nama_guru, nip::text, mapel, tlp, photo')
+                    .eq('nama_guru', session.nama)
+                    .single();
+
+                if (error) throw error;
+
+                if (data) {
+                    currentGuruData = data; // Simpan data ke variabel global
+                    document.getElementById('biodataContainer').style.display = 'block';
+                    document.getElementById('bioNama').textContent = data.nama_guru || '-';
+                    document.getElementById('bioNip').textContent = data.nip || '-';
+                    document.getElementById('bioMapel').textContent = data.mapel || '-';
+                    document.getElementById('bioTlp').textContent = data.tlp || '-';
+                    
+                    const photoEl = document.getElementById('bioPhoto');
+                    if (data.photo) {
+                        photoEl.src = data.photo;
+                    } else {
+                        photoEl.src = 'https://via.placeholder.com/120?text=No+Photo'; 
+                    }
+                }
+            } catch (err) {
+                console.error('Error loading biodata:', err);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', loadGuruBiodata);
+
+        // --- Logic Update Profil ---
+        const updateModal = document.getElementById('updateProfilModal');
+        const btnUpdate = document.getElementById('btnUpdateProfil');
+        const closeUpdate = document.getElementById('closeUpdateModal');
+        const cancelUpdate = document.getElementById('cancelUpdateBtn');
+        const updateForm = document.getElementById('updateProfilForm');
+
+        if(btnUpdate) {
+            btnUpdate.addEventListener('click', () => {
+                if(currentGuruData) {
+                    document.getElementById('editNama').value = currentGuruData.nama_guru || '';
+                    document.getElementById('editNip').value = currentGuruData.nip || '';
+                    document.getElementById('editMapel').value = currentGuruData.mapel || '';
+                    document.getElementById('editTlp').value = currentGuruData.tlp || '';
+                    document.getElementById('editPhoto').value = ''; // Reset file input
+                    document.getElementById('editPhotoPreview').src = '';
+                    document.getElementById('editPhotoPreviewContainer').style.display = 'none';
+                    updateModal.classList.add('active');
+                }
+            });
+        }
+
+        function closeUpdateModalFunc() {
+            updateModal.classList.remove('active');
+        }
+
+        if(closeUpdate) closeUpdate.addEventListener('click', closeUpdateModalFunc);
+        if(cancelUpdate) cancelUpdate.addEventListener('click', closeUpdateModalFunc);
+
+        // Preview Image Logic
+        const editPhotoInput = document.getElementById('editPhoto');
+        const editPhotoPreviewContainer = document.getElementById('editPhotoPreviewContainer');
+        const editPhotoPreview = document.getElementById('editPhotoPreview');
+
+        if(editPhotoInput) {
+            editPhotoInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        editPhotoPreview.src = e.target.result;
+                        editPhotoPreviewContainer.style.display = 'block';
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+
+        if(updateForm) {
+            updateForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const saveBtn = document.getElementById('saveUpdateBtn');
+                const originalText = saveBtn.textContent;
+                saveBtn.textContent = 'Menyimpan...';
+                saveBtn.disabled = true;
+
+                // Validasi ID Guru sebelum update
+                if (!currentGuruData || !currentGuruData.id_guru) {
+                    alert("Terjadi kesalahan: ID Guru tidak ditemukan. Silakan refresh halaman.");
+                    location.reload();
+                    return;
+                }
+
+                try {
+                    const nama = document.getElementById('editNama').value;
+                    const mapel = document.getElementById('editMapel').value;
+                    const tlp = document.getElementById('editTlp').value;
+                    const photoInput = document.getElementById('editPhoto');
+                    
+                    let photoUrl = currentGuruData.photo;
+
+                    // Upload photo if selected
+                    if(photoInput.files.length > 0) {
+                        const file = photoInput.files[0];
+                        const fileExt = file.name.split('.').pop();
+                        const fileName = `guru_${currentGuruData.id_guru}_${Date.now()}.${fileExt}`;
+                        
+                        const { error: uploadError } = await supabaseClient.storage
+                            .from('aset')
+                            .upload(fileName, file);
+                        
+                        if(uploadError) throw uploadError;
+                        
+                        const { data: urlData } = supabaseClient.storage
+                            .from('aset')
+                            .getPublicUrl(fileName);
+                            
+                        photoUrl = urlData.publicUrl;
+                    }
+
+                    // Update Database
+                    const { error } = await supabaseClient
+                        .from('dataguru')
+                        .update({
+                            nama_guru: nama,
+                            mapel: mapel,
+                            tlp: tlp,
+                            photo: photoUrl
+                        })
+                        .eq('id_guru', currentGuruData.id_guru);
+
+                    if(error) throw error;
+
+                    // Update Session if name/photo changed
+                    const session = JSON.parse(sessionStorage.getItem('guru_session'));
+                    if(session) {
+                        session.nama = nama;
+                        session.photo = photoUrl;
+                        sessionStorage.setItem('guru_session', JSON.stringify(session));
+                    }
+
+                    alert('Profil berhasil diperbarui!');
+                    closeUpdateModalFunc();
+                    
+                    // Reload data & UI
+                    loadGuruBiodata();
+                    
+                    // Update Sidebar & Welcome immediately
+                    const adminNameEl = document.querySelector('.admin-name');
+                    if (adminNameEl) adminNameEl.textContent = nama;
+                    const welcomeHeading = document.getElementById('welcomeHeading');
+                    if (welcomeHeading) welcomeHeading.textContent = `Selamat Datang, ${nama}!`;
+                    const adminAvatarEl = document.querySelector('.admin-avatar');
+                    if (photoUrl && adminAvatarEl) {
+                        adminAvatarEl.innerHTML = `<img src="${photoUrl}" alt="Foto" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+                    }
+
+                } catch(err) {
+                    console.error(err);
+                    alert('Gagal memperbarui profil: ' + err.message);
+                } finally {
+                    saveBtn.textContent = originalText;
+                    saveBtn.disabled = false;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

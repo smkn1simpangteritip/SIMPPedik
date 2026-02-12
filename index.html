@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <!-- Supabase JS SDK -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        /* --- CSS: Styling Halaman --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('bg1.png');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            background-color: #ffffff;
+            padding: 0;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 900px;
+            transition: transform 0.3s ease;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .login-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .login-header h2 {
+            color: #333;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #444;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* --- Tabs Role --- */
+        .role-tabs {
+            display: flex;
+            background-color: #f0f2f5;
+            padding: 5px;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+        }
+
+        .role-tab {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: #666;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .role-tab.active {
+            background-color: #ffffff;
+            color: #667eea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Tombol Toggle Password */
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 38px; /* Menyesuaikan posisi vertikal */
+            cursor: pointer;
+            color: #666;
+            font-size: 0.8rem;
+            background: none;
+            border: none;
+            font-weight: 600;
+        }
+
+        .toggle-password:hover {
+            color: #764ba2;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .btn-login:hover {
+            opacity: 0.9;
+        }
+
+        .btn-login:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .footer-text {
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .footer-text a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* Pesan Error/Sukses */
+        .message {
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+        .error { background-color: #ffebee; color: #c62828; display: block; }
+        .success { background-color: #e8f5e9; color: #2e7d32; display: block; }
+
+        /* --- Layout Kiri (Identitas Sekolah) --- */
+        .login-left {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+
+        .school-logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+        }
+
+        .login-left h1 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .login-left p {
+            font-size: 1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+            font-style: italic;
+        }
+
+        /* --- Layout Kanan (Form) --- */
+        .login-right {
+            flex: 1;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Responsif untuk Mobile */
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column;
+                max-width: 400px;
+                margin: 20px;
+            }
+            .login-left {
+                padding: 2rem;
+            }
+            .login-left h1 { font-size: 1.4rem; }
+            .school-logo { width: 80px; }
+            .login-right { padding: 2rem; }
+        }
+
+        /* --- Modal Styles (Registration) --- */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background-color: white; width: 95%; max-width: 850px; padding: 25px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: slideDown 0.3s ease; max-height: 90vh; overflow-y: auto; }
+        @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .modal-header h3 { margin: 0; color: #333; font-size: 1.4rem; }
+        .close-modal { font-size: 1.5rem; cursor: pointer; color: #888; transition: color 0.2s; }
+        .close-modal:hover { color: #ef4444; }
+
+        .reg-section-title { font-size: 1rem; color: #667eea; margin: 15px 0 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; font-weight: 600; }
+        .reg-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .reg-form-group { margin-bottom: 10px; }
+        .reg-form-group label { display: block; margin-bottom: 5px; color: #555; font-size: 0.85rem; font-weight: 600; }
+        .reg-form-group input, .reg-form-group select, .reg-form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; transition: border-color 0.3s; }
+        .reg-form-group input:focus, .reg-form-group select:focus, .reg-form-group textarea:focus { outline: none; border-color: #667eea; }
+        .reg-form-group textarea { resize: vertical; min-height: 60px; }
+        .full-width { grid-column: 1 / -1; }
+        .required::after { content: " *"; color: #ef4444; }
+
+        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px; }
+        .btn-secondary { background-color: #e2e8f0; color: #475569; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+        .btn-secondary:hover { background-color: #cbd5e1; }
+        .btn-primary { background: linear-gradient(to right, #667eea, #764ba2); color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; transition: opacity 0.2s; }
+        .btn-primary:hover { opacity: 0.9; }
+
+        @media (max-width: 768px) {
+            .reg-form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <!-- Bagian Kiri: Identitas Sekolah -->
+        <div class="login-left">
+            <img src="" alt="Logo Sekolah" class="school-logo" style="display: none;">
+            <h1></h1>
+            <p></p>
+        </div>
+
+        <!-- Bagian Kanan: Form Login -->
+        <div class="login-right">
+            <div class="login-header">
+                <h2>Selamat Datang</h2>
+                <p>Silakan masuk ke akun Anda</p>
+            </div>
+
+            <div id="messageBox" class="message"></div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Masuk Sebagai</label>
+                    <div class="role-tabs">
+                        <button type="button" class="role-tab active" data-role="Siswa">Siswa</button>
+                        <button type="button" class="role-tab" data-role="Guru">Guru</button>
+                        <button type="button" class="role-tab" data-role="Administrator">Admin</button>
+                    </div>
+                    <input type="hidden" id="role" value="Siswa">
+                </div>
+
+                <div class="form-group">
+                    <label for="field1" id="label1">Nama Lengkap</label>
+                    <input type="text" id="field1" placeholder="Masukkan Nama Lengkap" required>
+                    <select id="field1-select" style="display: none;">
+                        <option value="" disabled selected>Pilih Nama</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="field2" id="label2">NISN</label>
+                    <input type="number" id="field2" placeholder="Masukkan NISN" required>
+                    <button type="button" class="toggle-password" id="togglePassword" style="display: none;">Lihat</button>
+                </div>
+
+                <button type="submit" class="btn-login" id="submitBtn">Masuk</button>
+            </form>
+
+            <div class="footer-text">
+                <p>Belum punya akun? <a href="#" id="registerLink">Daftar sekarang</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Selamat Datang -->
+    <div id="welcomeModal" class="modal">
+        <div class="modal-content" style="max-width: 400px; text-align: center; padding: 40px 20px;">
+            <div style="margin-bottom: 20px;">
+                <i class="fas fa-check-circle" style="font-size: 5rem; color: #2ecc71;"></i>
+            </div>
+            <h3 style="color: #333; margin-bottom: 10px; font-size: 1.5rem;">Berhasil Masuk!</h3>
+            <p id="welcomeMessage" style="color: #666; margin-bottom: 30px; font-size: 1.1rem;"></p>
+            <button id="btnWelcomeOk" class="btn-primary" style="width: 100%; padding: 12px; font-size: 1rem;">OK</button>
+        </div>
+    </div>
+
+    <!-- Modal Pendaftaran Sekolah -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-school"></i> Pendaftaran Sekolah Baru</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <form id="registerForm">
+                <div class="reg-section-title">Identitas Sekolah</div>
+                <div class="reg-form-grid">
+                    <div class="reg-form-group">
+                        <label for="reg_npsn" class="required">NPSN</label>
+                        <input type="number" id="reg_npsn" required placeholder="8 Digit Angka">
+                    </div>
+                    <div class="reg-form-group">
+                        <label for="reg_nama_sekolah" class="required">Nama Sekolah</label>
+                        <input type="text" id="reg_nama_sekolah" required>
+                    </div>
+                    <div class="reg-form-group">
+                        <label for="reg_status" class="required">Status</label>
+                        <select id="reg_status" required>
+                            <option value="">Pilih Status</option>
+                            <option value="Negeri">Negeri</option>
+                            <option value="Swasta">Swasta</option>
+                        </select>
+                    </div>
+                    <div class="reg-form-group">
+                        <label for="reg_tahun_pelajaran" class="required">Tahun Pelajaran</label>
+                        <input type="text" id="reg_tahun_pelajaran" required placeholder="Contoh: 2023/2024">
+                    </div>
+                </div>
+
+                <div class="reg-section-title">Kepala Sekolah</div>
+                <div class="reg-form-grid">
+                    <div class="reg-form-group">
+                        <label for="reg_nama_kepsek" class="required">Nama Kepala Sekolah</label>
+                        <input type="text" id="reg_nama_kepsek" required>
+                    </div>
+                    <div class="reg-form-group">
+                        <label for="reg_nip_kepsek" class="required">NIP Kepala Sekolah</label>
+                        <input type="number" id="reg_nip_kepsek" required>
+                    </div>
+                    <div class="reg-form-group full-width">
+                        <label for="reg_jabatan" class="required">Jabatan</label>
+                        <input type="text" id="reg_jabatan" required value="Kepala Sekolah">
+                    </div>
+                </div>
+
+                <div class="reg-section-title">Kontak & Alamat</div>
+                <div class="reg-form-grid">
+                    <div class="reg-form-group full-width">
+                        <label for="reg_alamat" class="required">Alamat</label>
+                        <textarea id="reg_alamat" required></textarea>
+                    </div>
+                    <div class="reg-form-group">
+                        <label for="reg_tlp" class="required">Nomor Telepon</label>
+                        <input type="number" id="reg_tlp" required>
+                    </div>
+                    <div class="reg-form-group">
+                        <label for="reg_email" class="required">Email</label>
+                        <input type="email" id="reg_email" required>
+                    </div>
+                    <div class="reg-form-group full-width">
+                        <label for="reg_slogan">Slogan/Motto Sekolah</label>
+                        <input type="text" id="reg_slogan" placeholder="Contoh: Unggul dalam Prestasi">
+                    </div>
+                </div>
+
+                <div class="reg-section-title">Akun Login Admin</div>
+                <div class="reg-form-grid">
+                    <div class="reg-form-group">
+                        <label for="reg_username" class="required">Username</label>
+                        <input type="text" id="reg_username" required>
+                    </div>
+                    <div class="reg-form-group">
+                        <label for="reg_password" class="required">Password</label>
+                        <input type="password" id="reg_password" required placeholder="Min. 8 Karakter">
+                    </div>
+                </div>
+
+                <div class="reg-section-title">Logo Sekolah</div>
+                <div class="reg-form-group">
+                    <label for="reg_logo" class="required">Upload Logo (Max 5MB)</label>
+                    <input type="file" id="reg_logo" accept=".jpg,.jpeg,.png,.svg" required style="padding: 5px;">
+                    <div id="reg_file_info" style="font-size: 0.8rem; color: #666; margin-top: 5px;"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary cancel-reg-btn">Cancel</button>
+                    <button type="submit" class="btn-primary" id="btnDaftar">Daftar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        /* --- JavaScript: Logika Halaman --- */
+        
+        // --- Supabase Integration ---
+        const supabaseUrl = 'https://mjvobqfcoutazqcovtlp.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdm9icWZjb3V0YXpxY292dGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzEwMzYsImV4cCI6MjA4NjE0NzAzNn0.jz6JaC9mMTMhLVhXSh1OCnFWDPZ0Cy2tUnHEmWxAR8o';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        async function loadSchoolIdentity() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('identitassekolah')
+                    .select('nama_sekolah, logo, slogan')
+                    .limit(1)
+                    .single();
+                
+                if (data) {
+                    if (data.nama_sekolah) {
+                        document.querySelector('.login-left h1').textContent = data.nama_sekolah;
+                    }
+                    if (data.logo) {
+                        document.querySelector('.school-logo').src = data.logo;
+                        document.querySelector('.school-logo').style.display = 'block';
+                    }
+                    if (data.slogan) {
+                        document.querySelector('.login-left p').textContent = `"${data.slogan}"`;
+                    }
+                }
+            } catch (err) {
+                console.error("Error loading school identity:", err);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', loadSchoolIdentity);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('loginForm');
+            const roleInput = document.getElementById('role'); // Input hidden
+            const roleTabs = document.querySelectorAll('.role-tab');
+            
+            // Elemen Form
+            const label1 = document.getElementById('label1');
+            const field1 = document.getElementById('field1');
+            const field1Select = document.getElementById('field1-select');
+            const label2 = document.getElementById('label2');
+            const field2 = document.getElementById('field2');
+            const togglePasswordBtn = document.getElementById('togglePassword');
+            const submitBtn = document.getElementById('submitBtn');
+            const messageBox = document.getElementById('messageBox');
+            const registerLink = document.getElementById('registerLink');
+
+            // Konfigurasi Field berdasarkan Role
+            const roleConfig = {
+                'Siswa': {
+                    label1: 'Nama Lengkap', 
+                    isSelect1: true,
+                    options1: ['Ahmad Santoso', 'Budi Pratama', 'Citra Lestari', 'Dewi Anggraini', 'Eko Saputra'],
+                    label2: 'NISN', placeholder2: 'Masukkan NISN', type2: 'number',
+                    isPassword: false
+                },
+                'Guru': {
+                    label1: 'Nama Lengkap', 
+                    isSelect1: true,
+                    options1: [], // Akan diisi dari database
+                    label2: 'NIP', placeholder2: 'Masukkan NIP', type2: 'number',
+                    isPassword: false
+                },
+                'Administrator': {
+                    label1: 'Username', placeholder1: 'Masukkan Username', type1: 'text',
+                    isSelect1: false,
+                    label2: 'Password', placeholder2: 'Masukkan Password', type2: 'password',
+                    isPassword: true
+                }
+            };
+
+            // --- Fetch Data Guru untuk Dropdown ---
+            async function loadGuruData() {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('dataguru')
+                        .select('nama_guru')
+                        .order('nama_guru');
+                    
+                    if (error) throw error;
+                    
+                    if (data && data.length > 0) {
+                        roleConfig['Guru'].options1 = data.map(guru => guru.nama_guru);
+                        
+                        // Jika sedang di tab Guru, refresh dropdown
+                        if (roleInput.value === 'Guru') {
+                            updateFormUI(roleConfig['Guru']);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error loading guru options:', err);
+                }
+            }
+            loadGuruData();
+
+            // 0. Handle Role Tabs
+            roleTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const selectedRole = tab.getAttribute('data-role');
+                    const config = roleConfig[selectedRole];
+
+                    // Update UI Form
+                    if (config) {
+                        updateFormUI(config);
+                    }
+
+                    // Hapus class active dari semua tab
+                    roleTabs.forEach(t => t.classList.remove('active'));
+                    // Tambah class active ke tab yang diklik
+                    tab.classList.add('active');
+                    // Update nilai input hidden
+                    roleInput.value = tab.getAttribute('data-role');
+                });
+            });
+
+            function updateFormUI(config) {
+                // Update Field 1
+                label1.textContent = config.label1;
+                
+                if (config.isSelect1) {
+                    // Mode Dropdown
+                    field1.style.display = 'none';
+                    field1.required = false;
+                    field1Select.style.display = 'block';
+                    field1Select.required = true;
+                    
+                    // Isi Opsi Dropdown
+                    field1Select.innerHTML = '<option value="" disabled selected>Pilih Nama</option>';
+                    config.options1.forEach(name => {
+                        const opt = document.createElement('option');
+                        opt.value = name;
+                        opt.textContent = name;
+                        field1Select.appendChild(opt);
+                    });
+                } else {
+                    // Mode Input Text
+                    field1.style.display = 'block';
+                    field1.required = true;
+                    field1Select.style.display = 'none';
+                    field1Select.required = false;
+                    
+                    field1.placeholder = config.placeholder1;
+                    field1.type = config.type1;
+                    field1.value = ''; // Reset nilai
+                }
+
+                // Update Field 2
+                label2.textContent = config.label2;
+                field2.placeholder = config.placeholder2;
+                field2.type = config.type2;
+                field2.value = ''; // Reset nilai
+
+                // Toggle Password Button visibility
+                togglePasswordBtn.style.display = config.isPassword ? 'block' : 'none';
+            }
+
+            // Inisialisasi UI awal
+            updateFormUI(roleConfig[roleInput.value]);
+
+            // 1. Fitur Toggle Lihat/Sembunyikan Password
+            togglePasswordBtn.addEventListener('click', () => {
+                const type = field2.getAttribute('type') === 'password' ? 'text' : 'password';
+                field2.setAttribute('type', type);
+                togglePasswordBtn.textContent = type === 'password' ? 'Lihat' : 'Sembunyi';
+            });
+
+            // 2. Handle Submit Form
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault(); // Mencegah reload halaman
+
+                // Reset pesan
+                messageBox.className = 'message';
+                messageBox.style.display = 'none';
+                
+                const originalBtnText = submitBtn.textContent;
+                submitBtn.textContent = 'Memproses...';
+                submitBtn.disabled = true;
+
+                const role = roleInput.value;
+                const val1 = roleConfig[role].isSelect1 ? field1Select.value : field1.value;
+                const val2 = field2.value;
+
+                if (role === 'Administrator') {
+                    try {
+                        const { data, error } = await supabaseClient
+                            .from('identitassekolah')
+                            .select('username, password')
+                            .eq('username', val1)
+                            .eq('password', val2)
+                            .single();
+
+                        if (error || !data) throw new Error('Username atau Password salah.');
+
+                        showMessage('Login Berhasil! Mengalihkan...', 'success');
+                        setTimeout(() => { window.location.href = 'dasboradmin.html'; }, 1000);
+                    } catch (err) {
+                        showMessage(err.message || 'Login gagal.', 'error');
+                        submitBtn.textContent = originalBtnText;
+                        submitBtn.disabled = false;
+                    }
+                } else if (role === 'Guru') {
+                    try {
+                        // Query Supabase untuk cek Nama dan NIP
+                        const { data, error } = await supabaseClient
+                            .from('dataguru')
+                            .select('*')
+                            .eq('nama_guru', val1)
+                            .eq('nip', val2.trim())
+                            .single();
+
+                        if (error || !data) throw new Error('Nama atau NIP tidak sesuai dengan data guru.');
+
+                        // Simpan sesi guru ke sessionStorage
+                        sessionStorage.setItem('guru_session', JSON.stringify({
+                            nama: data.nama_guru,
+                            nip: data.nip,
+                            photo: data.photo
+                        }));
+
+                        // Tampilkan Modal Selamat Datang
+                        const welcomeModal = document.getElementById('welcomeModal');
+                        const welcomeMessage = document.getElementById('welcomeMessage');
+                        const btnWelcomeOk = document.getElementById('btnWelcomeOk');
+
+                        welcomeMessage.textContent = `Selamat datang ${data.nama_guru} di aplikasi SIMPedik`;
+                        welcomeModal.classList.add('active');
+
+                        // Redirect saat klik OK
+                        btnWelcomeOk.onclick = () => window.location.href = 'adminguru.html';
+
+                    } catch (err) {
+                        showMessage(err.message || 'Login gagal.', 'error');
+                        submitBtn.textContent = originalBtnText;
+                        submitBtn.disabled = false;
+                    }
+                } else {
+                    // Simulasi untuk Siswa/Guru
+                    setTimeout(() => {
+                    if (role && val1 && val2) {
+                        showMessage('Login Berhasil! Mengalihkan...', 'success');
+                        console.log("Login data:", { role, field1: val1, field2: val2 });
+                        // window.location.href = '/dashboard.html'; // Redirect jika ada
+                    } else {
+                        showMessage('Data login tidak valid.', 'error');
+                    }
+                        submitBtn.textContent = originalBtnText;
+                        submitBtn.disabled = false;
+                    }, 1500);
+                }
+            });
+
+            // Fungsi Helper untuk menampilkan pesan
+            function showMessage(text, type) {
+                messageBox.textContent = text;
+                messageBox.className = `message ${type}`;
+                messageBox.style.display = 'block';
+            }
+
+            // --- Logic Modal Pendaftaran ---
+            const regModal = document.getElementById('registerModal');
+            const closeRegModal = document.querySelector('.close-modal');
+            const cancelRegBtn = document.querySelector('.cancel-reg-btn');
+            const regForm = document.getElementById('registerForm');
+            const regLogoInput = document.getElementById('reg_logo');
+
+            // Buka Modal
+            registerLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                regModal.classList.add('active');
+            });
+
+            // Tutup Modal
+            function closeRegisterModal() {
+                regModal.classList.remove('active');
+                regForm.reset();
+                document.getElementById('reg_file_info').textContent = '';
+            }
+
+            closeRegModal.addEventListener('click', closeRegisterModal);
+            cancelRegBtn.addEventListener('click', closeRegisterModal);
+            window.addEventListener('click', (e) => {
+                if (e.target === regModal) closeRegisterModal();
+            });
+
+            // Handle File Info
+            regLogoInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('Ukuran file terlalu besar. Maksimal 5MB.');
+                        this.value = '';
+                        return;
+                    }
+                    document.getElementById('reg_file_info').textContent = `File terpilih: ${file.name}`;
+                }
+            });
+
+            // Handle Register Submit
+            regForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const btnDaftar = document.getElementById('btnDaftar');
+                const originalText = btnDaftar.textContent;
+                btnDaftar.textContent = 'Menyimpan...';
+                btnDaftar.disabled = true;
+
+                try {
+                    // Validasi NPSN
+                    const npsn = document.getElementById('reg_npsn').value;
+                    if (npsn.length !== 8) throw new Error('NPSN harus 8 digit angka.');
+
+                    // Validasi Password
+                    const password = document.getElementById('reg_password').value;
+                    if (password.length < 8) throw new Error('Password minimal 8 karakter.');
+
+                    // 1. Upload Logo
+                    const file = regLogoInput.files[0];
+                    if (!file) throw new Error('Harap upload logo sekolah.');
+
+                    const timestamp = Date.now();
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `logo_${npsn}_${timestamp}.${fileExt}`;
+
+                    const { error: uploadError } = await supabaseClient.storage
+                        .from('aset')
+                        .upload(fileName, file);
+                    
+                    if (uploadError) throw new Error('Gagal upload logo: ' + uploadError.message);
+
+                    const { data: urlData } = supabaseClient.storage
+                        .from('aset')
+                        .getPublicUrl(fileName);
+                    
+                    const logoUrl = urlData.publicUrl;
+
+                    // 2. Simpan Data ke Database
+                    const formData = {
+                        npsn: parseInt(npsn),
+                        nama_sekolah: document.getElementById('reg_nama_sekolah').value,
+                        status: document.getElementById('reg_status').value,
+                        nama_kepsek: document.getElementById('reg_nama_kepsek').value,
+                        nip_kepsek: parseInt(document.getElementById('reg_nip_kepsek').value),
+                        jabatan: document.getElementById('reg_jabatan').value,
+                        alamat: document.getElementById('reg_alamat').value,
+                        tlp: parseInt(document.getElementById('reg_tlp').value),
+                        email: document.getElementById('reg_email').value,
+                        slogan: document.getElementById('reg_slogan').value,
+                        tahun_pelajaran: document.getElementById('reg_tahun_pelajaran').value,
+                        logo: logoUrl,
+                        username: document.getElementById('reg_username').value,
+                        password: password
+                    };
+
+                    const { error: insertError } = await supabaseClient
+                        .from('identitassekolah')
+                        .upsert([formData]); // Menggunakan upsert sesuai logika identitassekolah.html
+
+                    if (insertError) throw new Error('Gagal menyimpan data: ' + insertError.message);
+
+                    alert('Pendaftaran Sekolah Berhasil! Silakan login.');
+                    closeRegisterModal();
+                    loadSchoolIdentity(); // Refresh data sekolah di halaman login
+                    
+                } catch (err) {
+                    console.error(err);
+                    alert('Terjadi kesalahan: ' + err.message);
+                } finally {
+                    btnDaftar.textContent = originalText;
+                    btnDaftar.disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
