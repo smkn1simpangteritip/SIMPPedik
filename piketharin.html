@@ -355,6 +355,16 @@
             .navbar-brand span {
                 font-size: 1rem;
             }
+
+            .mobile-vertical-btn {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .mobile-vertical-btn .btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -491,7 +501,7 @@
         <div class="dashboard-card card-blue">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                 <h2 style="color: white; margin: 0;">Petugas Piket Umum Siswa</h2>
-                <div style="display: flex; gap: 10px;">
+                <div class="mobile-vertical-btn" style="display: flex; gap: 10px;">
                     <button class="btn btn-primary" id="settingPiketSiswaBtn"><i class="fas fa-cogs"></i> Pengaturan Piket Siswa</button>
                     <button class="btn btn-danger" id="exportPiketSiswaBtn"><i class="fas fa-file-pdf"></i> Export</button>
                     <button class="btn btn-warning" id="viewAllPiketBtn"><i class="fas fa-list"></i> Lihat Semua Jadwal</button>
@@ -530,7 +540,7 @@
                         <input type="text" id="searchJurnalInput" placeholder="Cari Riwayat Piket...">
                     </div>
                 </div>
-                <div style="display: flex; gap: 10px;">
+                <div class="mobile-vertical-btn" style="display: flex; gap: 10px;">
                     <button class="btn btn-primary" id="inputJurnalBtn"><i class="fas fa-plus"></i> Input Data Piket</button>
                     <button class="btn btn-danger" id="exportJurnalBtn"><i class="fas fa-file-pdf"></i> Export Pdf</button>
                     <button class="btn btn-warning" id="resetJurnalBtn"><i class="fas fa-sync-alt"></i> Reset</button>
