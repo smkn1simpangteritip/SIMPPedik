@@ -832,6 +832,7 @@
                 if (error) throw error;
 
                 container.innerHTML = '';
+                currentPiketTeachers = [];
 
                 // Cek apakah guru yang login ada di jadwal hari ini
                 let isScheduled = false;
@@ -876,21 +877,28 @@
                 });
 
                 let photoMap = {};
+                let nipMap = {};
                 if (teacherNames.length > 0) {
                     const { data: guruData } = await supabaseClient
                         .from('dataguru')
-                        .select('nama_guru, photo')
+                        .select('nama_guru, photo, nip')
                         .in('nama_guru', teacherNames);
                     
                     if (guruData) {
                         guruData.forEach(g => {
                             if (g.photo) photoMap[g.nama_guru] = g.photo;
+                            if (g.nip) nipMap[g.nama_guru] = g.nip;
                         });
                     }
                 }
 
                 // Jika lolos validasi, tampilkan data
                 data.forEach((piket) => {
+                    // Simpan nama guru piket untuk export PDF
+                    if (piket.piket1) currentPiketTeachers.push({ name: piket.piket1, nip: nipMap[piket.piket1] });
+                    if (piket.piket2) currentPiketTeachers.push({ name: piket.piket2, nip: nipMap[piket.piket2] });
+                    if (piket.piket3) currentPiketTeachers.push({ name: piket.piket3, nip: nipMap[piket.piket3] });
+
                     // Helper untuk card guru
                     const createGuruCard = (nama, label, iconClass, colorClass) => {
                         if (!nama) return '';
@@ -1622,6 +1630,7 @@
         let jurnalDataList = [];
         let currentJurnalPage = 1;
         const jurnalPerPage = 10;
+        let currentPiketTeachers = [];
 
         // --- Load Data Jurnal Piket (Tabel Bawah) ---
         async function loadJurnalData() {
@@ -1766,12 +1775,33 @@
         if (exportJurnalBtn) {
             exportJurnalBtn.addEventListener('click', async () => {
                 try {
-                    const { data, error } = await supabaseClient
-                        .from('jurnalpiket')
-                        .select('*')
-                        .order('nama_siswa', { ascending: true });
+                    // Gunakan data lokal yang sudah dimuat (jurnalDataList)
+                    let data = [...jurnalDataList];
 
-                    if (error) throw error;
+                    // Cek filter pencarian
+                    const searchInput = document.getElementById('searchJurnalInput');
+                    const searchFilter = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+                    if (searchFilter) {
+                        data = data.filter(item => {
+                            let itemDay = '';
+                            if (item.tanggal) {
+                                itemDay = new Date(item.tanggal).toLocaleDateString('id-ID', { weekday: 'long' });
+                            }
+                            const text = (
+                                (item.nama_siswa || '') + ' ' + 
+                                (item.kelas || '') + ' ' + 
+                                (item.area || '') + ' ' + 
+                                (item.nisn || '') + ' ' +
+                                (item.id_petugas || '') + ' ' +
+                                itemDay
+                            ).toLowerCase();
+                            return text.includes(searchFilter);
+                        });
+                    }
+
+                    // Sortir berdasarkan nama siswa untuk tabel rekap (sesuai format sebelumnya)
+                    data.sort((a, b) => (a.nama_siswa || '').localeCompare(b.nama_siswa || ''));
 
                     if (!data || data.length === 0) {
                         alert('Tidak ada data untuk diexport');
@@ -1791,13 +1821,18 @@
                     doc.setFontSize(14);
                     doc.setTextColor(100);
                     doc.text(schoolName, pageWidth / 2, 30, { align: 'center' });
-
+                    
                     // Keterangan Bulan
                     const now = new Date();
                     const monthName = now.toLocaleDateString('id-ID', { month: 'long' });
                     doc.setFontSize(12);
                     doc.setTextColor(0);
                     doc.text(`Bulan : ${monthName}`, pageWidth / 2, 38, { align: 'center' });
+
+                    const today = new Date();
+                    const formattedDate = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                    doc.setFontSize(10);
+                    doc.text(`Simpang Teritip, ${formattedDate}`, pageWidth / 2, 43, { align: 'center' });
 
                     // Proses Data Rekap per Siswa
                     const stats = {};
@@ -1870,6 +1905,38 @@
                         columnStyles: { 4: { halign: 'left' } },
                         styles: { fontSize: 9 }
                     });
+
+                    // --- Tanda Tangan Guru Piket ---
+                    finalY = doc.lastAutoTable.finalY + 20;
+                    
+                    // Cek jika tidak cukup ruang di halaman ini
+                    if (finalY + 40 > doc.internal.pageSize.getHeight()) {
+                        doc.addPage();
+                        finalY = 20;
+                    }
+
+                    const colWidth = pageWidth / 3;
+                    
+                    doc.setFontSize(10);
+                    doc.setTextColor(0);
+
+                    // Guru 1
+                    const g1 = currentPiketTeachers[0];
+                    doc.text("Guru Piket 1", colWidth * 0.5, finalY, { align: 'center' });
+                    doc.text(g1 ? g1.name : "( .............................. )", colWidth * 0.5, finalY + 25, { align: 'center' });
+                    if (g1 && g1.nip) doc.text(`NIP. ${g1.nip}`, colWidth * 0.5, finalY + 30, { align: 'center' });
+
+                    // Guru 2
+                    const g2 = currentPiketTeachers[1];
+                    doc.text("Guru Piket 2", colWidth * 1.5, finalY, { align: 'center' });
+                    doc.text(g2 ? g2.name : "( .............................. )", colWidth * 1.5, finalY + 25, { align: 'center' });
+                    if (g2 && g2.nip) doc.text(`NIP. ${g2.nip}`, colWidth * 1.5, finalY + 30, { align: 'center' });
+
+                    // Guru 3
+                    const g3 = currentPiketTeachers[2];
+                    doc.text("Guru Piket 3", colWidth * 2.5, finalY, { align: 'center' });
+                    doc.text(g3 ? g3.name : "( .............................. )", colWidth * 2.5, finalY + 25, { align: 'center' });
+                    if (g3 && g3.nip) doc.text(`NIP. ${g3.nip}`, colWidth * 2.5, finalY + 30, { align: 'center' });
 
                     doc.save(`Laporan_Lengkap_Piket_Siswa_${monthName}.pdf`);
                 } catch (err) {
