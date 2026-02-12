@@ -421,7 +421,7 @@
             </li>
 
             <li class="menu-item">
-                <a href="#" class="menu-link">
+                <a href="pembinaanguru.html" class="menu-link">
                     <div class="menu-content">
                         <i class="fas fa-user-graduate menu-icon"></i>
                         <span>Pembinaan Siswa</span>
@@ -430,7 +430,7 @@
             </li>
 
             <li class="menu-item">
-                <a href="#" class="menu-link">
+                <a href="kasusguru.html" class="menu-link">
                     <div class="menu-content">
                         <i class="fas fa-book-reader menu-icon"></i>
                         <span>Kasus Belajar</span>
@@ -439,7 +439,7 @@
             </li>
 
             <li class="menu-item">
-                <a href="#" class="menu-link">
+                <a href="laporanguru.html" class="menu-link">
                     <div class="menu-content">
                         <i class="fas fa-file-alt menu-icon"></i>
                         <span>Laporan</span>
@@ -448,7 +448,7 @@
             </li>
 
             <li class="menu-item">
-                <a href="#" class="menu-link">
+                <a href="backupguru.html" class="menu-link">
                     <div class="menu-content">
                         <i class="fas fa-database menu-icon"></i>
                         <span>Backup dan Reset</span>
@@ -656,6 +656,20 @@
             <div class="modal-footer" style="border-top: 1px solid #eee; padding: 15px;">
                 <button class="btn btn-danger" id="exportAllPiketPdfBtn"><i class="fas fa-file-pdf"></i> Export PDF</button>
                 <button class="btn btn-secondary" id="closeAllPiketModalBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Notifikasi Duplikat -->
+    <div id="duplicateModal" class="modal">
+        <div class="modal-content" style="max-width: 500px; text-align: center; padding: 30px;">
+            <div style="margin-bottom: 20px;">
+                <i class="fas fa-info-circle" style="font-size: 4rem; color: #3b82f6;"></i>
+            </div>
+            <h3 style="color: #333; margin-bottom: 15px; font-size: 1.3rem;">Informasi Input Data</h3>
+            <div id="duplicateMessage" style="color: #666; margin-bottom: 25px; line-height: 1.5; text-align: left; background: #f9fafb; padding: 15px; border-radius: 8px; max-height: 200px; overflow-y: auto;"></div>
+            <div style="display: flex; justify-content: center;">
+                <button onclick="document.getElementById('duplicateModal').classList.remove('active')" class="btn btn-primary" style="padding: 10px 30px;">Mengerti</button>
             </div>
         </div>
     </div>
@@ -1441,9 +1455,12 @@
                 jurnalModal.classList.add('active');
 
                 try {
+                    const hariIni = weekday.toUpperCase();
+
                     const { data, error } = await supabaseClient
                         .from('datapiketsiswa')
                         .select('*')
+                        .ilike('id_piket', `%${hariIni}%`)
                         .order('id_piket');
 
                     if (error) throw error;
@@ -1451,7 +1468,7 @@
                     jurnalInputTableBody.innerHTML = '';
                     
                     if (!data || data.length === 0) {
-                        jurnalInputTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Tidak ada data petugas piket untuk diinput.</td></tr>';
+                        jurnalInputTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center;">Tidak ada data petugas piket untuk hari ${weekday}.</td></tr>`;
                         return;
                     }
 
@@ -1536,16 +1553,60 @@
                         throw new Error("Tidak ada data untuk disimpan.");
                     }
 
-                    // Simpan ke tabel jurnalpiket
-                    const { error } = await supabaseClient
+                    // Cek Duplikasi Data (Tanggal & ID Petugas yang sama)
+                    const { data: existingData, error: checkError } = await supabaseClient
                         .from('jurnalpiket')
-                        .insert(inserts);
+                        .select('id_petugas')
+                        .eq('tanggal', tanggal);
 
-                    if (error) throw error;
+                    if (checkError) throw checkError;
 
-                    alert('Data Jurnal Piket berhasil disimpan!');
+                    const existingIds = new Set(existingData.map(item => item.id_petugas));
+                    const duplicates = [];
+                    const finalInserts = [];
+
+                    inserts.forEach(item => {
+                        if (existingIds.has(item.id_petugas)) {
+                            duplicates.push(item.nama_siswa);
+                        } else {
+                            finalInserts.push(item);
+                        }
+                    });
+
+                    // Simpan data yang tidak duplikat
+                    if (finalInserts.length > 0) {
+                        const { error: insertError } = await supabaseClient
+                            .from('jurnalpiket')
+                            .insert(finalInserts);
+
+                        if (insertError) throw insertError;
+                    }
+
                     closeJurnalModalFunc();
                     loadJurnalData(); // Refresh tabel jurnal
+
+                    // Tampilkan Notifikasi
+                    if (duplicates.length > 0) {
+                        const duplicateModal = document.getElementById('duplicateModal');
+                        const duplicateMessage = document.getElementById('duplicateMessage');
+                        
+                        let msg = `<strong>Petugas Piket berikut sudah diinput untuk tanggal ini:</strong><br><ul style="margin: 10px 0 0 20px; padding: 0;">`;
+                        duplicates.forEach(name => {
+                            msg += `<li>${name}</li>`;
+                        });
+                        msg += `</ul><br>`;
+                        
+                        if (finalInserts.length > 0) {
+                            msg += `<span style="color: #10b981; font-weight: bold;">Data lainnya (${finalInserts.length} siswa) berhasil disimpan.</span>`;
+                        } else {
+                            msg += `<span style="color: #ef4444; font-weight: bold;">Tidak ada data baru yang disimpan.</span>`;
+                        }
+                        
+                        duplicateMessage.innerHTML = msg;
+                        duplicateModal.classList.add('active');
+                    } else {
+                        alert('Data Jurnal Piket berhasil disimpan!');
+                    }
 
                 } catch (err) {
                     console.error(err);
