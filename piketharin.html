@@ -494,6 +494,7 @@
                 <div style="display: flex; gap: 10px;">
                     <button class="btn btn-primary" id="settingPiketSiswaBtn"><i class="fas fa-cogs"></i> Pengaturan Piket Siswa</button>
                     <button class="btn btn-danger" id="exportPiketSiswaBtn"><i class="fas fa-file-pdf"></i> Export</button>
+                    <button class="btn btn-warning" id="viewAllPiketBtn"><i class="fas fa-list"></i> Lihat Semua Jadwal</button>
                 </div>
             </div>
             
@@ -558,6 +559,9 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Pagination Controls -->
+            <div id="jurnalPagination" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px;"></div>
         </div>
 
         <!-- Footer -->
@@ -615,6 +619,23 @@
                     <button type="submit" class="btn btn-primary">Simpan</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Lihat Semua Jadwal Piket -->
+    <div id="allPiketModal" class="modal">
+        <div class="modal-content" style="max-width: 95%; width: 1000px; max-height: 90vh; display: flex; flex-direction: column;">
+            <div class="modal-header">
+                <h3>Jadwal Piket Siswa (Senin - Jumat)</h3>
+                <span class="close-modal" id="closeAllPiketModal">&times;</span>
+            </div>
+            <div class="modal-body" style="overflow-y: auto; padding: 20px; flex: 1;">
+                <div id="allPiketContainer"></div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid #eee; padding: 15px;">
+                <button class="btn btn-danger" id="exportAllPiketPdfBtn"><i class="fas fa-file-pdf"></i> Export PDF</button>
+                <button class="btn btn-secondary" id="closeAllPiketModalBtn">Close</button>
+            </div>
         </div>
     </div>
 
@@ -1011,9 +1032,13 @@
             tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: #e0e7ff;">Memuat data...</td></tr>';
 
             try {
+                const now = new Date();
+                const hariIni = now.toLocaleDateString('id-ID', { weekday: 'long' }).toUpperCase();
+
                 const { data, error } = await supabaseClient
                     .from('datapiketsiswa')
                     .select('*')
+                    .ilike('id_piket', `%${hariIni}%`)
                     .order('id_piket', { ascending: true });
 
                 if (error) throw error;
@@ -1021,7 +1046,7 @@
                 tableBody.innerHTML = '';
 
                 if (!data || data.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #e0e7ff; padding: 20px;">Belum ada data petugas piket siswa.</td></tr>';
+                    tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #e0e7ff; padding: 20px;">Belum ada data petugas piket siswa untuk hari ${hariIni}.</td></tr>`;
                     return;
                 }
 
@@ -1157,24 +1182,193 @@
             });
         }
 
+        // --- Lihat Semua Jadwal Piket Logic ---
+        const viewAllPiketBtn = document.getElementById('viewAllPiketBtn');
+        const allPiketModal = document.getElementById('allPiketModal');
+        const closeAllPiketModal = document.getElementById('closeAllPiketModal');
+        const allPiketContainer = document.getElementById('allPiketContainer');
+
+        if (viewAllPiketBtn) {
+            viewAllPiketBtn.addEventListener('click', async () => {
+                allPiketModal.classList.add('active');
+                allPiketContainer.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>';
+
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('datapiketsiswa')
+                        .select('*')
+                        .order('kelas', { ascending: true });
+
+                    if (error) throw error;
+
+                    if (!data || data.length === 0) {
+                        allPiketContainer.innerHTML = '<p style="text-align:center; padding:20px;">Belum ada data jadwal piket.</p>';
+                        return;
+                    }
+
+                    const days = ['SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT'];
+                    let htmlContent = '';
+
+                    days.forEach(day => {
+                        // Filter data berdasarkan ID yang mengandung nama hari (misal: ID_SENIN-...)
+                        const dayData = data.filter(item => item.id_piket && item.id_piket.toUpperCase().includes(`ID_${day}`));
+                        
+                        if (dayData.length > 0) {
+                            htmlContent += `
+                                <div style="margin-bottom: 30px; background: #f9fafb; border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb;">
+                                    <div style="background: #3b82f6; color: white; padding: 10px 15px; font-weight: bold; font-size: 1.1rem;">
+                                        <i class="fas fa-calendar-day"></i> ${day}
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="custom-table" style="margin-top: 0;">
+                                            <thead style="background: #eff6ff; color: #1e3a8a;">
+                                                <tr>
+                                                    <th style="width: 50px;">No</th>
+                                                    <th>Nama Siswa</th>
+                                                    <th>NISN</th>
+                                                    <th>Kelas</th>
+                                                    <th>Area Piket</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                            `;
+                            
+                            dayData.forEach((item, index) => {
+                                htmlContent += `
+                                    <tr>
+                                        <td>${index + 1}</td>
+                                        <td>${item.nama_siswa}</td>
+                                        <td>${item.nisn || '-'}</td>
+                                        <td>${item.kelas}</td>
+                                        <td>${item.area}</td>
+                                    </tr>
+                                `;
+                            });
+
+                            htmlContent += `
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+                    
+                    if (htmlContent === '') {
+                         allPiketContainer.innerHTML = '<p style="text-align:center; padding:20px;">Tidak ada data jadwal yang sesuai format hari.</p>';
+                    } else {
+                        allPiketContainer.innerHTML = htmlContent;
+                    }
+
+                } catch (err) {
+                    console.error(err);
+                    allPiketContainer.innerHTML = `<p style="text-align:center; color:red; padding:20px;">Gagal memuat: ${err.message}</p>`;
+                }
+            });
+        }
+
+        if (closeAllPiketModal) {
+            closeAllPiketModal.addEventListener('click', () => {
+                allPiketModal.classList.remove('active');
+            });
+        }
+
+        // --- Close Modal Button Logic ---
+        const closeAllPiketModalBtn = document.getElementById('closeAllPiketModalBtn');
+        if (closeAllPiketModalBtn) {
+            closeAllPiketModalBtn.addEventListener('click', () => {
+                allPiketModal.classList.remove('active');
+            });
+        }
+
+        // --- Export PDF Semua Jadwal Piket Logic ---
+        const exportAllPiketPdfBtn = document.getElementById('exportAllPiketPdfBtn');
+        if (exportAllPiketPdfBtn) {
+            exportAllPiketPdfBtn.addEventListener('click', async () => {
+                const originalText = exportAllPiketPdfBtn.innerHTML;
+                exportAllPiketPdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+                exportAllPiketPdfBtn.disabled = true;
+
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('datapiketsiswa')
+                        .select('*')
+                        .order('kelas', { ascending: true });
+
+                    if (error) throw error;
+
+                    if (!data || data.length === 0) {
+                        alert('Tidak ada data jadwal untuk diexport.');
+                        return;
+                    }
+
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    
+                    // Header
+                    doc.setFontSize(18);
+                    doc.text("Jadwal Piket Siswa (Senin - Jumat)", 14, 22);
+                    
+                    const schoolName = document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
+                    doc.setFontSize(12);
+                    doc.setTextColor(100);
+                    doc.text(schoolName, 14, 30);
+
+                    let finalY = 40;
+                    const days = ['SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT'];
+
+                    for (const day of days) {
+                        const dayData = data.filter(item => item.id_piket && item.id_piket.toUpperCase().includes(`ID_${day}`));
+                        
+                        if (dayData.length > 0) {
+                            // Cek jika halaman penuh (estimasi)
+                            if (finalY > 250) {
+                                doc.addPage();
+                                finalY = 20;
+                            }
+
+                            doc.setFontSize(14);
+                            doc.setTextColor(0);
+                            doc.text(`Hari: ${day}`, 14, finalY);
+                            finalY += 5;
+
+                            const tableData = dayData.map((item, index) => [
+                                index + 1, item.nama_siswa, item.nisn || '-', item.kelas, item.area
+                            ]);
+
+                            doc.autoTable({
+                                head: [['No', 'Nama Siswa', 'NISN', 'Kelas', 'Area Piket']],
+                                body: tableData,
+                                startY: finalY,
+                                theme: 'grid',
+                                headStyles: { fillColor: [59, 130, 246] }, // Blue
+                                margin: { top: 20 },
+                                pageBreak: 'auto' // Handle page breaks automatically inside table
+                            });
+
+                            finalY = doc.lastAutoTable.finalY + 15;
+                        }
+                    }
+
+                    doc.save('Jadwal_Piket_Lengkap.pdf');
+
+                } catch (err) {
+                    console.error(err);
+                    alert('Gagal export PDF: ' + err.message);
+                } finally {
+                    exportAllPiketPdfBtn.innerHTML = originalText;
+                    exportAllPiketPdfBtn.disabled = false;
+                }
+            });
+        }
+
         // --- Search Jurnal Piket Logic ---
         const searchJurnalInput = document.getElementById('searchJurnalInput');
+        // Event listener dipindahkan ke dalam fungsi renderJurnalTable atau diinisialisasi ulang
         if (searchJurnalInput) {
             searchJurnalInput.addEventListener('input', function() {
-                const filter = this.value.toLowerCase();
-                const rows = document.querySelectorAll('#jurnalPiketTableBody tr');
-                
-                rows.forEach(row => {
-                    // Lewati baris pesan kosong/loading (biasanya punya colspan)
-                    if (row.cells.length <= 1) return;
-                    
-                    const text = row.textContent.toLowerCase();
-                    if (text.includes(filter)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
+                // Reset ke halaman 1 saat mencari
+                renderJurnalTable(1);
             });
         }
 
@@ -1319,6 +1513,11 @@
             });
         }
 
+        // --- Global Variables untuk Pagination Jurnal ---
+        let jurnalDataList = [];
+        let currentJurnalPage = 1;
+        const jurnalPerPage = 10;
+
         // --- Load Data Jurnal Piket (Tabel Bawah) ---
         async function loadJurnalData() {
             const tableBody = document.getElementById('jurnalPiketTableBody');
@@ -1334,13 +1533,56 @@
 
                 if (error) throw error;
 
-                tableBody.innerHTML = '';
-                if (!data || data.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#d1fae5; padding:20px;">Belum ada data jurnal piket.</td></tr>';
-                    return;
+                jurnalDataList = data || [];
+                renderJurnalTable(1);
+
+            } catch (err) {
+                console.error(err);
+                tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#fca5a5;">Gagal memuat: ${err.message}</td></tr>`;
+            }
+        }
+
+        function renderJurnalTable(page = 1) {
+            currentJurnalPage = page;
+            const tableBody = document.getElementById('jurnalPiketTableBody');
+            const searchFilter = document.getElementById('searchJurnalInput') ? document.getElementById('searchJurnalInput').value.toLowerCase() : '';
+
+            const now = new Date();
+            const hariIni = now.toLocaleDateString('id-ID', { weekday: 'long' }).toUpperCase();
+
+            // Filter data berdasarkan pencarian
+            const filteredData = jurnalDataList.filter(item => {
+                // Ambil nama hari dari tanggal untuk pencarian
+                let itemDay = '';
+                if (item.tanggal) {
+                    itemDay = new Date(item.tanggal).toLocaleDateString('id-ID', { weekday: 'long' });
                 }
 
-                data.forEach(item => {
+                const text = (
+                    (item.nama_siswa || '') + ' ' + 
+                    (item.kelas || '') + ' ' + 
+                    (item.area || '') + ' ' + 
+                    (item.nisn || '') + ' ' +
+                    (item.id_petugas || '') + ' ' +
+                    itemDay
+                ).toLowerCase();
+
+                // Jika ada pencarian, filter berdasarkan text. Jika tidak, tampilkan hanya data hari ini (berdasarkan ID Petugas atau Tanggal)
+                return searchFilter ? text.includes(searchFilter) : ((item.id_petugas && item.id_petugas.toUpperCase().includes(hariIni)) || (itemDay && itemDay.toUpperCase() === hariIni));
+            });
+
+            // Hitung Pagination
+            const totalPages = Math.ceil(filteredData.length / jurnalPerPage);
+            const start = (page - 1) * jurnalPerPage;
+            const end = start + jurnalPerPage;
+            const paginatedData = filteredData.slice(start, end);
+
+            tableBody.innerHTML = '';
+
+            if (paginatedData.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#d1fae5; padding:20px;">Data tidak ditemukan.</td></tr>';
+            } else {
+                paginatedData.forEach(item => {
                     // Format Tanggal: Rabu, 11 Februari 2026
                     let formattedDate = item.tanggal;
                     if (item.tanggal) {
@@ -1364,10 +1606,40 @@
                     `;
                     tableBody.appendChild(row);
                 });
-            } catch (err) {
-                console.error(err);
-                tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#fca5a5;">Gagal memuat: ${err.message}</td></tr>`;
             }
+
+            renderPaginationControls(totalPages, page);
+        }
+
+        function renderPaginationControls(totalPages, currentPage) {
+            const container = document.getElementById('jurnalPagination');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+
+            // Tombol Previous
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'btn btn-secondary';
+            prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => renderJurnalTable(currentPage - 1);
+            container.appendChild(prevBtn);
+
+            // Info Halaman
+            const info = document.createElement('span');
+            info.style.fontWeight = '600';
+            info.textContent = `Halaman ${currentPage} dari ${totalPages}`;
+            container.appendChild(info);
+
+            // Tombol Next
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'btn btn-secondary';
+            nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => renderJurnalTable(currentPage + 1);
+            container.appendChild(nextBtn);
         }
 
         window.deleteJurnal = async function(id) {
