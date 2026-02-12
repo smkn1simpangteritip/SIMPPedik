@@ -350,6 +350,29 @@
                 width: 100%;
             }
         }
+
+        /* --- Stats Card Styles (Light Mode) --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 2px solid #e5e7eb; /* Border tegas */
+        }
+
+        .stat-info h3 { font-size: 2rem; margin-bottom: 5px; color: #1f2937; margin-top: 0; }
+        .stat-info p { color: #6b7280; font-size: 0.9rem; font-weight: 700; margin: 0; }
+        .stat-icon { font-size: 2.5rem; opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -456,6 +479,31 @@
             <p style="color: #9ca3af; margin-top: 10px;">Halaman ini menampilkan laporan piket harian.</p>
         </div>
         
+        <!-- Stats Container -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3 id="statSiswaAktif">0</h3>
+                    <p>Jumlah Siswa Aktif</p>
+                </div>
+                <i class="fas fa-users stat-icon" style="color: #3b82f6;"></i>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3 id="statMelaksanakan">0</h3>
+                    <p>Jumlah Melaksanakan Piket</p>
+                </div>
+                <i class="fas fa-check-circle stat-icon" style="color: #10b981;"></i>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3 id="statTidakMelaksanakan">0</h3>
+                    <p>Jumlah Tidak Melaksanakan Piket</p>
+                </div>
+                <i class="fas fa-times-circle stat-icon" style="color: #ef4444;"></i>
+            </div>
+        </div>
+
         <!-- Container Data Laporan -->
         <div class="dashboard-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
@@ -571,6 +619,36 @@
         let currentPage = 1;
         const itemsPerPage = 10;
 
+        // Load Stats
+        async function loadStats() {
+            try {
+                // 1. Siswa Aktif
+                const { count: siswaCount, error: siswaError } = await supabaseClient
+                    .from('datasiswa')
+                    .select('*', { count: 'exact', head: true });
+                
+                if (!siswaError) {
+                    document.getElementById('statSiswaAktif').textContent = siswaCount || 0;
+                }
+
+                // 2. Jurnal Stats
+                const { data: jurnalData, error: jurnalError } = await supabaseClient
+                    .from('jurnalpiket')
+                    .select('status');
+
+                if (!jurnalError && jurnalData) {
+                    const melaksanakan = jurnalData.filter(item => item.status === 'Ya').length;
+                    const tidakMelaksanakan = jurnalData.filter(item => item.status === 'Tidak').length;
+                    
+                    document.getElementById('statMelaksanakan').textContent = melaksanakan;
+                    document.getElementById('statTidakMelaksanakan').textContent = tidakMelaksanakan;
+                }
+
+            } catch (err) {
+                console.error("Error loading stats:", err);
+            }
+        }
+
         // Load Data Jurnal
         async function loadJurnalData() {
             const tableBody = document.getElementById('jurnalTableBody');
@@ -591,6 +669,7 @@
 
                 jurnalDataList = data || [];
                 renderTable(1);
+                loadStats(); // Update stats when data loads
 
             } catch (err) {
                 console.error(err);
@@ -689,6 +768,7 @@
                     const { error } = await supabaseClient.from('jurnalpiket').delete().eq('id_piket', id);
                     if(error) throw error;
                     loadJurnalData();
+                    loadStats();
                 } catch(err) {
                     alert('Gagal menghapus: ' + err.message);
                 }
