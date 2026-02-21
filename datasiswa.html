@@ -383,6 +383,9 @@
                     <li><a href="walikelas.html" class="submenu-link active">Walikelas</a></li>
                     <li><a href="guruwali.html" class="submenu-link">Guru Wali</a></li>
                     <li><a href="gurupiket.html" class="submenu-link">Guru Piket</a></li>
+                    <li><a href="mappingsiswa.html" class="submenu-link">Mapping Kelas Siswa</a></li>
+                    <li><a href="datamapel.html" class="submenu-link">Mata Pelajaran</a></li>
+
                 </ul>
             </li>
 
@@ -397,9 +400,10 @@
                 </a>
                 <ul class="submenu">
                     <li><a href="#" class="submenu-link">Piket Harian</a></li>
-                    <li><a href="#" class="submenu-link">Pembinaan Guru Wali</a></li>
-                    <li><a href="#" class="submenu-link">Wali Kelas</a></li>
-                    <li><a href="#" class="submenu-link">Kasus</a></li>
+                    <li><a href="absensiadmin.html" class="submenu-link">Kehadiran Siswa</a></li>
+                    <li><a href="pembinaanwaliadmin.html" class="submenu-link">Pembinaan Guru Wali</a></li>
+                    <li><a href="nilaiakademisadmin.html" class="submenu-link">Nilai Akademis</a></li>
+                    <li><a href="kasusadmin.html" class="submenu-link">Kasus</a></li>
                 </ul>
             </li>
             <li class="menu-item">
@@ -410,14 +414,7 @@
                     </div>
                 </a>
             </li>
-            <li class="menu-item">
-                <a href="#" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-chart-bar menu-icon"></i>
-                        <span>Statistik</span>
-                    </div>
-                </a>
-            </li>
+
 
             <li class="menu-item">
                 <a href="#" class="menu-link">
@@ -436,7 +433,7 @@
                 <div class="admin-name">Administrator</div>
                 <div style="font-size: 0.75rem; color: #bdc3c7;">Online</div>
             </div>
-            <button class="btn-logout" title="Logout">
+            <button class="btn-logout" title="Logout" aria-label="Logout">
                 <i class="fas fa-sign-out-alt"></i>
             </button>
         </div>
@@ -457,7 +454,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     <button class="btn btn-primary" id="addSiswaBtn"><i class="fas fa-plus"></i> Tambah Siswa</button>
-                    <div class="search-box">
+                    <div class="search-box" title="Cari data siswa">
                         <i class="fas fa-search"></i>
                         <input type="text" id="searchInput" placeholder="Cari NISN atau Nama...">
                     </div>
@@ -466,7 +463,7 @@
                     <button class="btn btn-success" id="importBtn"><i class="fas fa-file-import"></i> Import CSV</button>
                     <button class="btn btn-danger" id="exportPdfBtn"><i class="fas fa-file-pdf"></i> Export Pdf</button>
                 </div>
-                <input type="file" id="importFile" accept=".csv" style="display: none;">
+                <input type="file" id="importFile" accept=".csv" style="display: none;" title="Pilih file CSV untuk diimport">
             </div>
 
             <div class="table-responsive">
