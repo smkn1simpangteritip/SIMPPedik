@@ -253,6 +253,7 @@
             top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.5);
             z-index: 1000;
+            -webkit-backdrop-filter: blur(4px);
             backdrop-filter: blur(4px);
         }
 
@@ -299,6 +300,8 @@
 
         /* --- Modal Styles --- */
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
         .modal.active { display: flex; }
         .modal-content { background-color: white; width: 90%; max-width: 500px; padding: 25px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: slideDown 0.3s ease; max-height: 90vh; overflow-y: auto; }
         @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -360,6 +363,9 @@
                     <li><a href="walikelas.html" class="submenu-link active">Walikelas</a></li>
                     <li><a href="guruwali.html" class="submenu-link">Guru Wali</a></li>
                     <li><a href="gurupiket.html" class="submenu-link">Guru Piket</a></li>
+                    <li><a href="mappingsiswa.html" class="submenu-link">Mapping Kelas Siswa</a></li>
+                    <li><a href="datamapel.html" class="submenu-link">Mata Pelajaran</a></li>
+
                 </ul>
             </li>
 
@@ -374,9 +380,10 @@
                 </a>
                 <ul class="submenu">
                     <li><a href="piketharianadmin.html" class="submenu-link">Piket Harian</a></li>
-                    <li><a href="#" class="submenu-link">Pembinaan Guru Wali</a></li>
-                    <li><a href="#" class="submenu-link">Wali Kelas</a></li>
-                    <li><a href="#" class="submenu-link">Kasus</a></li>
+                    <li><a href="absensiadmin.html" class="submenu-link">Kehadiran Siswa</a></li>
+                    <li><a href="pembinaanwaliadmin.html" class="submenu-link">Pembinaan Guru Wali</a></li>
+                    <li><a href="nilaiakademisadmin.html" class="submenu-link">Nilai Akademis</a></li>
+                    <li><a href="kasusadmin.html" class="submenu-link">Kasus</a></li>
                 </ul>
             </li>
             <li class="menu-item">
@@ -387,14 +394,7 @@
                     </div>
                 </a>
             </li>
-            <li class="menu-item">
-                <a href="#" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-chart-bar menu-icon"></i>
-                        <span>Statistik</span>
-                    </div>
-                </a>
-            </li>
+
 
             <li class="menu-item">
                 <a href="#" class="menu-link">
@@ -413,7 +413,7 @@
                 <div class="admin-name">Administrator</div>
                 <div style="font-size: 0.75rem; color: #bdc3c7;">Online</div>
             </div>
-            <button class="btn-logout" title="Logout">
+            <button class="btn-logout" title="Logout" aria-label="Logout">
                 <i class="fas fa-sign-out-alt"></i>
             </button>
         </div>
