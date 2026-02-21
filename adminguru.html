@@ -53,15 +53,6 @@
             right: 0;
         }
 
-        .menu-toggle {
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: white; /* Icon putih agar kontras dengan merah */
-            margin-right: 1rem;
-            background: none;
-            border: none;
-        }
-
         .navbar-brand {
             display: flex;
             align-items: center;
@@ -84,111 +75,21 @@
             color: white; /* Teks putih */
         }
 
-        /* --- Sidebar --- */
-        .sidebar {
-            position: fixed;
-            top: var(--header-height);
-            left: 0;
-            bottom: 0;
-            width: var(--sidebar-width);
-            background-color: var(--sidebar-bg);
-            color: var(--sidebar-text);
-            overflow-y: auto;
-            transition: transform 0.3s ease;
-            z-index: 1001;
-            display: flex;
-            flex-direction: column;
-            transform: translateX(-100%);
-        }
-
-        .sidebar.active {
-            transform: translateX(0);
-        }
-
-        .sidebar-menu {
-            flex: 1;
-            padding-top: 1rem;
-            list-style: none;
-        }
-
-        .menu-item {
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .menu-link {
-            display: flex;
-            align-items: center;
-            padding: 15px 20px;
-            color: var(--sidebar-text);
-            text-decoration: none;
-            transition: background 0.2s;
-            justify-content: space-between;
-        }
-
-        .menu-link:hover, .menu-link.active {
-            background-color: var(--sidebar-hover);
-            border-left: 4px solid var(--navbar-bg); /* Border merah sesuai navbar */
-        }
-
-        .menu-content {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .menu-icon {
-            width: 20px;
-            text-align: center;
-        }
-
-        /* Sidebar Footer */
-        .sidebar-footer {
-            padding: 20px;
-            background-color: rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .admin-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--navbar-bg); /* Merah */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-
-        .admin-info {
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .admin-name {
-            font-size: 0.9rem;
-            font-weight: 600;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            overflow: hidden;
-        }
-
         /* --- Main Content --- */
         .main-content {
-            margin-top: var(--header-height);
-            margin-left: 0;
+            max-width: 1200px; /* Center content on large screens */
+            margin: var(--header-height) auto 0;
             padding: 2rem;
             flex: 1;
             overflow-y: auto;
-            transition: margin-left 0.3s ease;
+            width: 100%;
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
         }
 
-        .sidebar.active ~ .main-content {
-            margin-left: 0;
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .main-content::-webkit-scrollbar {
+            display: none;
         }
 
         .dashboard-card {
@@ -245,9 +146,83 @@
             display: block;
         }
 
+        /* --- Menu Grid Styles --- */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 20px;
+        }
+        
+        .menu-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 25px 15px;
+            text-align: center;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            height: 100%;
+        }
+        
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-color: var(--navbar-bg);
+        }
+        
+        .icon-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            color: white;
+            font-size: 1.6rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .menu-card span {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #4b5563;
+        }
+        
+        .menu-card:hover span {
+            color: var(--navbar-bg);
+        }
+
         @media (max-width: 768px) {
             .navbar-brand span {
                 font-size: 1rem;
+            }
+
+            /* Penyesuaian Tampilan Mobile untuk Menu Grid */
+            .menu-grid {
+                grid-template-columns: repeat(2, 1fr); /* Memaksa 2 kolom di layar HP */
+                gap: 10px; /* Jarak antar card lebih kecil */
+            }
+
+            .menu-card {
+                padding: 15px 10px; /* Padding dalam card diperkecil */
+            }
+
+            .icon-box {
+                width: 45px; /* Ukuran box ikon diperkecil */
+                height: 45px;
+                font-size: 1.2rem; /* Ukuran ikon font diperkecil */
+                margin-bottom: 10px;
+            }
+
+            .menu-card span {
+                font-size: 0.85rem; /* Ukuran teks diperkecil */
             }
         }
 
@@ -262,121 +237,11 @@
 
     <!-- Navbar -->
     <nav class="navbar">
-        <button class="menu-toggle" id="menuToggle">
-            <i class="fas fa-bars"></i>
-        </button>
         <a href="#" class="navbar-brand">
             <img src="" alt="Logo Sekolah" style="display: none;">
             <span></span>
         </a>
     </nav>
-
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-        <ul class="sidebar-menu">
-            <li class="menu-item">
-                <a href="adminguru.html" class="menu-link active">
-                    <div class="menu-content">
-                        <i class="fas fa-home menu-icon"></i>
-                        <span>Dashboard</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="piketharin.html" class="menu-link" id="piketLink">
-                    <div class="menu-content">
-                        <i class="fas fa-calendar-check menu-icon"></i>
-                        <span>Piket Harian</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="guruwaliguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-user-tie menu-icon"></i>
-                        <span>Guru Wali</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="walikelasguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-chalkboard-teacher menu-icon"></i>
-                        <span>Walikelas</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="pembinaanguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-user-graduate menu-icon"></i>
-                        <span>Pembinaan Siswa</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="arsipguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-archive menu-icon"></i>
-                        <span>Arsip</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="kasusguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-book-reader menu-icon"></i>
-                        <span>Kasus Belajar</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="laporanguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-file-alt menu-icon"></i>
-                        <span>Laporan</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="backupguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-database menu-icon"></i>
-                        <span>Backup dan Reset</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="index.html" class="menu-link" onclick="return confirm('Apakah Anda yakin ingin keluar?');">
-                    <div class="menu-content">
-                        <i class="fas fa-sign-out-alt menu-icon"></i>
-                        <span>Log Out</span>
-                    </div>
-                </a>
-            </li>
-        </ul>
-
-        <!-- Sidebar Footer -->
-        <div class="sidebar-footer">
-            <div class="admin-avatar">G</div> 
-            <div class="admin-info">
-                <div class="admin-name">Admin Guru</div>
-                <div style="font-size: 0.75rem; color: #bdc3c7;">Online</div>
-            </div>
-        </div>
-    </aside>
-
-    <!-- Overlay untuk Mobile -->
-    <div class="overlay" id="overlay"></div>
 
     <!-- Main Content Area -->
     <main class="main-content">
@@ -427,62 +292,57 @@
             </div>
         </div>
 
-        <!-- Container Preview Piket Bulan Ini -->
+        <!-- Container Menu Grid -->
         <div class="dashboard-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-                <h3 style="margin: 0; color: #333; font-size: 1.2rem;">
-                    <i class="fas fa-calendar-alt" style="color: var(--navbar-bg); margin-right: 10px;"></i>
-                    Piket Bulan Ini: <span id="piketMonthDisplay" style="font-weight: 700; color: var(--primary-color);"></span>
-                </h3>
-                <a href="piketharin.html" style="background-color: #3b82f6; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; transition: opacity 0.2s;"><i class="fas fa-eye"></i> Lihat Detail</a>
-            </div>
-            <div class="stats-grid" style="margin-bottom: 0;">
-                <div class="stat-card">
-                    <div class="stat-info">
-                        <h3 id="countPetugasHariIni">0</h3>
-                        <p>Petugas Piket Hari Ini</p>
+            <div class="menu-grid">
+                <a href="piketharin.html" class="menu-card" id="piketLink">
+                    <div class="icon-box" style="background-color: #3b82f6;">
+                        <i class="fas fa-calendar-check"></i>
                     </div>
-                    <i class="fas fa-user-clock stat-icon" style="color: #3b82f6;"></i>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-info">
-                        <h3 id="countMelaksanakan">0</h3>
-                        <p>Melaksanakan Tugas</p>
+                    <span>Piket Umum</span>
+                </a>
+                <a href="absensisiswa.html" class="menu-card">
+                    <div class="icon-box" style="background-color: #10b981;">
+                        <i class="fas fa-user-check"></i>
                     </div>
-                    <i class="fas fa-check-circle stat-icon" style="color: #10b981;"></i>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-info">
-                        <h3 id="countTidakMelaksanakan">0</h3>
-                        <p>Tidak Melaksanakan</p>
+                    <span>Absensi Kehadiran</span>
+                </a>
+                <a href="#" class="menu-card" id="walikelasLink">
+                    <div class="icon-box" style="background-color: #f59e0b;">
+                        <i class="fas fa-chalkboard-teacher"></i>
                     </div>
-                    <i class="fas fa-times-circle stat-icon" style="color: #ef4444;"></i>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Stats Cards (Contoh Placeholder) -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-info">
-                    <h3>45</h3>
-                    <p>Guru Aktif</p>
-                </div>
-                <i class="fas fa-chalkboard-teacher stat-icon" style="color: var(--navbar-bg);"></i>
-            </div>
-            <div class="stat-card">
-                <div class="stat-info">
-                    <h3>12</h3>
-                    <p>Wali Kelas</p>
-                </div>
-                <i class="fas fa-user-tie stat-icon" style="color: #2ecc71;"></i>
-            </div>
-            <div class="stat-card">
-                <div class="stat-info">
-                    <h3>5</h3>
-                    <p>Kasus Siswa</p>
-                </div>
-                <i class="fas fa-exclamation-circle stat-icon" style="color: #f1c40f;"></i>
+                    <span>Walikelas</span>
+                </a>
+                <a href="guruwaliguru.html" class="menu-card">
+                    <div class="icon-box" style="background-color: #8b5cf6;">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <span>Guru Wali</span>
+                </a>
+                <a href="nilaisiswaguru.html" class="menu-card">
+                    <div class="icon-box" style="background-color: #8b5cf6;">
+                        <i class="fas fa-newspaper"></i>
+                    </div>
+                    <span>Nilai Mata Pelajaran</span>
+                </a>
+                <a href="arsipguru.html" class="menu-card">
+                    <div class="icon-box" style="background-color: #6366f1;">
+                        <i class="fas fa-archive"></i>
+                    </div>
+                    <span>Arsip Guru</span>
+                </a>
+                <a href="kasussiswaguru.html" class="menu-card">
+                    <div class="icon-box" style="background-color: #ef4444;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <span>Kasus Pembelajaran</span>
+                </a>
+                <a href="index.html" class="menu-card" onclick="return confirm('Apakah Anda yakin ingin keluar?');">
+                    <div class="icon-box" style="background-color: #64748b;">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </div>
+                    <span>Log Out</span>
+                </a>
             </div>
         </div>
 
@@ -492,18 +352,6 @@
             <p>Dikembangkan oleh Tim IT Sekolah.</p>
         </footer>
     </main>
-
-    <!-- Modal Akses Ditolak -->
-    <div id="accessDeniedModal" class="modal">
-        <div class="modal-content">
-            <div style="margin-bottom: 20px;">
-                <i class="fas fa-ban" style="font-size: 4rem; color: #ef4444;"></i>
-            </div>
-            <h3 style="color: #333; margin-bottom: 10px;">Akses Ditolak</h3>
-            <p style="color: #666; margin-bottom: 25px;">Maaf, anda tidak memiliki tugas tambahan sebagai guru piket.</p>
-            <button onclick="document.getElementById('accessDeniedModal').classList.remove('active')" style="background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: 600; width: 100%;">Tutup</button>
-        </div>
-    </div>
 
     <!-- Modal Update Profil -->
     <div id="updateProfilModal" class="modal">
@@ -546,6 +394,18 @@
         </div>
     </div>
 
+    <!-- Modal Peringatan Walikelas -->
+    <div id="walikelasWarningModal" class="modal">
+        <div class="modal-content" style="text-align: center; max-width: 400px;">
+            <div style="margin-bottom: 20px;">
+                <i class="fas fa-exclamation-circle" style="font-size: 4rem; color: #f59e0b;"></i>
+            </div>
+            <h3 style="color: #333; margin-bottom: 10px;">Akses Ditolak</h3>
+            <p style="color: #666; margin-bottom: 25px;">Maaf, anda tidak memiliki tugas tambahan sebagai walikelas...!</p>
+            <button onclick="document.getElementById('walikelasWarningModal').classList.remove('active')" style="background: #f59e0b; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: 600; width: 100%;">Tutup</button>
+        </div>
+    </div>
+
     <script>
         // --- Supabase Integration for Navbar ---
         const supabaseUrl = 'https://mjvobqfcoutazqcovtlp.supabase.co';
@@ -580,40 +440,15 @@
             document.addEventListener('DOMContentLoaded', loadSchoolIdentity);
         }
 
-        // Toggle Sidebar (Mobile)
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-
-        function toggleSidebar() {
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-        }
-
-        menuToggle.addEventListener('click', toggleSidebar);
-        overlay.addEventListener('click', toggleSidebar);
-
         // --- Load Data Guru dari Sesi Login ---
         document.addEventListener('DOMContentLoaded', () => {
             const session = JSON.parse(sessionStorage.getItem('guru_session'));
             
             if (session) {
-                // Update Nama di Sidebar
-                const adminNameEl = document.querySelector('.admin-name');
-                if (adminNameEl) adminNameEl.textContent = session.nama;
-
                 // Update Welcome Heading
                 const welcomeHeading = document.getElementById('welcomeHeading');
                 if (welcomeHeading) welcomeHeading.textContent = `Selamat Datang, ${session.nama}!`;
 
-                // Update Avatar jika ada foto
-                const adminAvatarEl = document.querySelector('.admin-avatar');
-                if (session.photo && adminAvatarEl) {
-                    adminAvatarEl.innerHTML = `<img src="${session.photo}" alt="Foto" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-                    adminAvatarEl.style.backgroundColor = 'transparent';
-                } else if (adminAvatarEl) {
-                    adminAvatarEl.textContent = session.nama.charAt(0).toUpperCase();
-                }
             }
         });
 
@@ -626,105 +461,6 @@
         }
         setInterval(updateLiveTime, 1000);
         updateLiveTime();
-
-        // --- Validasi Akses Piket Harian ---
-        const piketLink = document.getElementById('piketLink');
-        const accessDeniedModal = document.getElementById('accessDeniedModal');
-
-        if (piketLink) {
-            piketLink.addEventListener('click', async (e) => {
-                e.preventDefault();
-                
-                const session = JSON.parse(sessionStorage.getItem('guru_session'));
-                if (!session || !session.nama) {
-                    alert('Sesi tidak valid. Silakan login ulang.');
-                    window.location.href = 'index.html';
-                    return;
-                }
-
-                const namaGuru = session.nama;
-
-                try {
-                    // Validasi: Cek apakah nama guru ada di tabel gurupiket (kolom piket1, piket2, atau piket3)
-                    const { data, error } = await supabaseClient
-                        .from('gurupiket')
-                        .select('id')
-                        .or(`piket1.eq."${namaGuru}",piket2.eq."${namaGuru}",piket3.eq."${namaGuru}"`)
-                        .limit(1);
-
-                    if (error) throw error;
-
-                    if (data && data.length > 0) {
-                        window.location.href = 'piketharin.html';
-                    } else {
-                        accessDeniedModal.classList.add('active');
-                    }
-                } catch (err) {
-                    console.error('Error checking piket access:', err);
-                    alert('Terjadi kesalahan saat memvalidasi akses.');
-                }
-            });
-        }
-
-        // --- Load Statistik Piket Bulan Ini ---
-        async function loadPiketStats() {
-            const now = new Date();
-            
-            // 1. Set Bulan Display
-            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-            const currentMonthName = monthNames[now.getMonth()];
-            const currentYear = now.getFullYear();
-            const displayEl = document.getElementById('piketMonthDisplay');
-            if(displayEl) displayEl.textContent = `${currentMonthName} ${currentYear}`;
-
-            // 2. Count Petugas Piket Hari Ini (datapiketsiswa)
-            // ID Format: ID_HARI-... (e.g. ID_SENIN-...)
-            const days = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'];
-            const todayName = days[now.getDay()];
-            
-            try {
-                const { count, error } = await supabaseClient
-                    .from('datapiketsiswa')
-                    .select('*', { count: 'exact', head: true })
-                    .ilike('id_piket', `ID_${todayName}%`);
-                
-                if (!error) {
-                    const countEl = document.getElementById('countPetugasHariIni');
-                    if(countEl) countEl.textContent = count || 0;
-                }
-            } catch (err) {
-                console.error("Error counting petugas:", err);
-            }
-
-            // 3. Count Riwayat Piket Bulan Ini (jurnalpiket)
-            try {
-                // First day of month
-                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-                // Last day of month
-                const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-
-                const { data, error } = await supabaseClient
-                    .from('jurnalpiket')
-                    .select('status')
-                    .gte('tanggal', startOfMonth)
-                    .lte('tanggal', endOfMonth);
-
-                if (!error && data) {
-                    const melaksanakan = data.filter(d => d.status === 'Ya').length;
-                    const tidakMelaksanakan = data.filter(d => d.status === 'Tidak').length;
-
-                    const elYa = document.getElementById('countMelaksanakan');
-                    const elTidak = document.getElementById('countTidakMelaksanakan');
-                    
-                    if(elYa) elYa.textContent = melaksanakan;
-                    if(elTidak) elTidak.textContent = tidakMelaksanakan;
-                }
-            } catch (err) {
-                console.error("Error counting jurnal:", err);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', loadPiketStats);
 
         let currentGuruData = null; // Variabel global untuk menyimpan data guru
 
@@ -880,14 +616,8 @@
                     loadGuruBiodata();
                     
                     // Update Sidebar & Welcome immediately
-                    const adminNameEl = document.querySelector('.admin-name');
-                    if (adminNameEl) adminNameEl.textContent = nama;
                     const welcomeHeading = document.getElementById('welcomeHeading');
                     if (welcomeHeading) welcomeHeading.textContent = `Selamat Datang, ${nama}!`;
-                    const adminAvatarEl = document.querySelector('.admin-avatar');
-                    if (photoUrl && adminAvatarEl) {
-                        adminAvatarEl.innerHTML = `<img src="${photoUrl}" alt="Foto" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-                    }
 
                 } catch(err) {
                     console.error(err);
@@ -895,6 +625,38 @@
                 } finally {
                     saveBtn.textContent = originalText;
                     saveBtn.disabled = false;
+                }
+            });
+        }
+
+        // --- Walikelas Validation ---
+        const walikelasLink = document.getElementById('walikelasLink');
+        const walikelasWarningModal = document.getElementById('walikelasWarningModal');
+
+        if (walikelasLink) {
+            walikelasLink.addEventListener('click', async (e) => {
+                e.preventDefault();
+                
+                const session = JSON.parse(sessionStorage.getItem('guru_session'));
+                if (!session || !session.nama) {
+                    alert("Sesi tidak valid. Silakan login ulang.");
+                    return;
+                }
+
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('walikelas')
+                        .select('nama_guru')
+                        .eq('nama_guru', session.nama)
+                        .maybeSingle();
+
+                    if (data) {
+                        window.location.href = 'walikelasguru.html';
+                    } else {
+                        walikelasWarningModal.classList.add('active');
+                    }
+                } catch (err) {
+                    console.error("Error validating walikelas:", err);
                 }
             });
         }
