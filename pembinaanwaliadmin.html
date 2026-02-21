@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pembinaan Guru Wali - SMKN 1 Simpang Teritip</title>
+    <!-- Font Awesome untuk Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase JS SDK -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --sidebar-bg: #2c3e50;
+            --sidebar-text: #ecf0f1;
+            --sidebar-hover: #34495e;
+            --header-height: 60px;
+            --sidebar-width: 260px;
+            --bg-light: #f4f6f9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden; /* Mencegah scroll ganda pada body */
+        }
+
+        /* --- Navbar --- */
+        .navbar {
+            height: var(--header-height);
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            z-index: 1002;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .menu-toggle {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #333;
+            margin-right: 1rem;
+            background: none;
+            border: none;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+            width: auto;
+        }
+
+        .navbar-brand span {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--secondary-color);
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 1001; /* Di atas Navbar */
+            display: flex;
+            flex-direction: column;
+            transform: translateX(-100%); /* Default: Tersembunyi di semua device */
+        }
+
+        .sidebar.active {
+            transform: translateX(0); /* Muncul saat aktif */
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding-top: 1rem;
+            list-style: none;
+        }
+
+        .menu-item {
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            transition: background 0.2s;
+            justify-content: space-between;
+        }
+
+        .menu-link:hover, .menu-link.active {
+            background-color: var(--sidebar-hover);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .menu-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu-icon {
+            width: 20px;
+            text-align: center;
+        }
+
+        .dropdown-icon {
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+        }
+
+        /* Dropdown Menu */
+        .submenu {
+            list-style: none;
+            background-color: rgba(0,0,0,0.2);
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .submenu.open {
+            max-height: 500px; /* Cukup besar untuk menampung item */
+        }
+
+        .submenu-link {
+            display: block;
+            padding: 10px 20px 10px 50px; /* Indentasi */
+            color: #bdc3c7;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .submenu-link:hover, .submenu-link.active {
+            color: #fff;
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        /* Sidebar Footer (Profile) */
+        .sidebar-footer {
+            padding: 20px;
+            background-color: rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .admin-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .admin-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .admin-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        .btn-logout {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+        }
+
+        .btn-logout:hover {
+            color: #c0392b;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            margin-top: var(--header-height);
+            margin-left: 0; /* Default: Full width */
+            padding: 2rem;
+            flex: 1;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Default (Mobile): Konten tidak bergeser saat sidebar aktif (kena overlay) */
+        .sidebar.active ~ .main-content {
+            margin-left: 0;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        /* Footer */
+        .main-footer {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 0.85rem;
+            border-top: 1px solid #eee;
+            margin-top: 20px;
+        }
+
+        /* --- Responsive Mobile --- */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000; /* Di bawah sidebar, di atas konten lain */
+            backdrop-filter: blur(4px); /* Efek Blur */
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand span {
+                font-size: 1rem; /* Sedikit lebih kecil di HP */
+            }
+            .navbar-date {
+                display: none !important;
+            }
+        }
+
+        @media (min-width: 769px) {
+            /* Mode Desktop: Geser konten ke kanan saat sidebar muncul (Push Effect) */
+            .sidebar.active ~ .main-content {
+                margin-left: 0; /* Tidak menggeser konten, tapi overlay */
+            }
+        }
+
+        /* --- Stats Grid for Pembinaan --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 5px; height: 100%;
+            background-color: var(--primary-color);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .stat-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        .stat-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #eff6ff;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .stat-body {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .stat-count {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .stat-footer {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #f1f5f9;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Colors for cards */
+        .card-blue::before { background-color: #3b82f6; }
+        .card-blue .stat-icon { background-color: #eff6ff; color: #3b82f6; }
+        .card-blue:hover { border-color: #3b82f6; }
+        
+        .card-green::before { background-color: #10b981; }
+        .card-green .stat-icon { background-color: #ecfdf5; color: #10b981; }
+        .card-green:hover { border-color: #10b981; }
+        
+        .card-purple::before { background-color: #8b5cf6; }
+        .card-purple .stat-icon { background-color: #f5f3ff; color: #8b5cf6; }
+        .card-purple:hover { border-color: #8b5cf6; }
+        
+        .card-orange::before { background-color: #f59e0b; }
+        .card-orange .stat-icon { background-color: #fffbeb; color: #f59e0b; }
+        .card-orange:hover { border-color: #f59e0b; }
+
+        .card-red::before { background-color: #ef4444; }
+        .card-red .stat-icon { background-color: #fef2f2; color: #ef4444; }
+        .card-red:hover { border-color: #ef4444; }
+
+        /* Table Styles */
+        .table-responsive { overflow-x: auto; }
+        .custom-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .custom-table th, .custom-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
+        .custom-table th { background-color: #f8f9fa; color: #555; font-weight: 600; white-space: nowrap; }
+        .custom-table td { white-space: nowrap; }
+        .custom-table tr:hover { background-color: #f9f9f9; }
+        
+        .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.9rem; color: white; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; transition: opacity 0.2s; }
+        .btn-danger { background-color: #ef4444; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <button class="menu-toggle" id="menuToggle" title="Toggle Sidebar Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <a href="#" class="navbar-brand">
+            <img src="" alt="Logo Sekolah" style="display: none;">
+            <span></span>
+        </a>
+        <div class="navbar-date" style="margin-left: auto; display: flex; align-items: center; gap: 10px; color: #555; font-weight: 600; font-size: 0.9rem;">
+            <i class="far fa-calendar-alt" style="color: var(--primary-color);"></i>
+            <span id="navbarDate"></span>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <ul class="sidebar-menu">
+            <li class="menu-item">
+                <a href="dasboradmin.html" class="menu-link">
+                    <div class="menu-content">
+                        <i class="fas fa-home menu-icon"></i>
+                        <span>Dashboard</span>
+                    </div>
+                </a>
+            </li>
+
+            <!-- Menu Pengaturan (Dropdown) -->
+            <li class="menu-item">
+                <a href="#" class="menu-link dropdown-toggle">
+                    <div class="menu-content">
+                        <i class="fas fa-cogs menu-icon"></i>
+                        <span>Pengaturan</span>
+                    </div>
+                    <i class="fas fa-chevron-right dropdown-icon"></i>
+                </a>
+                <ul class="submenu">
+                    <li><a href="identitassekolah.html" class="submenu-link">Identitas Sekolah</a></li>
+                    <li><a href="rombel.html" class="submenu-link">Rombongan Belajar</a></li>
+                    <li><a href="dataguru.html" class="submenu-link">Data Guru</a></li>
+                    <li><a href="datasiswa.html" class="submenu-link">Data Siswa</a></li>
+                    <li><a href="walikelas.html" class="submenu-link">Walikelas</a></li>
+                    <li><a href="guruwali.html" class="submenu-link">Guru Wali</a></li>
+                    <li><a href="gurupiket.html" class="submenu-link">Guru Piket</a></li>
+                    <li><a href="mappingsiswa.html" class="submenu-link">Mapping Kelas Siswa</a></li>
+                    <li><a href="datamapel.html" class="submenu-link">Mata Pelajaran</a></li>
+                </ul>
+            </li>
+
+            <!-- Menu Laporan (Dropdown) - ACTIVE -->
+            <li class="menu-item">
+                <a href="#" class="menu-link dropdown-toggle active">
+                    <div class="menu-content">
+                        <i class="fas fa-file-alt menu-icon"></i>
+                        <span>Laporan</span>
+                    </div>
+                    <i class="fas fa-chevron-right dropdown-icon" style="transform: rotate(90deg);"></i>
+                </a>
+                <ul class="submenu open">
+                    <li><a href="piketharianadmin.html" class="submenu-link">Piket Harian</a></li>
+                    <li><a href="absensiadmin.html" class="submenu-link">Kehadiran Siswa</a></li>
+                    <li><a href="pembinaanwaliadmin.html" class="submenu-link active">Pembinaan Guru Wali</a></li>
+                    <li><a href="nilaiakademisadmin.html" class="submenu-link">Nilai Akademis</a></li>
+                    <li><a href="kasusadmin.html" class="submenu-link">Kasus</a></li>
+                </ul>
+            </li>
+            <li class="menu-item">
+                <a href="Arsipadmin.html" class="menu-link">
+                    <div class="menu-content">
+                        <i class="fas fa-archive menu-icon"></i>
+                        <span>Arsip</span>
+                    </div>
+                </a>
+            </li>
+
+
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <div class="menu-content">
+                        <i class="fas fa-history menu-icon"></i>
+                        <span>Backup dan Reset</span>
+                    </div>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Sidebar Footer -->
+        <div class="sidebar-footer">
+            <div class="admin-avatar">A</div> 
+            <div class="admin-info">
+                <div class="admin-name">Administrator</div>
+                <div style="font-size: 0.75rem; color: #bdc3c7;">Online</div>
+            </div>
+            <button class="btn-logout" title="Logout" onclick="if(confirm('Apakah Anda yakin ingin keluar?')) window.location.href = 'index.html'">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Overlay untuk Mobile -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <div class="dashboard-card">
+            <h2>Pembinaan Guru Wali</h2>
+            <p style="color: #666; margin-top: 10px;">Halaman ini menampilkan data pembinaan yang dilakukan oleh Guru Wali.</p>
+        </div>
+        
+        <!-- Container Preview Pembinaan Per Kelas -->
+        <div class="stats-grid" id="pembinaanStatsGrid"></div>
+
+        <!-- Container Tabel Detail Pembinaan -->
+        <div class="dashboard-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: #333;">Data Detail Pembinaan</h3>
+                <input type="text" id="searchPembinaan" placeholder="Cari Siswa / Kasus..." style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 250px;">
+            </div>
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Id Pembinaan</th>
+                            <th>Nama Siswa</th>
+                            <th>NISN</th>
+                            <th>Tanggal</th>
+                            <th>Kasus</th>
+                            <th>Guru Pembina</th>
+                            <th>Foto</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pembinaanTableBody">
+                        <tr><td colspan="8" style="text-align: center;">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="main-footer">
+            <p>&copy; 2024 SMK Negeri 1 Simpang Teritip. All rights reserved.</p>
+            <p>Dikembangkan oleh Tim IT Sekolah.</p>
+        </footer>
+    </main>
+
+    <script>
+        // --- Supabase Integration for Navbar ---
+        const supabaseUrl = 'https://mjvobqfcoutazqcovtlp.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdm9icWZjb3V0YXpxY292dGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzEwMzYsImV4cCI6MjA4NjE0NzAzNn0.jz6JaC9mMTMhLVhXSh1OCnFWDPZ0Cy2tUnHEmWxAR8o';
+        
+        if (typeof supabase !== 'undefined') {
+            const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+            async function loadSchoolIdentity() {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('identitassekolah')
+                        .select('nama_sekolah, logo')
+                        .limit(1)
+                        .single();
+                    
+                    if (data) {
+                        if (data.nama_sekolah) {
+                            document.querySelector('.navbar-brand span').textContent = data.nama_sekolah;
+                        }
+                        if (data.logo) {
+                            const img = document.querySelector('.navbar-brand img');
+                            img.src = data.logo;
+                            img.style.display = 'block';
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error loading school identity:", err);
+                }
+            }
+            document.addEventListener('DOMContentLoaded', loadSchoolIdentity);
+
+            // --- Load Data Pembinaan & Aggregate per Kelas ---
+            async function loadPembinaanStats() {
+                const grid = document.getElementById('pembinaanStatsGrid');
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666;">Memuat data pembinaan...</div>';
+
+                try {
+                    // 1. Fetch Semua Kelas (Rombel)
+                    const { data: rombelData, error: rombelError } = await supabaseClient
+                        .from('rombel')
+                        .select('nama_kelas')
+                        .order('nama_kelas');
+                    
+                    if (rombelError) throw rombelError;
+
+                    // 2. Fetch Data Pembinaan
+                    const { data: pembinaanData, error: pembinaanError } = await supabaseClient
+                        .from('pembinaanwali')
+                        .select('nisn, tanggal');
+                    
+                    if (pembinaanError) throw pembinaanError;
+
+                    // 3. Fetch Data Perwalian (untuk mapping NISN ke Kelas)
+                    const { data: perwalianData, error: perwalianError } = await supabaseClient
+                        .from('perwalian')
+                        .select('nisn, kelas');
+
+                    if (perwalianError) throw perwalianError;
+
+                    // Buat Map NISN -> Kelas
+                    const nisnToKelas = {};
+                    if (perwalianData) {
+                        perwalianData.forEach(p => {
+                            if (p.nisn) nisnToKelas[p.nisn] = p.kelas;
+                        });
+                    }
+
+                    // Inisialisasi Stats untuk SEMUA kelas dari Rombel
+                    const stats = {};
+                    if (rombelData) {
+                        rombelData.forEach(r => {
+                            stats[r.nama_kelas] = { count: 0, lastDate: null };
+                        });
+                    }
+
+                    // Agregasi Data Pembinaan
+                    if (pembinaanData) {
+                        pembinaanData.forEach(item => {
+                            const kelas = nisnToKelas[item.nisn];
+                            
+                            // Hanya hitung jika kelas ditemukan dan ada di daftar stats (berasal dari rombel)
+                            if (kelas && stats[kelas]) {
+                                stats[kelas].count++;
+
+                                // Cek tanggal terakhir
+                                if (item.tanggal) {
+                                    const itemDate = new Date(item.tanggal);
+                                    if (!stats[kelas].lastDate || itemDate > stats[kelas].lastDate) {
+                                        stats[kelas].lastDate = itemDate;
+                                    }
+                                }
+                            } else {
+                                // Opsional: Handle siswa yang kelasnya tidak ada di rombel (misal alumni atau data lama)
+                                // Saat ini diabaikan agar sesuai dengan daftar kelas aktif
+                            }
+                        });
+                    }
+
+                    // Render Cards
+                    grid.innerHTML = '';
+                    const sortedClasses = Object.keys(stats).sort();
+                    const colors = ['card-blue', 'card-green', 'card-purple', 'card-orange', 'card-red'];
+
+                    if (sortedClasses.length === 0) {
+                        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 20px; background: white; border-radius: 8px;">Belum ada data pembinaan.</div>';
+                        return;
+                    }
+
+                    sortedClasses.forEach((kelas, index) => {
+                        const data = stats[kelas];
+                        const colorClass = colors[index % colors.length];
+                        const lastDateStr = data.lastDate ? data.lastDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+
+                        const card = document.createElement('div');
+                        card.className = `stat-card ${colorClass}`;
+                        card.innerHTML = `
+                            <div class="stat-header">
+                                <div class="stat-title">${kelas}</div>
+                                <div class="stat-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                            </div>
+                            <div class="stat-body">
+                                <div class="stat-count">${data.count}</div>
+                                <div class="stat-label">Total Pembinaan</div>
+                            </div>
+                            <div class="stat-footer">
+                                <span>Terakhir: ${lastDateStr}</span>
+                                <i class="fas fa-history"></i>
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
+
+                } catch (err) {
+                    console.error("Error loading stats:", err);
+                    grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: red;">Gagal memuat data: ${err.message}</div>`;
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', loadPembinaanStats);
+
+            // --- Load Tabel Pembinaan ---
+            async function loadPembinaanTable() {
+                const tbody = document.getElementById('pembinaanTableBody');
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Memuat data...</td></tr>';
+
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('pembinaanwali')
+                        .select('*')
+                        .order('tanggal', { ascending: false });
+
+                    if (error) throw error;
+
+                    tbody.innerHTML = '';
+                    
+                    if (!data || data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Belum ada data pembinaan.</td></tr>';
+                        return;
+                    }
+
+                    data.forEach((item, index) => {
+                        const dateStr = item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
+                        const photoHtml = item.photo ? `<a href="${item.photo}" target="_blank" style="color: var(--primary-color); text-decoration: none;"><i class="fas fa-image"></i> Lihat</a>` : '-';
+
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${item.id_pembinaan || '-'}</td>
+                            <td>${item.nama_siswa || '-'}</td>
+                            <td>${item.nisn || '-'}</td>
+                            <td>${dateStr}</td>
+                            <td>${item.kasus || '-'}</td>
+                            <td>${item.guru_wali || '-'}</td>
+                            <td style="text-align: center;">${photoHtml}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+
+                    // Setup Search
+                    const searchInput = document.getElementById('searchPembinaan');
+                    if (searchInput) {
+                        searchInput.addEventListener('input', (e) => {
+                            const term = e.target.value.toLowerCase();
+                            const rows = tbody.querySelectorAll('tr');
+                            rows.forEach(row => {
+                                const text = row.innerText.toLowerCase();
+                                row.style.display = text.includes(term) ? '' : 'none';
+                            });
+                        });
+                    }
+
+                } catch (err) {
+                    console.error("Error loading table:", err);
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: red;">Gagal memuat data: ${err.message}</td></tr>`;
+                }
+            }
+
+            window.deletePembinaan = async function(id) {
+                if(confirm('Apakah Anda yakin ingin menghapus data pembinaan ini?')) {
+                    try {
+                        const { error } = await supabaseClient
+                            .from('pembinaanwali')
+                            .delete()
+                            .eq('id_pembinaan', id);
+                        
+                        if (error) throw error;
+                        
+                        alert('Data berhasil dihapus');
+                        loadPembinaanTable(); 
+                        loadPembinaanStats(); // Refresh stats as well
+                    } catch (err) {
+                        alert('Gagal menghapus: ' + err.message);
+                    }
+                }
+            };
+
+            document.addEventListener('DOMContentLoaded', loadPembinaanTable);
+        }
+
+        // --- Date Display in Navbar ---
+        function updateNavbarDate() {
+            const now = new Date();
+            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            document.getElementById('navbarDate').textContent = now.toLocaleDateString('id-ID', options);
+        }
+        document.addEventListener('DOMContentLoaded', updateNavbarDate);
+
+        // Toggle Sidebar (Mobile)
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        menuToggle.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+
+        // Dropdown Menu Logic
+        const dropdowns = document.querySelectorAll('.dropdown-toggle');
+
+        dropdowns.forEach(dropdown => {
+            dropdown.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Toggle submenu
+                const submenu = dropdown.nextElementSibling;
+                submenu.classList.toggle('open');
+
+                // Rotate icon
+                const icon = dropdown.querySelector('.dropdown-icon');
+                if (submenu.classList.contains('open')) {
+                    icon.style.transform = 'rotate(90deg)';
+                } else {
+                    icon.style.transform = 'rotate(0deg)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
