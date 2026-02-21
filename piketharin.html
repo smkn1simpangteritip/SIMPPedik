@@ -144,6 +144,37 @@
             text-align: center;
         }
 
+        .dropdown-icon {
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+        }
+
+        /* Dropdown Menu */
+        .submenu {
+            list-style: none;
+            background-color: rgba(0,0,0,0.2);
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .submenu.open {
+            max-height: 500px;
+        }
+
+        .submenu-link {
+            display: block;
+            padding: 10px 20px 10px 50px;
+            color: #bdc3c7;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .submenu-link:hover, .submenu-link.active {
+            color: #fff;
+            background-color: rgba(255,255,255,0.05);
+        }
+
         /* Sidebar Footer */
         .sidebar-footer {
             padding: 20px;
@@ -366,125 +397,36 @@
                 justify-content: center;
             }
         }
+
+        /* Tombol Kembali Ke Dashboard */
+        .btn-back-dashboard {
+            margin-left: auto;
+            background-color: transparent;
+            border: 1px solid white;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        .btn-back-dashboard:hover {
+            background-color: white;
+            color: var(--navbar-bg);
+        }
     </style>
 </head>
 <body>
 
     <!-- Navbar -->
     <nav class="navbar">
-        <button class="menu-toggle" id="menuToggle">
-            <i class="fas fa-bars"></i>
-        </button>
         <a href="#" class="navbar-brand">
             <img src="" alt="Logo Sekolah" style="display: none;">
             <span></span>
         </a>
+        <a href="adminguru.html" class="btn-back-dashboard">Kembali Ke Dashboard</a>
     </nav>
-
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-        <ul class="sidebar-menu">
-            <li class="menu-item">
-                <a href="adminguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-home menu-icon"></i>
-                        <span>Dashboard</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="piketharin.html" class="menu-link active">
-                    <div class="menu-content">
-                        <i class="fas fa-calendar-check menu-icon"></i>
-                        <span>Piket Harian</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="guruwaliguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-user-tie menu-icon"></i>
-                        <span>Guru Wali</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="walikelasguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-chalkboard-teacher menu-icon"></i>
-                        <span>Walikelas</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="pembinaanguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-user-graduate menu-icon"></i>
-                        <span>Pembinaan Siswa</span>
-                    </div>
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="arsipguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-archive menu-icon"></i>
-                        <span>Arsip</span>
-                    </div>
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="kasusguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-book-reader menu-icon"></i>
-                        <span>Kasus Belajar</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="laporanguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-file-alt menu-icon"></i>
-                        <span>Laporan</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="backupguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-database menu-icon"></i>
-                        <span>Backup dan Reset</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="index.html" class="menu-link" onclick="return confirm('Apakah Anda yakin ingin keluar?');">
-                    <div class="menu-content">
-                        <i class="fas fa-sign-out-alt menu-icon"></i>
-                        <span>Log Out</span>
-                    </div>
-                </a>
-            </li>
-        </ul>
-
-        <!-- Sidebar Footer -->
-        <div class="sidebar-footer">
-            <div class="admin-avatar">G</div> 
-            <div class="admin-info">
-                <div class="admin-name">Admin Guru</div>
-                <div style="font-size: 0.75rem; color: #bdc3c7;">Online</div>
-            </div>
-        </div>
-    </aside>
-
-    <!-- Overlay untuk Mobile -->
-    <div class="overlay" id="overlay"></div>
 
     <!-- Main Content Area -->
     <main class="main-content">
@@ -599,7 +541,7 @@
                 <input type="hidden" id="piketSiswaId">
                 <div class="form-group">
                     <label for="idPiketSiswa">ID Piket</label>
-                    <input type="text" id="idPiketSiswa" name="idPiketSiswa" placeholder="Contoh: PKS-001" required>
+                    <input type="text" id="idPiketSiswa" name="idPiketSiswa" placeholder="Otomatis Terisi" readonly required style="background-color: #f3f4f6; cursor: not-allowed;">
                 </div>
                 <div class="form-group">
                     <label for="namaSiswaPiket">Nama Siswa</label>
@@ -768,36 +710,11 @@
             document.addEventListener('DOMContentLoaded', loadSchoolIdentity);
         }
 
-        // Toggle Sidebar (Mobile)
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-
-        function toggleSidebar() {
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-        }
-
-        menuToggle.addEventListener('click', toggleSidebar);
-        overlay.addEventListener('click', toggleSidebar);
-
         // --- Load Data Guru dari Sesi Login ---
         document.addEventListener('DOMContentLoaded', () => {
             const session = JSON.parse(sessionStorage.getItem('guru_session'));
             
             if (session) {
-                // Update Nama di Sidebar
-                const adminNameEl = document.querySelector('.admin-name');
-                if (adminNameEl) adminNameEl.textContent = session.nama;
-
-                // Update Avatar jika ada foto
-                const adminAvatarEl = document.querySelector('.admin-avatar');
-                if (session.photo && adminAvatarEl) {
-                    adminAvatarEl.innerHTML = `<img src="${session.photo}" alt="Foto" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-                    adminAvatarEl.style.backgroundColor = 'transparent';
-                } else if (adminAvatarEl) {
-                    adminAvatarEl.textContent = session.nama.charAt(0).toUpperCase();
-                }
             }
         });
 
@@ -851,27 +768,25 @@
                     );
                 }
 
-                // Jika tidak ada jadwal atau guru tidak terdaftar hari ini
-                if (!data || data.length === 0 || !isScheduled) {
-                    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #cbd5e1; background: #111827; border-radius: 8px;">
-                        <div style="background: rgba(185, 28, 28, 0.2); color: #fca5a5; padding: 20px; border-radius: 8px; border: 1px solid #7f1d1d; display: inline-block; margin-top: 20px;">
-                            <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                            <h3 style="margin: 0 0 5px 0;">Akses Dibatasi</h3>
-                            <p style="margin: 0;">Maaf, Jadwal Piket anda bukan hari ini.</p>
-                        </div>
-                        <div style="margin-top: 20px;">
-                            <a href="adminguru.html" class="btn" style="background: #6b7280; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Kembali ke Dashboard</a>
-                        </div>
-                    </div>`;
-
-                    // Nonaktifkan tombol Input Data Piket jika akses dibatasi
-                    const inputJurnalBtn = document.getElementById('inputJurnalBtn');
-                    if (inputJurnalBtn) {
+                // Logika Tombol Input: Hanya aktif jika guru piket hari ini
+                const inputJurnalBtn = document.getElementById('inputJurnalBtn');
+                if (inputJurnalBtn) {
+                    if (!isScheduled) {
                         inputJurnalBtn.disabled = true;
                         inputJurnalBtn.style.opacity = '0.5';
                         inputJurnalBtn.style.cursor = 'not-allowed';
-                        inputJurnalBtn.title = 'Akses dibatasi karena bukan jadwal piket Anda.';
+                        inputJurnalBtn.title = 'Akses dibatasi: Anda bukan petugas piket hari ini.';
+                    } else {
+                        inputJurnalBtn.disabled = false;
+                        inputJurnalBtn.style.opacity = '1';
+                        inputJurnalBtn.style.cursor = 'pointer';
+                        inputJurnalBtn.title = '';
                     }
+                }
+
+                // Jika tidak ada jadwal hari ini
+                if (!data || data.length === 0) {
+                    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #cbd5e1;">Tidak ada jadwal piket hari ini.</div>`;
                     return;
                 }
 
@@ -1166,6 +1081,17 @@
         if (piketSiswaForm) {
             piketSiswaForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+
+                // Validasi Input: Pastikan semua data terisi
+                const namaSiswa = document.getElementById('namaSiswaPiket').value;
+                const hariPiket = document.getElementById('hariPiketSiswa').value;
+                const kelasPiket = document.getElementById('kelasPiket').value;
+                const areaPiket = document.getElementById('areaPiket').value;
+
+                if (!namaSiswa || !hariPiket || !kelasPiket || !areaPiket) {
+                    alert("Data Pengaturan Piket tidak boleh Kosong");
+                    return;
+                }
                 
                 const submitBtn = piketSiswaForm.querySelector('button[type="submit"]');
                 const originalText = submitBtn.textContent;
@@ -1668,28 +1594,27 @@
             const tableBody = document.getElementById('jurnalPiketTableBody');
             const searchFilter = document.getElementById('searchJurnalInput') ? document.getElementById('searchJurnalInput').value.toLowerCase() : '';
 
-            const now = new Date();
-            const hariIni = now.toLocaleDateString('id-ID', { weekday: 'long' }).toUpperCase();
-
             // Filter data berdasarkan pencarian
             const filteredData = jurnalDataList.filter(item => {
-                // Ambil nama hari dari tanggal untuk pencarian
-                let itemDay = '';
-                if (item.tanggal) {
-                    itemDay = new Date(item.tanggal).toLocaleDateString('id-ID', { weekday: 'long' });
+                if (searchFilter) {
+                    // Ambil nama hari dari tanggal untuk pencarian
+                    let itemDay = '';
+                    if (item.tanggal) {
+                        itemDay = new Date(item.tanggal).toLocaleDateString('id-ID', { weekday: 'long' });
+                    }
+
+                    const text = (
+                        (item.nama_siswa || '') + ' ' + 
+                        (item.kelas || '') + ' ' + 
+                        (item.area || '') + ' ' + 
+                        (item.nisn || '') + ' ' +
+                        (item.id_petugas || '') + ' ' +
+                        itemDay
+                    ).toLowerCase();
+
+                    return text.includes(searchFilter);
                 }
-
-                const text = (
-                    (item.nama_siswa || '') + ' ' + 
-                    (item.kelas || '') + ' ' + 
-                    (item.area || '') + ' ' + 
-                    (item.nisn || '') + ' ' +
-                    (item.id_petugas || '') + ' ' +
-                    itemDay
-                ).toLowerCase();
-
-                // Jika ada pencarian, filter berdasarkan text. Jika tidak, tampilkan hanya data hari ini (berdasarkan ID Petugas atau Tanggal)
-                return searchFilter ? text.includes(searchFilter) : ((item.id_petugas && item.id_petugas.toUpperCase().includes(hariIni)) || (itemDay && itemDay.toUpperCase() === hariIni));
+                return true; // Tampilkan semua data jika tidak ada filter
             });
 
             // Hitung Pagination
@@ -1913,7 +1838,7 @@
                         styles: { fontSize: 9 }
                     });
 
-                    // --- Tanda Tangan Guru Piket ---
+                    // --- Tanda Tangan ---
                     finalY = doc.lastAutoTable.finalY + 20;
                     
                     // Cek jika tidak cukup ruang di halaman ini
@@ -1922,28 +1847,45 @@
                         finalY = 20;
                     }
 
-                    const colWidth = pageWidth / 3;
+                    const session = JSON.parse(sessionStorage.getItem('guru_session'));
+                    const loggedInName = session ? session.nama : '';
+                    const loggedInNip = session ? session.nip : '';
+
+                    // Cek apakah user yang login adalah petugas piket hari ini
+                    const isUserPiket = currentPiketTeachers.some(t => t.name === loggedInName);
                     
                     doc.setFontSize(10);
                     doc.setTextColor(0);
 
-                    // Guru 1
-                    const g1 = currentPiketTeachers[0];
-                    doc.text("Guru Piket 1", colWidth * 0.5, finalY, { align: 'center' });
-                    doc.text(g1 ? g1.name : "( .............................. )", colWidth * 0.5, finalY + 25, { align: 'center' });
-                    if (g1 && g1.nip) doc.text(`NIP. ${g1.nip}`, colWidth * 0.5, finalY + 30, { align: 'center' });
+                    if (isUserPiket) {
+                        // Tampilkan Petugas Piket Hari Ini (Sesuai Container)
+                        const colWidth = pageWidth / 3;
 
-                    // Guru 2
-                    const g2 = currentPiketTeachers[1];
-                    doc.text("Guru Piket 2", colWidth * 1.5, finalY, { align: 'center' });
-                    doc.text(g2 ? g2.name : "( .............................. )", colWidth * 1.5, finalY + 25, { align: 'center' });
-                    if (g2 && g2.nip) doc.text(`NIP. ${g2.nip}`, colWidth * 1.5, finalY + 30, { align: 'center' });
+                        // Guru 1
+                        const g1 = currentPiketTeachers[0];
+                        doc.text("Guru Piket 1", colWidth * 0.5, finalY, { align: 'center' });
+                        doc.text(g1 ? g1.name : "( .............................. )", colWidth * 0.5, finalY + 25, { align: 'center' });
+                        if (g1 && g1.nip) doc.text(`NIP. ${g1.nip}`, colWidth * 0.5, finalY + 30, { align: 'center' });
 
-                    // Guru 3
-                    const g3 = currentPiketTeachers[2];
-                    doc.text("Guru Piket 3", colWidth * 2.5, finalY, { align: 'center' });
-                    doc.text(g3 ? g3.name : "( .............................. )", colWidth * 2.5, finalY + 25, { align: 'center' });
-                    if (g3 && g3.nip) doc.text(`NIP. ${g3.nip}`, colWidth * 2.5, finalY + 30, { align: 'center' });
+                        // Guru 2
+                        const g2 = currentPiketTeachers[1];
+                        doc.text("Guru Piket 2", colWidth * 1.5, finalY, { align: 'center' });
+                        doc.text(g2 ? g2.name : "( .............................. )", colWidth * 1.5, finalY + 25, { align: 'center' });
+                        if (g2 && g2.nip) doc.text(`NIP. ${g2.nip}`, colWidth * 1.5, finalY + 30, { align: 'center' });
+
+                        // Guru 3
+                        const g3 = currentPiketTeachers[2];
+                        doc.text("Guru Piket 3", colWidth * 2.5, finalY, { align: 'center' });
+                        doc.text(g3 ? g3.name : "( .............................. )", colWidth * 2.5, finalY + 25, { align: 'center' });
+                        if (g3 && g3.nip) doc.text(`NIP. ${g3.nip}`, colWidth * 2.5, finalY + 30, { align: 'center' });
+                    } else {
+                        // Tampilkan Admin yang Login (Posisi Kanan)
+                        const xPos = pageWidth - 50; 
+                        
+                        doc.text("Dicetak Oleh,", xPos, finalY, { align: 'center' });
+                        doc.text(loggedInName || "( .............................. )", xPos, finalY + 25, { align: 'center' });
+                        if (loggedInNip) doc.text(`NIP. ${loggedInNip}`, xPos, finalY + 30, { align: 'center' });
+                    }
 
                     doc.save(`Laporan_Lengkap_Piket_Siswa_${monthName}.pdf`);
                 } catch (err) {
