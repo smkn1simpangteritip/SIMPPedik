@@ -56,15 +56,6 @@
             right: 0;
         }
 
-        .menu-toggle {
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: white; /* Icon putih agar kontras dengan merah */
-            margin-right: 1rem;
-            background: none;
-            border: none;
-        }
-
         .navbar-brand {
             display: flex;
             align-items: center;
@@ -87,97 +78,22 @@
             color: white; /* Teks putih */
         }
 
-        /* --- Sidebar --- */
-        .sidebar {
-            position: fixed;
-            top: var(--header-height);
-            left: 0;
-            bottom: 0;
-            width: var(--sidebar-width);
-            background-color: var(--sidebar-bg);
-            color: var(--sidebar-text);
-            overflow-y: auto;
-            transition: transform 0.3s ease;
-            z-index: 1001;
-            display: flex;
-            flex-direction: column;
-            transform: translateX(-100%);
-        }
-
-        .sidebar.active {
-            transform: translateX(0);
-        }
-
-        .sidebar-menu {
-            flex: 1;
-            padding-top: 1rem;
-            list-style: none;
-        }
-
-        .menu-item {
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .menu-link {
-            display: flex;
-            align-items: center;
-            padding: 15px 20px;
-            color: var(--sidebar-text);
-            text-decoration: none;
-            transition: background 0.2s;
-            justify-content: space-between;
-        }
-
-        .menu-link:hover, .menu-link.active {
-            background-color: var(--sidebar-hover);
-            border-left: 4px solid var(--navbar-bg); /* Border merah sesuai navbar */
-        }
-
-        .menu-content {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .menu-icon {
-            width: 20px;
-            text-align: center;
-        }
-
-        /* Sidebar Footer */
-        .sidebar-footer {
-            padding: 20px;
-            background-color: rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .admin-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--navbar-bg); /* Merah */
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        /* Tombol Kembali Ke Dashboard */
+        .btn-back-dashboard {
+            margin-left: auto;
+            background-color: transparent;
+            border: 1px solid white;
             color: white;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-
-        .admin-info {
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .admin-name {
-            font-size: 0.9rem;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
             font-weight: 600;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            overflow: hidden;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        .btn-back-dashboard:hover {
+            background-color: white;
+            color: var(--navbar-bg);
         }
 
         /* --- Main Content --- */
@@ -188,10 +104,6 @@
             flex: 1;
             overflow-y: auto;
             transition: margin-left 0.3s ease;
-        }
-
-        .sidebar.active ~ .main-content {
-            margin-left: 0;
         }
 
         .dashboard-card {
@@ -337,19 +249,6 @@
             margin-top: 20px;
         }
 
-        /* Overlay */
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            backdrop-filter: blur(4px);
-        }
-
-        .overlay.active {
-            display: block;
-        }
 
         @media (max-width: 768px) {
             .navbar-brand span {
@@ -372,119 +271,12 @@
 
     <!-- Navbar -->
     <nav class="navbar">
-        <button class="menu-toggle" id="menuToggle">
-            <i class="fas fa-bars"></i>
-        </button>
         <a href="#" class="navbar-brand">
             <img src="" alt="Logo Sekolah" style="display: none;">
             <span></span>
         </a>
+        <a href="adminguru.html" class="btn-back-dashboard">Kembali Ke Dashboard</a>
     </nav>
-
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-        <ul class="sidebar-menu">
-            <li class="menu-item">
-                <a href="adminguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-home menu-icon"></i>
-                        <span>Dashboard</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="piketharin.html" class="menu-link active">
-                    <div class="menu-content">
-                        <i class="fas fa-calendar-check menu-icon"></i>
-                        <span>Piket Harian</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="guruwaliguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-user-tie menu-icon"></i>
-                        <span>Guru Wali</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="walikelasguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-chalkboard-teacher menu-icon"></i>
-                        <span>Walikelas</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="pembinaanguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-user-graduate menu-icon"></i>
-                        <span>Pembinaan Siswa</span>
-                    </div>
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="arsipguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-archive menu-icon"></i>
-                        <span>Arsip</span>
-                    </div>
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="kasusguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-book-reader menu-icon"></i>
-                        <span>Kasus Belajar</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="laporanguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-file-alt menu-icon"></i>
-                        <span>Laporan</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="backupguru.html" class="menu-link">
-                    <div class="menu-content">
-                        <i class="fas fa-database menu-icon"></i>
-                        <span>Backup dan Reset</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="index.html" class="menu-link" onclick="return confirm('Apakah Anda yakin ingin keluar?');">
-                    <div class="menu-content">
-                        <i class="fas fa-sign-out-alt menu-icon"></i>
-                        <span>Log Out</span>
-                    </div>
-                </a>
-            </li>
-        </ul>
-
-        <!-- Sidebar Footer -->
-        <div class="sidebar-footer">
-            <div class="admin-avatar">G</div> 
-            <div class="admin-info">
-                <div class="admin-name">Admin Guru</div>
-                <div style="font-size: 0.75rem; color: #bdc3c7;">Online</div>
-            </div>
-        </div>
-    </aside>
-
-    <!-- Overlay untuk Mobile -->
-    <div class="overlay" id="overlay"></div>
 
     <!-- Main Content Area -->
     <main class="main-content">
@@ -752,36 +544,11 @@
             document.addEventListener('DOMContentLoaded', loadSchoolIdentity);
         }
 
-        // Toggle Sidebar (Mobile)
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-
-        function toggleSidebar() {
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-        }
-
-        menuToggle.addEventListener('click', toggleSidebar);
-        overlay.addEventListener('click', toggleSidebar);
-
         // --- Load Data Guru dari Sesi Login ---
         document.addEventListener('DOMContentLoaded', () => {
             const session = JSON.parse(sessionStorage.getItem('guru_session'));
             
             if (session) {
-                // Update Nama di Sidebar
-                const adminNameEl = document.querySelector('.admin-name');
-                if (adminNameEl) adminNameEl.textContent = session.nama;
-
-                // Update Avatar jika ada foto
-                const adminAvatarEl = document.querySelector('.admin-avatar');
-                if (session.photo && adminAvatarEl) {
-                    adminAvatarEl.innerHTML = `<img src="${session.photo}" alt="Foto" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-                    adminAvatarEl.style.backgroundColor = 'transparent';
-                } else if (adminAvatarEl) {
-                    adminAvatarEl.textContent = session.nama.charAt(0).toUpperCase();
-                }
             }
         });
 
