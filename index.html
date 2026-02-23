@@ -226,7 +226,7 @@
                 max-width: 400px;
                 margin: 20px;
             }
-            .login-left {scroll-behavior: calc();
+            .login-left {
                 padding: 2rem;
             }
             .login-left h1 { font-size: 1.4rem; }
@@ -235,7 +235,7 @@
         }
 
         /* --- Modal Styles (Registration) --- */
-        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
         .modal.active { display: flex; }
         .modal-content { background-color: white; width: 95%; max-width: 850px; padding: 25px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: slideDown 0.3s ease; max-height: 90vh; overflow-y: auto; }
         @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -263,6 +263,42 @@
 
         @media (max-width: 768px) {
             .reg-form-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Custom Searchable Dropdown */
+        .dropdown-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 0 0 5px 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .dropdown-options.show {
+            display: block;
+        }
+        .dropdown-option {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f1f1;
+            font-size: 0.95rem;
+            color: #333;
+        }
+        .dropdown-option:hover {
+            background-color: #f3f4f6;
+            color: #667eea;
+        }
+        .no-results {
+            padding: 10px;
+            color: #888;
+            font-size: 0.9rem;
+            text-align: center;
         }
     </style>
 </head>
@@ -298,10 +334,8 @@
 
                 <div class="form-group">
                     <label for="field1" id="label1">Nama Lengkap</label>
-                    <input type="text" id="field1" placeholder="Masukkan Nama Lengkap" required>
-                    <select id="field1-select" style="display: none;">
-                        <option value="" disabled selected>Pilih Nama</option>
-                    </select>
+                    <input type="text" id="field1" placeholder="Masukkan Nama Lengkap" required autocomplete="off">
+                    <div id="field1-dropdown" class="dropdown-options"></div>
                 </div>
 
                 <div class="form-group">
@@ -468,7 +502,7 @@
             // Elemen Form
             const label1 = document.getElementById('label1');
             const field1 = document.getElementById('field1');
-            const field1Select = document.getElementById('field1-select');
+            const field1Dropdown = document.getElementById('field1-dropdown');
             const label2 = document.getElementById('label2');
             const field2 = document.getElementById('field2');
             const togglePasswordBtn = document.getElementById('togglePassword');
@@ -476,12 +510,14 @@
             const messageBox = document.getElementById('messageBox');
             const registerLink = document.getElementById('registerLink');
 
+            let currentOptions = [];
+
             // Konfigurasi Field berdasarkan Role
             const roleConfig = {
                 'Siswa': {
                     label1: 'Nama Lengkap', 
                     isSelect1: true,
-                    options1: ['Ahmad Santoso', 'Budi Pratama', 'Citra Lestari', 'Dewi Anggraini', 'Eko Saputra'],
+                    options1: [], // Akan diisi dari database
                     label2: 'NISN', placeholder2: 'Masukkan NISN', type2: 'number',
                     isPassword: false
                 },
@@ -524,6 +560,30 @@
             }
             loadGuruData();
 
+            // --- Fetch Data Siswa untuk Dropdown ---
+            async function loadSiswaData() {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('datasiswa')
+                        .select('nama_siswa')
+                        .order('nama_siswa');
+                    
+                    if (error) throw error;
+                    
+                    if (data && data.length > 0) {
+                        roleConfig['Siswa'].options1 = data.map(siswa => siswa.nama_siswa);
+                        
+                        // Jika sedang di tab Siswa, refresh dropdown
+                        if (roleInput.value === 'Siswa') {
+                            updateFormUI(roleConfig['Siswa']);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error loading siswa options:', err);
+                }
+            }
+            loadSiswaData();
+
             // 0. Handle Role Tabs
             roleTabs.forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -547,32 +607,18 @@
             function updateFormUI(config) {
                 // Update Field 1
                 label1.textContent = config.label1;
+                field1.value = ''; // Reset nilai
                 
                 if (config.isSelect1) {
-                    // Mode Dropdown
-                    field1.style.display = 'none';
-                    field1.required = false;
-                    field1Select.style.display = 'block';
-                    field1Select.required = true;
-                    
-                    // Isi Opsi Dropdown
-                    field1Select.innerHTML = '<option value="" disabled selected>Pilih Nama</option>';
-                    config.options1.forEach(name => {
-                        const opt = document.createElement('option');
-                        opt.value = name;
-                        opt.textContent = name;
-                        field1Select.appendChild(opt);
-                    });
+                    // Mode Searchable Dropdown
+                    field1.placeholder = "Ketik nama untuk mencari...";
+                    field1.type = "text";
+                    currentOptions = config.options1 || [];
                 } else {
                     // Mode Input Text
-                    field1.style.display = 'block';
-                    field1.required = true;
-                    field1Select.style.display = 'none';
-                    field1Select.required = false;
-                    
                     field1.placeholder = config.placeholder1;
                     field1.type = config.type1;
-                    field1.value = ''; // Reset nilai
+                    currentOptions = [];
                 }
 
                 // Update Field 2
@@ -587,6 +633,49 @@
 
             // Inisialisasi UI awal
             updateFormUI(roleConfig[roleInput.value]);
+
+            // --- Logic Searchable Dropdown ---
+            field1.addEventListener('input', function() {
+                if (currentOptions.length > 0) {
+                    const val = this.value.toLowerCase();
+                    const filtered = currentOptions.filter(opt => opt.toLowerCase().includes(val));
+                    renderDropdown(filtered);
+                }
+            });
+
+            field1.addEventListener('focus', function() {
+                if (currentOptions.length > 0) {
+                    const val = this.value.toLowerCase();
+                    const filtered = val ? currentOptions.filter(opt => opt.toLowerCase().includes(val)) : currentOptions;
+                    renderDropdown(filtered);
+                }
+            });
+
+            function renderDropdown(options) {
+                field1Dropdown.innerHTML = '';
+                if (options.length === 0) {
+                    field1Dropdown.innerHTML = '<div class="no-results">Tidak ditemukan</div>';
+                } else {
+                    options.forEach(opt => {
+                        const div = document.createElement('div');
+                        div.className = 'dropdown-option';
+                        div.textContent = opt;
+                        div.onclick = () => {
+                            field1.value = opt;
+                            field1Dropdown.classList.remove('show');
+                        };
+                        field1Dropdown.appendChild(div);
+                    });
+                }
+                field1Dropdown.classList.add('show');
+            }
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!field1.contains(e.target) && !field1Dropdown.contains(e.target)) {
+                    field1Dropdown.classList.remove('show');
+                }
+            });
 
             // 1. Fitur Toggle Lihat/Sembunyikan Password
             togglePasswordBtn.addEventListener('click', () => {
@@ -608,7 +697,7 @@
                 submitBtn.disabled = true;
 
                 const role = roleInput.value;
-                const val1 = roleConfig[role].isSelect1 ? field1Select.value : field1.value;
+                const val1 = field1.value;
                 const val2 = field2.value;
 
                 if (role === 'Administrator') {
@@ -634,7 +723,7 @@
                         // Query Supabase untuk cek Nama dan NIP
                         const { data, error } = await supabaseClient
                             .from('dataguru')
-                            .select('id_guru, nama_guru, nip::text, mapel, tlp, photo')
+                            .select('*')
                             .eq('nama_guru', val1)
                             .eq('nip', val2.trim())
                             .single();
@@ -664,19 +753,28 @@
                         submitBtn.textContent = originalBtnText;
                         submitBtn.disabled = false;
                     }
-                } else {
-                    // Simulasi untuk Siswa/Guru
-                    setTimeout(() => {
-                    if (role && val1 && val2) {
+                } else if (role === 'Siswa') {
+                    try {
+                        // Query Supabase untuk cek Nama dan NISN
+                        const { data, error } = await supabaseClient
+                            .from('datasiswa')
+                            .select('*')
+                            .eq('nama_siswa', val1)
+                            .eq('nisn', val2.trim())
+                            .single();
+
+                        if (error || !data) throw new Error('Nama atau NISN tidak sesuai.');
+
+                        // Simpan sesi siswa ke sessionStorage
+                        sessionStorage.setItem('siswa_session', JSON.stringify(data));
+
                         showMessage('Login Berhasil! Mengalihkan...', 'success');
-                        console.log("Login data:", { role, field1: val1, field2: val2 });
-                        // window.location.href = '/dashboard.html'; // Redirect jika ada
-                    } else {
-                        showMessage('Data login tidak valid.', 'error');
-                    }
+                        setTimeout(() => { window.location.href = 'adminsiswa.html'; }, 1000);
+                    } catch (err) {
+                        showMessage('Nama atau NISN tidak ditemukan.', 'error');
                         submitBtn.textContent = originalBtnText;
                         submitBtn.disabled = false;
-                    }, 1500);
+                    }
                 }
             });
 
@@ -766,14 +864,14 @@
 
                     // 2. Simpan Data ke Database
                     const formData = {
-                        npsn: npsn,
+                        npsn: parseInt(npsn),
                         nama_sekolah: document.getElementById('reg_nama_sekolah').value,
                         status: document.getElementById('reg_status').value,
                         nama_kepsek: document.getElementById('reg_nama_kepsek').value,
-                        nip_kepsek: document.getElementById('reg_nip_kepsek').value, // Kirim sebagai string
+                        nip_kepsek: parseInt(document.getElementById('reg_nip_kepsek').value),
                         jabatan: document.getElementById('reg_jabatan').value,
                         alamat: document.getElementById('reg_alamat').value,
-                        tlp: document.getElementById('reg_tlp').value, // Kirim sebagai string
+                        tlp: parseInt(document.getElementById('reg_tlp').value),
                         email: document.getElementById('reg_email').value,
                         slogan: document.getElementById('reg_slogan').value,
                         tahun_pelajaran: document.getElementById('reg_tahun_pelajaran').value,
