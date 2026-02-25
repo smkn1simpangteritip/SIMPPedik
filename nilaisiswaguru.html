@@ -1019,10 +1019,11 @@
 
                             <td style="padding: 12px 0; color: #666; font-weight: 600;">KKTP/KKM</td>
 
-                            <td style="padding: 8px 0; color: #333;">:
-
-                                <input type="number" id="inputKKTP" class="custom-input" placeholder="0">
-
+                            <td style="padding: 8px 0; color: #333; display: flex; align-items: center;">
+                                <span style="margin-right: 5px;">:</span>
+                                <input type="number" id="inputKKTP" class="custom-input" placeholder="0" style="width: 80px;">
+                                <span style="margin-left: 15px; margin-right: 5px; font-weight: 600; color: #666;">Jumlah Ulangan Harian :</span>
+                                <input type="number" id="inputJmlUH" class="custom-input" placeholder="0" min="0" max="7" style="width: 80px;">
                             </td>
 
                         </tr>
@@ -1130,6 +1131,7 @@
                             <th>Mapel</th>
 
                             <th>KKTP</th>
+                            <th>JU</th>
 
                             <th>UH1</th>
 
@@ -1867,10 +1869,12 @@
                     const globalKktp = document.getElementById('inputKKTP').value;
 
                     const semesterVal = document.getElementById('pilihSemester').value;
+                    const globalJu = document.getElementById('inputJmlUH').value;
                    
                     // Gunakan data dari DB jika ada, jika tidak gunakan default
 
                     const kktp = (gradeData && gradeData.kktp) ? gradeData.kktp : globalKktp;
+                    const ju = (gradeData && gradeData.jumlah_uh) ? gradeData.jumlah_uh : globalJu;
 
                     const currentSemester = (gradeData && gradeData.semester) ? gradeData.semester : semesterVal;
 
@@ -1893,6 +1897,7 @@
                         <td><input type="text" class="input-text input-readonly" value="${mapelName}" readonly></td>
 
                         <td><input type="number" class="input-nilai kktp-input" placeholder="0" value="${kktp}"></td> <!-- KKTP -->
+                        <td><input type="number" class="input-nilai ju-input" placeholder="0" value="${ju}"></td> <!-- JU -->
 
                         <td><input type="number" class="input-nilai uh-input" placeholder="0" value="${val('uh1')}"></td> <!-- UH1 -->
 
@@ -1959,6 +1964,10 @@
                     const kktpInput = row.querySelector('.kktp-input');
 
                     kktpInput.addEventListener('input', () => calculateStatus(row));
+
+                    // Event listener untuk JU per baris
+                    const juInput = row.querySelector('.ju-input');
+                    juInput.addEventListener('input', () => calculateNH());
                    
                     // Hitung status awal berdasarkan data yang dimuat
 
@@ -2010,45 +2019,38 @@
 
         // --- Fungsi Hitung NH Otomatis ---
 
-        function calculateNH(row) {
+        function calculateNH() {
+            const rows = document.querySelectorAll('#nilaiTable tbody tr');
 
-            const uhInputs = row.querySelectorAll('.uh-input');
+            // 2. Hitung NH untuk setiap siswa menggunakan pembagi Max Count
+            rows.forEach(row => {
+                const uhInputs = row.querySelectorAll('.uh-input');
+                let sum = 0;
+                let hasValue = false;
 
-            let sum = 0;
+                uhInputs.forEach(input => {
+                    const val = parseFloat(input.value);
+                    if (!isNaN(val) && input.value.trim() !== '') {
+                        sum += val;
+                        hasValue = true;
+                    }
+                });
 
-            let count = 0;
-
-
-
-            uhInputs.forEach(input => {
-
-                const val = parseFloat(input.value);
-
-                // Cek jika nilai adalah angka dan tidak kosong
-
-                if (!isNaN(val) && input.value.trim() !== '') {
-
-                    sum += val;
-
-                    count++;
-
+                const nhInput = row.querySelector('.nh-input');
+                const juVal = parseFloat(row.querySelector('.ju-input').value) || 0;
+                
+                // Jika ada nilai, bagi dengan JU.
+                if (hasValue && juVal > 0) {
+                    nhInput.value = Math.round(sum / juVal);
+                } else {
+                    nhInput.value = '';
                 }
 
+                // Hitung NR untuk baris ini (tanpa update preview per baris agar tidak berat)
+                calculateNR(row, false);
             });
-
-
-
-            const nhInput = row.querySelector('.nh-input');
-
-            // Jika ada nilai yang diisi, hitung rata-rata (dibulatkan), jika tidak kosongkan
-
-            nhInput.value = count > 0 ? Math.round(sum / count) : '';
-           
-            // Hitung NR setelah NH berubah
-
-            calculateNR(row);
-
-            // Update preview setelah nilai berubah
+            
+            // Update preview sekali saja di akhir
             updatePreview();
         }
 
@@ -2056,7 +2058,7 @@
 
         // --- Fungsi Hitung NR Otomatis ---
 
-        function calculateNR(row) {
+        function calculateNR(row, doUpdatePreview = true) {
 
             const nhVal = parseFloat(row.querySelector('.nh-input').value) || 0;
 
@@ -2074,7 +2076,7 @@
 
                 nrInput.value = '';
 
-                calculateStatus(row); // Update status saat nilai kosong
+                calculateStatus(row, false); // Update status saat nilai kosong
 
                 return;
 
@@ -2088,17 +2090,17 @@
            
             // Hitung Status setelah NR berubah
 
-            calculateStatus(row);
+            calculateStatus(row, false);
 
             // Update preview setelah nilai berubah
-            updatePreview();
+            if (doUpdatePreview) updatePreview();
         }
 
 
 
         // --- Fungsi Hitung Status Otomatis ---
 
-        function calculateStatus(row) {
+        function calculateStatus(row, doUpdatePreview = true) {
 
             const nrVal = parseFloat(row.querySelector('.nr-input').value);
 
@@ -2158,13 +2160,33 @@
 
                     kktpInput.value = val;
 
-                    calculateStatus(row);
+                    calculateStatus(row, false);
 
                 }
 
             });
 
             updatePreview(); // Update preview setelah KKTP berubah
+        });
+
+        // Auto-fill JU column when global input changes
+        document.getElementById('inputJmlUH').addEventListener('input', function() {
+            let val = this.value;
+            
+            // Validasi input agar tidak lebih dari 7 (sesuai jumlah kolom UH)
+            if (val > 7) {
+                val = 7;
+                this.value = 7;
+            }
+
+            const rows = document.querySelectorAll('#nilaiTable tbody tr');
+            rows.forEach(row => {
+                const juInput = row.querySelector('.ju-input');
+                if (juInput) {
+                    juInput.value = val;
+                }
+            });
+            calculateNH(); // Recalculate NH based on new JU
         });
 
 
@@ -2236,6 +2258,7 @@
                     mapel: row.cells[5].querySelector('input').value,
 
                     kktp: getNum('.kktp-input'),
+                    jumlah_uh: getNum('.ju-input'),
 
                     uh1: getUh(0),
 
@@ -2355,7 +2378,7 @@
 
                 "No", "ID", "Nama Siswa", "Kelas", "Semester", "Mapel",
 
-                "KKTP", "UH1", "UH2", "UH3", "UH4", "UH5", "UH6", "UH7",
+                "KKTP", "JU", "UH1", "UH2", "UH3", "UH4", "UH5", "UH6", "UH7",
 
                 "NH", "UTS", "US", "NR", "Status"
 
@@ -2377,7 +2400,7 @@
                
                 // Kolom Input (Index 1 s/d 18) - Ambil value dari input
 
-                for (let i = 1; i <= 18; i++) {
+                for (let i = 1; i <= 19; i++) {
 
                     const input = row.cells[i].querySelector('input');
 
@@ -2519,6 +2542,10 @@
                         if (val !== undefined) uhInputs[i].value = val;
                     }
                     
+                    // Update JU
+                    const juInput = row.querySelector('.ju-input');
+                    if (juInput && excelRow['JU'] !== undefined) juInput.value = excelRow['JU'];
+
                     // Update UTS
                     const utsInput = row.querySelector('.uts-input');
                     if (utsInput && excelRow['UTS'] !== undefined) utsInput.value = excelRow['UTS'];
@@ -2759,30 +2786,6 @@
                 doc.save(`Laporan_Perkembangan_${kelas}_${mapelName}.pdf`);
             });
         }
-
-        // Override fungsi calculateNH, calculateNR, calculateStatus yang sudah ada
-        // untuk memanggil updatePreview() setiap kali nilai berubah
-
-        // Simpan fungsi asli
-        const originalCalculateNH = calculateNH;
-        const originalCalculateNR = calculateNR;
-        const originalCalculateStatus = calculateStatus;
-
-        // Override dengan fungsi baru yang memanggil updatePreview
-        calculateNH = function(row) {
-            originalCalculateNH(row);
-            updatePreview();
-        };
-
-        calculateNR = function(row) {
-            originalCalculateNR(row);
-            updatePreview();
-        };
-
-        calculateStatus = function(row) {
-            originalCalculateStatus(row);
-            updatePreview();
-        };
 
     </script>
 
