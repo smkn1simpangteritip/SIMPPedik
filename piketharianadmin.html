@@ -796,12 +796,51 @@
             doc.setTextColor(100);
             doc.text(schoolName, 14, 30);
 
+            // Ambil data berdasarkan pencarian atau semua data jika kosong
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+            
+            let dataToExport = jurnalDataList;
+
+            if (searchTerm) {
+                dataToExport = jurnalDataList.filter(item => {
+                    const text = (
+                        (item.id_piket || '') + ' ' +
+                        (item.nama_siswa || '') + ' ' + 
+                        (item.kelas || '') + ' ' + 
+                        (item.area || '') + ' ' + 
+                        (item.nisn || '') + ' ' +
+                        (item.id_petugas || '')
+                    ).toLowerCase();
+                    return text.includes(searchTerm);
+                });
+            }
+
+            const tableBody = dataToExport.map(item => {
+                let formattedDate = item.tanggal;
+                if (item.tanggal) {
+                    const dateObj = new Date(item.tanggal);
+                    formattedDate = dateObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                }
+                return [
+                    item.id_piket,
+                    item.id_petugas || '-',
+                    formattedDate,
+                    item.nama_siswa,
+                    item.nisn || '-',
+                    item.kelas,
+                    item.area,
+                    item.status
+                ];
+            });
+
             doc.autoTable({
-                html: '.custom-table',
+                head: [['Id', 'Id Petugas', 'Tanggal', 'Nama Siswa', 'NISN', 'Kelas', 'Area Piket', 'Status Piket']],
+                body: tableBody,
                 startY: 40,
                 theme: 'grid',
                 headStyles: { fillColor: [102, 126, 234] },
-                columns: [0, 1, 2, 3, 4, 5, 6, 7] // Exclude Aksi column
+                styles: { fontSize: 9 }
             });
 
             doc.save('Laporan_Piket_Harian.pdf');
