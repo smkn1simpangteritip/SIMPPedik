@@ -356,16 +356,19 @@
         const absensiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0YnNrdnlzdXFlY25hb3BxbGFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTAwODksImV4cCI6MjA4NjUyNjA4OX0.npr4SV6s8XFxXek0R0jNvdhlnIZrdTqrNvWGYVtMAcY';
         const absensiClient = supabase.createClient(absensiUrl, absensiKey);
 
+        let schoolData = {};
+
         // --- Load School Identity ---
         async function loadSchoolIdentity() {
             try {
                 const { data, error } = await supabaseClient
                     .from('identitassekolah')
-                    .select('nama_sekolah, logo')
+                    .select('nama_sekolah, logo, kop_sekolah')
                     .limit(1)
                     .single();
                 
                 if (data) {
+                    schoolData = data;
                     if (data.nama_sekolah) {
                         document.querySelector('.navbar-brand span').textContent = data.nama_sekolah;
                     }
@@ -677,21 +680,47 @@
         };
 
         // --- Export PDF ---
-        document.getElementById('exportPdfBtn').addEventListener('click', () => {
+        document.getElementById('exportPdfBtn').addEventListener('click', async () => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('l', 'mm', 'a4');
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let yPos = 20;
+
+            // Tambahkan KOP Sekolah jika ada
+            if (schoolData.kop_sekolah) {
+                try {
+                    const response = await fetch(schoolData.kop_sekolah);
+                    const blob = await response.blob();
+                    const base64data = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+
+                    const imgProps = doc.getImageProperties(base64data);
+                    const pdfWidth = pageWidth - 20; 
+                    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                    
+                    doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                    yPos = 10 + imgHeight + 10;
+                } catch (err) {
+                    console.error("Gagal memuat KOP Sekolah:", err);
+                }
+            }
             
             doc.setFontSize(18);
-            doc.text("Laporan Kasus Siswa", 14, 22);
+            doc.text("Laporan Kasus Siswa", pageWidth / 2, yPos, { align: 'center' });
+            yPos += 8;
             
-            const schoolName = document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
+            const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
             doc.setFontSize(12);
             doc.setTextColor(100);
-            doc.text(schoolName, 14, 30);
+            doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 10;
 
             doc.autoTable({
                 html: '#kasusTable',
-                startY: 40,
+                startY: yPos,
                 theme: 'grid',
                 columns: [0, 1, 2, 3, 4, 5, 6, 7, 8], // Exclude Aksi
                 headStyles: { fillColor: [220, 38, 38] } // Red header
