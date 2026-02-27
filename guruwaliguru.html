@@ -459,6 +459,7 @@
         let supabaseClient;
         let absensiClient;
         let currentUserNip = '';
+        let schoolData = {};
         if (typeof supabase !== 'undefined') {
             supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
             absensiClient = supabase.createClient(absensiUrl, absensiKey);
@@ -467,11 +468,12 @@
                 try {
                     const { data, error } = await supabaseClient
                         .from('identitassekolah')
-                        .select('nama_sekolah, logo')
+                        .select('nama_sekolah, logo, kop_sekolah')
                         .limit(1)
                         .single();
                     
                     if (data) {
+                        schoolData = data;
                         if (data.nama_sekolah) {
                             document.querySelector('.navbar-brand span').textContent = data.nama_sekolah;
                         }
@@ -1452,6 +1454,7 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.width;
+            let yPos = 20;
             
             // Show loading indicator (optional, simple alert for now)
             const originalCursor = document.body.style.cursor;
@@ -1466,23 +1469,47 @@
 
                 const [resAbsensi, resPiket, resNilai, resKasus] = await Promise.all([pAbsensi, pPiket, pNilai, pKasus]);
 
+                // Add KOP
+                if (schoolData.kop_sekolah) {
+                    try {
+                        const response = await fetch(schoolData.kop_sekolah);
+                        const blob = await response.blob();
+                        const base64data = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+
+                        const imgProps = doc.getImageProperties(base64data);
+                        const pdfWidth = pageWidth - 20; 
+                        const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                        
+                        doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                        yPos = 10 + imgHeight + 10;
+                    } catch (err) {
+                        console.error("Gagal memuat KOP Sekolah:", err);
+                    }
+                }
+
                 // 2. Header PDF
-                const schoolName = document.querySelector('.navbar-brand span')?.textContent || 'SMK Negeri 1 Simpang Teritip';
+                const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span')?.textContent || 'SMK Negeri 1 Simpang Teritip';
                 doc.setFontSize(16);
-                doc.text("Laporan Lengkap Siswa", pageWidth / 2, 20, { align: 'center' });
+                doc.text("Laporan Lengkap Siswa", pageWidth / 2, yPos, { align: 'center' });
+                yPos += 8;
                 doc.setFontSize(12);
                 doc.setTextColor(100);
-                doc.text(schoolName, pageWidth / 2, 28, { align: 'center' });
+                doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
+                yPos += 10;
                 doc.setTextColor(0);
 
                 // 3. Identitas Siswa
                 doc.setFontSize(10);
-                doc.text(`Nama: ${nama}`, 14, 40);
-                doc.text(`NISN: ${nisn || '-'}`, 14, 45);
-                doc.text(`Kelas: ${kelas || '-'}`, 14, 50);
-                doc.text(`Kode ID: ${kodeId || '-'}`, 14, 55);
+                doc.text(`Nama: ${nama}`, 14, yPos);
+                doc.text(`NISN: ${nisn || '-'}`, 14, yPos + 5);
+                doc.text(`Kelas: ${kelas || '-'}`, 14, yPos + 10);
+                doc.text(`Kode ID: ${kodeId || '-'}`, 14, yPos + 15);
                 
-                let yPos = 65;
+                yPos += 25;
 
                 // 4. Data Kehadiran
                 doc.setFont(undefined, 'bold');
@@ -1734,4 +1761,3 @@
     </script>
 </body>
 </html>
-
