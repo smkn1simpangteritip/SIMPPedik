@@ -577,6 +577,7 @@
             const kelasDataCache = {};
             const kelasPaginationState = {};
             const ROWS_PER_PAGE = 20; // Jumlah baris per halaman
+            let schoolData = {}; // Menyimpan data sekolah untuk keperluan export
 
             // --- Load Summary Cards ---
             async function loadKelasSummary() {
@@ -654,11 +655,12 @@
                 try {
                     const { data, error } = await supabaseClient
                         .from('identitassekolah')
-                        .select('nama_sekolah, logo')
+                        .select('nama_sekolah, logo, kop_sekolah')
                         .limit(1)
                         .single();
                     
                     if (data) {
+                        schoolData = data; // Simpan data ke variabel global
                         if (data.nama_sekolah) {
                             document.querySelector('.navbar-brand span').textContent = data.nama_sekolah;
                         }
@@ -908,7 +910,7 @@
                 container.appendChild(createBtn('Next', currentPage + 1, false, currentPage === totalPages));
             }
 
-            function exportNilaiPdf(kelas) {
+            async function exportNilaiPdf(kelas) {
                 const safeKelas = kelas.replace(/\s+/g, '-');
                 const searchId = `search-${safeKelas}`;
                 const searchInput = document.getElementById(searchId);
@@ -932,15 +934,41 @@
 
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
+                const pageWidth = doc.internal.pageSize.getWidth();
+                let yPos = 20;
+
+                // Tambahkan KOP Sekolah jika ada
+                if (schoolData.kop_sekolah) {
+                    try {
+                        const response = await fetch(schoolData.kop_sekolah);
+                        const blob = await response.blob();
+                        const base64data = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+
+                        const imgProps = doc.getImageProperties(base64data);
+                        const pdfWidth = pageWidth - 20; // Margin kiri kanan 10
+                        const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                        
+                        doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                        yPos = 10 + imgHeight + 10; // Update posisi Y di bawah gambar
+                    } catch (err) {
+                        console.error("Gagal memuat KOP Sekolah:", err);
+                    }
+                }
 
                 // Header
                 doc.setFontSize(18);
-                doc.text(`Laporan Nilai Akademis - Kelas ${kelas}`, 14, 22);
+                doc.text(`Laporan Nilai Akademis - Kelas ${kelas}`, pageWidth / 2, yPos, { align: 'center' });
+                yPos += 8;
                 
-                const schoolName = document.querySelector('.navbar-brand span')?.textContent || 'SMK Negeri 1 Simpang Teritip';
+                const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span')?.textContent || 'SMK Negeri 1 Simpang Teritip';
                 doc.setFontSize(12);
                 doc.setTextColor(100);
-                doc.text(schoolName, 14, 30);
+                doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
+                yPos += 10;
 
                 // Table Data
                 const tableData = data.map((item, index) => {
@@ -973,7 +1001,7 @@
                 doc.autoTable({
                     head: [['No', 'Nama Siswa', 'Mata Pelajaran', 'KKTP', 'NH', 'UTS', 'US', 'NR', 'Status']],
                     body: tableData,
-                    startY: 40,
+                    startY: yPos,
                     theme: 'grid',
                     styles: { fontSize: 9 },
                     headStyles: { fillColor: [102, 126, 234] }
