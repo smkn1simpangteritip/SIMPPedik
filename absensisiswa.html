@@ -393,6 +393,7 @@
 
         let supabaseClient;
         let mappingClient;
+        let schoolData = {};
 
         if (typeof supabase !== 'undefined') {
             supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
@@ -402,11 +403,12 @@
                 try {
                     const { data, error } = await supabaseClient
                         .from('identitassekolah')
-                        .select('nama_sekolah, logo')
+                        .select('nama_sekolah, logo, kop_sekolah')
                         .limit(1)
                         .single();
                     
                     if (data) {
+                        schoolData = data;
                         if (data.nama_sekolah) {
                             document.querySelector('.navbar-brand span').textContent = data.nama_sekolah;
                         }
@@ -1123,21 +1125,46 @@
         });
 
         // Event Listener Export PDF Riwayat
-        document.getElementById('exportRiwayatPdfBtn').addEventListener('click', () => {
+        document.getElementById('exportRiwayatPdfBtn').addEventListener('click', async () => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let yPos = 20;
+
+            // Add KOP
+            if (schoolData.kop_sekolah) {
+                try {
+                    const response = await fetch(schoolData.kop_sekolah);
+                    const blob = await response.blob();
+                    const base64data = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+
+                    const imgProps = doc.getImageProperties(base64data);
+                    const pdfWidth = pageWidth - 20; 
+                    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                    
+                    doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                    yPos = 10 + imgHeight + 10;
+                } catch (err) {
+                    console.error("Gagal memuat KOP Sekolah:", err);
+                }
+            }
 
             // 1. Judul Laporan
             doc.setFontSize(16);
-            doc.text("Laporan Absensi Siswa", 14, 20);
+            doc.text("Laporan Absensi Siswa", 14, yPos);
+            yPos += 6;
             
             // Tanggal Cetak
             const now = new Date();
             const dateStr = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
             doc.setFontSize(10);
-            doc.text(`Dicetak pada: ${dateStr}`, 14, 26);
+            doc.text(`Dicetak pada: ${dateStr}`, 14, yPos);
 
-            let finalY = 35;
+            let finalY = yPos + 10;
 
             // 2. Preview Absensi Per Kelas (Card/Box)
             if (currentFilteredData.length > 0) {
@@ -1154,7 +1181,6 @@
                 let yPos = finalY;
                 const boxWidth = 40;
                 const boxHeight = 32;
-                const pageWidth = doc.internal.pageSize.width;
 
                 doc.setFontSize(9);
                 
@@ -1221,7 +1247,6 @@
                 sigY = 20;
             }
 
-            const pageWidth = doc.internal.pageSize.width;
             const margin = 14;
             
             // Gunakan daftar petugas piket hari ini
@@ -1252,4 +1277,3 @@
     </script>
 </body>
 </html>
-
