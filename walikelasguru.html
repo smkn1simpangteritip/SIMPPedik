@@ -756,6 +756,50 @@
                 </div>
             </div>
 
+            <!-- 6. Riwayat Pembinaan Guru Wali -->
+            <div class="accordion-item" id="pembinaanKelasItem">
+                <div class="card-header-dark accordion-header" onclick="toggleAccordion(this)" style="display: flex; justify-content: space-between; align-items: center; padding: 20px;">
+                    <h3 style="margin: 0; font-size: 1.2rem; display: flex; align-items: center;">
+                        <i class="fas fa-user-tie" style="color: #8b5cf6; margin-right: 10px;"></i>
+                        Riwayat Pembinaan Guru Wali
+                    </h3>
+                    <i class="fas fa-chevron-down accordion-icon" style="color: #9ca3af;"></i>
+                </div>
+                
+                <div class="accordion-content">
+                    <!-- Search and Export for Pembinaan -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                         <div style="display: flex; gap: 10px;">
+                            <button id="exportPembinaanPdfBtn" class="btn-export"><i class="fas fa-file-pdf"></i> Export PDF</button>
+                        </div>
+                        <div>
+                            <input type="text" id="searchPembinaanInput" placeholder="Cari Nama Siswa / Materi..." style="padding: 8px; border: 1px solid #374151; border-radius: 4px; width: 250px; background-color: #111827; color: white;">
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="custom-table" id="pembinaanTable">
+                            <thead>
+                                <tr>
+                                    <th style="background-color: #3b82f6; color: white;">No</th>
+                                    <th style="background-color: #3b82f6; color: white;">Id Pembinaan</th>
+                                    <th style="background-color: #3b82f6; color: white;">Nama Siswa</th>
+                                    <th style="background-color: #3b82f6; color: white;">NISN</th>
+                                    <th style="background-color: #3b82f6; color: white;">Tanggal Pembinaan</th>
+                                    <th style="background-color: #3b82f6; color: white;">Materi Pembinaan</th>
+                                    <th style="background-color: #3b82f6; color: white;">Guru Wali</th>
+                                    <th style="background-color: #3b82f6; color: white;">Photo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="8" style="text-align: center;">Memuat data pembinaan...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <!-- Footer -->
@@ -788,6 +832,7 @@
         
         let supabaseClient;
         let absensiClient;
+        let schoolData = {};
 
         if (typeof supabase !== 'undefined') {
             supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
@@ -797,11 +842,12 @@
                 try {
                     const { data, error } = await supabaseClient
                         .from('identitassekolah')
-                        .select('nama_sekolah, logo')
+                        .select('nama_sekolah, logo, kop_sekolah')
                         .limit(1)
                         .single();
                     
                     if (data) {
+                        schoolData = data;
                         if (data.nama_sekolah) {
                             document.querySelector('.navbar-brand span').textContent = data.nama_sekolah;
                         }
@@ -855,6 +901,7 @@
                         loadPiketKelas(waliData.kelas);
                         loadNilaiKelas(waliData.kelas);
                         loadKasusKelas(waliData.kelas);
+                        loadPembinaanKelas(waliData.kelas);
                         loadMapelOptions(waliData.kelas);
 
                         const photoEl = document.getElementById('bioPhoto');
@@ -1232,6 +1279,63 @@
             }
         }
 
+        // --- Load Data Pembinaan Kelas ---
+        async function loadPembinaanKelas(kelas) {
+            const tbody = document.querySelector('#pembinaanTable tbody');
+            
+            try {
+                // 1. Ambil siswa di kelas ini untuk filter
+                const { data: students, error: studentError } = await absensiClient
+                    .from('mappingsiswa')
+                    .select('nama_siswa')
+                    .eq('kelas', kelas);
+                
+                if (studentError) throw studentError;
+                
+                if (!students || students.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Tidak ada siswa di kelas ini.</td></tr>';
+                    return;
+                }
+
+                const studentNames = students.map(s => s.nama_siswa);
+
+                // 2. Ambil data pembinaan dari tabel pembinaanwali (di database utama/supabaseClient)
+                const { data, error } = await supabaseClient
+                    .from('pembinaanwali')
+                    .select('*')
+                    .in('nama_siswa', studentNames)
+                    .order('tanggal', { ascending: false });
+
+                if (error) throw error;
+
+                tbody.innerHTML = '';
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Belum ada data pembinaan.</td></tr>';
+                    return;
+                }
+
+                data.forEach((item, index) => {
+                    const row = document.createElement('tr');
+                    const photoHtml = item.photo ? `<a href="${item.photo}" target="_blank" style="color: #3b82f6; text-decoration: none;"><i class="fas fa-image"></i> Lihat</a>` : '-';
+                    
+                    row.innerHTML = `
+                        <td style="text-align: center;">${index + 1}</td>
+                        <td>${item.id_pembinaan || '-'}</td>
+                        <td>${item.nama_siswa}</td>
+                        <td>${item.nisn || '-'}</td>
+                        <td>${item.tanggal || '-'}</td>
+                        <td>${item.kasus || '-'}</td>
+                        <td>${item.guru_wali || '-'}</td>
+                        <td style="text-align: center;">${photoHtml}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (err) {
+                console.error("Error loading pembinaan:", err);
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: red;">Gagal memuat data: ${err.message}</td></tr>`;
+            }
+        }
+
         // --- Search Absensi ---
         document.getElementById('searchAbsensiInput').addEventListener('input', function(e) {
             const term = e.target.value.toLowerCase().trim();
@@ -1292,6 +1396,22 @@
             });
         });
 
+        // --- Search Pembinaan ---
+        document.getElementById('searchPembinaanInput').addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase().trim();
+            const rows = document.querySelectorAll('#pembinaanTable tbody tr');
+            
+            rows.forEach(row => {
+                const cells = row.getElementsByTagName('td');
+                if (cells.length < 8) return;
+
+                const name = cells[2].textContent.toLowerCase();
+                const materi = cells[5].textContent.toLowerCase();
+                const match = name.includes(term) || materi.includes(term);
+                row.style.display = match ? '' : 'none';
+            });
+        });
+
         // --- Filter Nilai Logic ---
         function filterNilaiTable() {
             const mapelFilter = document.getElementById('filterMapelNilai').value.toLowerCase();
@@ -1317,23 +1437,49 @@
         document.getElementById('searchNilaiInput').addEventListener('input', filterNilaiTable);
 
         // --- Export PDF Piket ---
-        document.getElementById('exportPiketPdfBtn').addEventListener('click', () => {
+        document.getElementById('exportPiketPdfBtn').addEventListener('click', async () => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let yPos = 20;
+
+            // Add KOP
+            if (schoolData.kop_sekolah) {
+                try {
+                    const response = await fetch(schoolData.kop_sekolah);
+                    const blob = await response.blob();
+                    const base64data = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+
+                    const imgProps = doc.getImageProperties(base64data);
+                    const pdfWidth = pageWidth - 20; 
+                    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                    
+                    doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                    yPos = 10 + imgHeight + 10;
+                } catch (err) {
+                    console.error("Gagal memuat KOP Sekolah:", err);
+                }
+            }
             
             const kelas = document.getElementById('kelasTitle').textContent || 'Kelas';
             
             doc.setFontSize(18);
-            doc.text(`Rekap Piket Umum Siswa - Kelas ${kelas}`, 14, 22);
+            doc.text(`Rekap Piket Umum Siswa - Kelas ${kelas}`, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 8;
             
-            const schoolName = document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
+            const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
             doc.setFontSize(12);
             doc.setTextColor(100);
-            doc.text(schoolName, 14, 30);
+            doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 10;
 
             doc.autoTable({
                 html: '#piketTable',
-                startY: 40,
+                startY: yPos,
                 theme: 'grid',
                 headStyles: { fillColor: [59, 130, 246] },
                 styles: { fontSize: 10, cellPadding: 3 },
@@ -1344,23 +1490,49 @@
         });
 
         // --- Export PDF Absensi ---
-        document.getElementById('exportAbsensiPdfBtn').addEventListener('click', () => {
+        document.getElementById('exportAbsensiPdfBtn').addEventListener('click', async () => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let yPos = 20;
+
+            // Add KOP
+            if (schoolData.kop_sekolah) {
+                try {
+                    const response = await fetch(schoolData.kop_sekolah);
+                    const blob = await response.blob();
+                    const base64data = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+
+                    const imgProps = doc.getImageProperties(base64data);
+                    const pdfWidth = pageWidth - 20; 
+                    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                    
+                    doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                    yPos = 10 + imgHeight + 10;
+                } catch (err) {
+                    console.error("Gagal memuat KOP Sekolah:", err);
+                }
+            }
             
             const kelas = document.getElementById('kelasTitle').textContent || 'Kelas';
             
             doc.setFontSize(18);
-            doc.text(`Rekap Absensi Siswa - Kelas ${kelas}`, 14, 22);
+            doc.text(`Rekap Absensi Siswa - Kelas ${kelas}`, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 8;
             
-            const schoolName = document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
+            const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
             doc.setFontSize(12);
             doc.setTextColor(100);
-            doc.text(schoolName, 14, 30);
+            doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 10;
 
             doc.autoTable({
                 html: '#absensiTable',
-                startY: 40,
+                startY: yPos,
                 theme: 'grid',
                 headStyles: { fillColor: [59, 130, 246] },
                 styles: { fontSize: 10, cellPadding: 3 },
@@ -1371,23 +1543,49 @@
         });
 
         // --- Export PDF Nilai ---
-        document.getElementById('exportNilaiPdfBtn').addEventListener('click', () => {
+        document.getElementById('exportNilaiPdfBtn').addEventListener('click', async () => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let yPos = 20;
+
+            // Add KOP
+            if (schoolData.kop_sekolah) {
+                try {
+                    const response = await fetch(schoolData.kop_sekolah);
+                    const blob = await response.blob();
+                    const base64data = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+
+                    const imgProps = doc.getImageProperties(base64data);
+                    const pdfWidth = pageWidth - 20; 
+                    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                    
+                    doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                    yPos = 10 + imgHeight + 10;
+                } catch (err) {
+                    console.error("Gagal memuat KOP Sekolah:", err);
+                }
+            }
             
             const kelas = document.getElementById('kelasTitle').textContent || 'Kelas';
             
             doc.setFontSize(18);
-            doc.text(`Rekap Nilai Siswa - Kelas ${kelas}`, 14, 22);
+            doc.text(`Rekap Nilai Siswa - Kelas ${kelas}`, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 8;
             
-            const schoolName = document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
+            const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
             doc.setFontSize(12);
             doc.setTextColor(100);
-            doc.text(schoolName, 14, 30);
+            doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 10;
 
             doc.autoTable({
                 html: '#nilaiTable',
-                startY: 40,
+                startY: yPos,
                 theme: 'grid',
                 headStyles: { fillColor: [59, 130, 246] },
                 styles: { fontSize: 10, cellPadding: 3 },
@@ -1414,23 +1612,49 @@
         });
 
         // --- Export PDF Kasus ---
-        document.getElementById('exportKasusPdfBtn').addEventListener('click', () => {
+        document.getElementById('exportKasusPdfBtn').addEventListener('click', async () => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let yPos = 20;
+
+            // Add KOP
+            if (schoolData.kop_sekolah) {
+                try {
+                    const response = await fetch(schoolData.kop_sekolah);
+                    const blob = await response.blob();
+                    const base64data = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+
+                    const imgProps = doc.getImageProperties(base64data);
+                    const pdfWidth = pageWidth - 20; 
+                    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                    
+                    doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                    yPos = 10 + imgHeight + 10;
+                } catch (err) {
+                    console.error("Gagal memuat KOP Sekolah:", err);
+                }
+            }
             
             const kelas = document.getElementById('kelasTitle').textContent || 'Kelas';
             
             doc.setFontSize(18);
-            doc.text(`Laporan Kasus Siswa - Kelas ${kelas}`, 14, 22);
+            doc.text(`Laporan Kasus Siswa - Kelas ${kelas}`, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 8;
             
-            const schoolName = document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
+            const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
             doc.setFontSize(12);
             doc.setTextColor(100);
-            doc.text(schoolName, 14, 30);
+            doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 10;
 
             doc.autoTable({
                 html: '#kasusTable',
-                startY: 40,
+                startY: yPos,
                 theme: 'grid',
                 headStyles: { fillColor: [239, 68, 68] }, // Red header for Kasus
                 styles: { fontSize: 10, cellPadding: 3 },
@@ -1440,8 +1664,48 @@
             doc.save(`Laporan_Kasus_${kelas}.pdf`);
         });
 
+        // --- Export PDF Pembinaan ---
+        document.getElementById('exportPembinaanPdfBtn').addEventListener('click', async () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4'); // Landscape
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let yPos = 20;
+
+            // Add KOP
+            if (schoolData.kop_sekolah) {
+                try {
+                    const response = await fetch(schoolData.kop_sekolah);
+                    const blob = await response.blob();
+                    const base64data = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+                    const imgProps = doc.getImageProperties(base64data);
+                    const pdfWidth = pageWidth - 20; 
+                    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                    doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                    yPos = 10 + imgHeight + 10;
+                } catch (err) { console.error("Gagal memuat KOP:", err); }
+            }
+            
+            const kelas = document.getElementById('kelasTitle').textContent || 'Kelas';
+            doc.setFontSize(16);
+            doc.text(`Riwayat Pembinaan Guru Wali - Kelas ${kelas}`, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 10;
+
+            doc.autoTable({
+                html: '#pembinaanTable',
+                startY: yPos,
+                theme: 'grid',
+                headStyles: { fillColor: [139, 92, 246] }, // Purple header
+                columns: [0, 1, 2, 3, 4, 5, 6] // Exclude Photo column
+            });
+            doc.save(`Riwayat_Pembinaan_${kelas}.pdf`);
+        });
+
         // --- Export Laporan Perkembangan Peserta Didik (Lengkap) ---
-        document.getElementById('exportLaporanLengkapBtn').addEventListener('click', () => {
+        document.getElementById('exportLaporanLengkapBtn').addEventListener('click', async () => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.width;
@@ -1449,9 +1713,31 @@
             const kelas = document.getElementById('kelasTitle').textContent || 'Kelas';
             const namaWalikelas = document.getElementById('bioNama').textContent;
             const nipWalikelas = document.getElementById('bioNip').textContent;
-            const schoolName = document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
+            const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
             
             let yPos = 20;
+
+            // Add KOP
+            if (schoolData.kop_sekolah) {
+                try {
+                    const response = await fetch(schoolData.kop_sekolah);
+                    const blob = await response.blob();
+                    const base64data = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+
+                    const imgProps = doc.getImageProperties(base64data);
+                    const pdfWidth = pageWidth - 20; 
+                    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                    
+                    doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                    yPos = 10 + imgHeight + 10;
+                } catch (err) {
+                    console.error("Gagal memuat KOP Sekolah:", err);
+                }
+            }
 
             // --- Header ---
             doc.setFontSize(16);
@@ -1675,6 +1961,29 @@
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 const pageWidth = doc.internal.pageSize.width;
+                let yPos = 20;
+
+                // Add KOP
+                if (schoolData.kop_sekolah) {
+                    try {
+                        const response = await fetch(schoolData.kop_sekolah);
+                        const blob = await response.blob();
+                        const base64data = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+
+                        const imgProps = doc.getImageProperties(base64data);
+                        const pdfWidth = pageWidth - 20; 
+                        const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                        
+                        doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                        yPos = 10 + imgHeight + 10;
+                    } catch (err) {
+                        console.error("Gagal memuat KOP Sekolah:", err);
+                    }
+                }
 
                 // 1. Fetch Data Spesifik Siswa secara Paralel
                 const pAbsensi = absensiClient.from('absensiswa').select('status_kehadiran').eq('nama_siswa', nama).eq('kelas', kelas);
@@ -1685,21 +1994,23 @@
                 const [resAbsensi, resNilai, resKasus, resPiket] = await Promise.all([pAbsensi, pNilai, pKasus, pPiket]);
 
                 // 2. Header PDF
-                const schoolName = document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
+                const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
                 doc.setFontSize(16);
-                doc.text("Laporan Kemajuan Siswa", pageWidth / 2, 20, { align: 'center' });
+                doc.text("Laporan Kemajuan Siswa", pageWidth / 2, yPos, { align: 'center' });
+                yPos += 8;
                 doc.setFontSize(12);
                 doc.setTextColor(100);
-                doc.text(schoolName, pageWidth / 2, 28, { align: 'center' });
+                doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
+                yPos += 10;
                 doc.setTextColor(0);
 
                 // Biodata Singkat
                 doc.setFontSize(10);
-                doc.text(`Nama: ${nama}`, 14, 40);
-                doc.text(`NISN: ${nisn || '-'}`, 14, 45);
-                doc.text(`Kelas: ${kelas}`, 14, 50);
+                doc.text(`Nama: ${nama}`, 14, yPos);
+                doc.text(`NISN: ${nisn || '-'}`, 14, yPos + 5);
+                doc.text(`Kelas: ${kelas}`, 14, yPos + 10);
                 
-                let yPos = 60;
+                yPos += 20;
 
                 // 3. Data Absensi
                 const stats = { Hadir: 0, Sakit: 0, Ijin: 0, Alpa: 0 };
