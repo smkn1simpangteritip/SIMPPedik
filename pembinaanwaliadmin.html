@@ -10,6 +10,9 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <!-- Chart.js Library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF & AutoTable for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <style>
         :root {
             --primary-color: #667eea;
@@ -512,12 +515,15 @@
 
         <!-- Container Tabel Detail Pembinaan -->
         <div class="dashboard-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                 <h3 style="margin: 0; color: #333;">Data Detail Pembinaan</h3>
-                <input type="text" id="searchPembinaan" placeholder="Cari Siswa / Kasus..." style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 250px;">
+                <div style="display: flex; gap: 10px;">
+                    <button id="exportPdfBtn" class="btn btn-danger"><i class="fas fa-file-pdf"></i> Export PDF</button>
+                    <input type="text" id="searchPembinaan" placeholder="Cari Siswa / Kasus..." style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 250px;">
+                </div>
             </div>
             <div class="table-responsive">
-                <table class="custom-table">
+                <table class="custom-table" id="pembinaanTable">
                     <thead>
                         <tr>
                             <th>No</th>
@@ -551,16 +557,18 @@
         
         if (typeof supabase !== 'undefined') {
             const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+            let schoolData = {};
 
             async function loadSchoolIdentity() {
                 try {
                     const { data, error } = await supabaseClient
                         .from('identitassekolah')
-                        .select('nama_sekolah, logo')
+                        .select('nama_sekolah, logo, kop_sekolah')
                         .limit(1)
                         .single();
                     
                     if (data) {
+                        schoolData = data;
                         if (data.nama_sekolah) {
                             document.querySelector('.navbar-brand span').textContent = data.nama_sekolah;
                         }
@@ -762,6 +770,50 @@
             };
 
             document.addEventListener('DOMContentLoaded', loadPembinaanTable);
+
+            // --- Export PDF ---
+            document.getElementById('exportPdfBtn').addEventListener('click', async () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('l', 'mm', 'a4');
+                const pageWidth = doc.internal.pageSize.getWidth();
+                let yPos = 20;
+
+                // Tambahkan KOP Sekolah jika ada
+                if (schoolData.kop_sekolah) {
+                    try {
+                        const response = await fetch(schoolData.kop_sekolah);
+                        const blob = await response.blob();
+                        const base64data = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+
+                        const imgProps = doc.getImageProperties(base64data);
+                        const pdfWidth = pageWidth - 20; 
+                        const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                        
+                        doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                        yPos = 10 + imgHeight + 10;
+                    } catch (err) {
+                        console.error("Gagal memuat KOP Sekolah:", err);
+                    }
+                }
+                
+                doc.setFontSize(18);
+                doc.text("Laporan Pembinaan Guru Wali", pageWidth / 2, yPos, { align: 'center' });
+                yPos += 10;
+
+                doc.autoTable({
+                    html: '#pembinaanTable',
+                    startY: yPos,
+                    theme: 'grid',
+                    columns: [0, 1, 2, 3, 4, 5, 6], // Exclude Foto
+                    headStyles: { fillColor: [102, 126, 234] }
+                });
+
+                doc.save('Laporan_Pembinaan_Wali.pdf');
+            });
         }
 
         // --- Date Display in Navbar ---
