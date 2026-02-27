@@ -524,6 +524,8 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdm9icWZjb3V0YXpxY292dGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzEwMzYsImV4cCI6MjA4NjE0NzAzNn0.jz6JaC9mMTMhLVhXSh1OCnFWDPZ0Cy2tUnHEmWxAR8o';
         
         let supabaseClient;
+        let schoolData = {};
+
         if (typeof supabase !== 'undefined') {
             supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
@@ -531,11 +533,12 @@
                 try {
                     const { data, error } = await supabaseClient
                         .from('identitassekolah')
-                        .select('nama_sekolah, logo')
+                        .select('nama_sekolah, logo, kop_sekolah')
                         .limit(1)
                         .single();
                     
                     if (data) {
+                        schoolData = data;
                         if (data.nama_sekolah) {
                             document.querySelector('.navbar-brand span').textContent = data.nama_sekolah;
                         }
@@ -982,15 +985,41 @@
 
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
+                    const pageWidth = doc.internal.pageSize.getWidth();
+                    let yPos = 20;
+
+                    // Add KOP
+                    if (schoolData.kop_sekolah) {
+                        try {
+                            const response = await fetch(schoolData.kop_sekolah);
+                            const blob = await response.blob();
+                            const base64data = await new Promise((resolve) => {
+                                const reader = new FileReader();
+                                reader.onloadend = () => resolve(reader.result);
+                                reader.readAsDataURL(blob);
+                            });
+
+                            const imgProps = doc.getImageProperties(base64data);
+                            const pdfWidth = pageWidth - 20; 
+                            const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                            
+                            doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                            yPos = 10 + imgHeight + 10;
+                        } catch (err) {
+                            console.error("Gagal memuat KOP Sekolah:", err);
+                        }
+                    }
 
                     // Header PDF
                     doc.setFontSize(18);
-                    doc.text("Laporan Petugas Piket Siswa", 14, 22);
+                    doc.text("Laporan Petugas Piket Siswa", pageWidth / 2, yPos, { align: 'center' });
+                    yPos += 8;
                     
-                    const schoolName = document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
+                    const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
                     doc.setFontSize(12);
                     doc.setTextColor(100);
-                    doc.text(schoolName, 14, 30);
+                    doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
+                    yPos += 10;
 
                     // Persiapkan Data Tabel
                     const tableData = data.map((item, index) => [
@@ -1001,7 +1030,7 @@
                     doc.autoTable({
                         head: [['No', 'ID Petugas', 'Nama Siswa', 'NISN', 'Kelas', 'Area Piket']],
                         body: tableData,
-                        startY: 40,
+                        startY: yPos,
                         theme: 'grid',
                         headStyles: { fillColor: [30, 64, 175] } // Warna Biru sesuai tema card
                     });
@@ -1136,17 +1165,43 @@
 
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
+                    const pageWidth = doc.internal.pageSize.getWidth();
+                    let yPos = 20;
+
+                    // Add KOP
+                    if (schoolData.kop_sekolah) {
+                        try {
+                            const response = await fetch(schoolData.kop_sekolah);
+                            const blob = await response.blob();
+                            const base64data = await new Promise((resolve) => {
+                                const reader = new FileReader();
+                                reader.onloadend = () => resolve(reader.result);
+                                reader.readAsDataURL(blob);
+                            });
+
+                            const imgProps = doc.getImageProperties(base64data);
+                            const pdfWidth = pageWidth - 20; 
+                            const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                            
+                            doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                            yPos = 10 + imgHeight + 10;
+                        } catch (err) {
+                            console.error("Gagal memuat KOP Sekolah:", err);
+                        }
+                    }
                     
                     // Header
                     doc.setFontSize(18);
-                    doc.text("Jadwal Piket Siswa (Senin - Jumat)", 14, 22);
+                    doc.text("Jadwal Piket Siswa (Senin - Jumat)", pageWidth / 2, yPos, { align: 'center' });
+                    yPos += 8;
                     
-                    const schoolName = document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
+                    const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
                     doc.setFontSize(12);
                     doc.setTextColor(100);
-                    doc.text(schoolName, 14, 30);
+                    doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
+                    yPos += 10;
 
-                    let finalY = 40;
+                    let finalY = yPos;
                     const days = ['SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT'];
 
                     for (const day of days) {
@@ -1593,28 +1648,55 @@
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF('l', 'mm', 'a4'); // Landscape orientation
                     const pageWidth = doc.internal.pageSize.getWidth();
+                    let yPos = 20;
+
+                    // Add KOP
+                    if (schoolData.kop_sekolah) {
+                        try {
+                            const response = await fetch(schoolData.kop_sekolah);
+                            const blob = await response.blob();
+                            const base64data = await new Promise((resolve) => {
+                                const reader = new FileReader();
+                                reader.onloadend = () => resolve(reader.result);
+                                reader.readAsDataURL(blob);
+                            });
+
+                            const imgProps = doc.getImageProperties(base64data);
+                            const pdfWidth = pageWidth - 20; 
+                            const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                            
+                            doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                            yPos = 10 + imgHeight + 10;
+                        } catch (err) {
+                            console.error("Gagal memuat KOP Sekolah:", err);
+                        }
+                    }
 
                     // Header PDF (Center Top)
                     doc.setFontSize(18);
                     doc.setTextColor(0, 0, 0);
-                    doc.text("Laporan Jurnal Piket Siswa", pageWidth / 2, 22, { align: 'center' });
+                    doc.text("Laporan Jurnal Piket Siswa", pageWidth / 2, yPos, { align: 'center' });
+                    yPos += 8;
                     
-                    const schoolName = document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
+                    const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
                     doc.setFontSize(14);
                     doc.setTextColor(100);
-                    doc.text(schoolName, pageWidth / 2, 30, { align: 'center' });
+                    doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
+                    yPos += 8;
                     
                     // Keterangan Bulan
                     const now = new Date();
                     const monthName = now.toLocaleDateString('id-ID', { month: 'long' });
                     doc.setFontSize(12);
                     doc.setTextColor(0);
-                    doc.text(`Bulan : ${monthName}`, pageWidth / 2, 38, { align: 'center' });
+                    doc.text(`Bulan : ${monthName}`, pageWidth / 2, yPos, { align: 'center' });
+                    yPos += 5;
 
                     const today = new Date();
                     const formattedDate = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
                     doc.setFontSize(10);
-                    doc.text(`Simpang Teritip, ${formattedDate}`, pageWidth / 2, 43, { align: 'center' });
+                    doc.text(`Simpang Teritip, ${formattedDate}`, pageWidth / 2, yPos, { align: 'center' });
+                    yPos += 5;
 
                     // Proses Data Rekap per Siswa
                     const stats = {};
@@ -1642,7 +1724,7 @@
                     doc.autoTable({
                         head: [['No', 'ID Petugas', 'Nama Petugas', 'NISN', 'Kelas', 'Jumlah Piket', 'Jumlah Tidak Piket']],
                         body: tableData,
-                        startY: 45,
+                        startY: yPos,
                         theme: 'grid',
                         headStyles: { fillColor: [16, 185, 129], halign: 'center' },
                         bodyStyles: { halign: 'center' },
