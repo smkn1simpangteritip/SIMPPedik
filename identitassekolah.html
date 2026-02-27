@@ -761,13 +761,33 @@
                             <p><strong>Klik untuk memilih file</strong> atau drag & drop</p>
                             <p>Format yang didukung: JPG, PNG, SVG (Maks. 5MB)</p>
                         </div>
-                        <input type="file" id="logo" name="logo" accept=".jpg,.jpeg,.png,.svg,.gif" style="display: none;" required>
+                        <input type="file" id="logo" name="logo" accept=".jpg,.jpeg,.png,.svg,.gif" style="display: none;">
                         <div id="fileInfo" class="file-info hidden">
                             File terpilih: <span id="fileName"></span> (<span id="fileSize"></span>)
                         </div>
                         <div id="savedLogoContainer" style="display: none; margin-top: 15px; text-align: center;">
                             <p style="color: var(--text-muted); margin-bottom: 5px; font-size: 0.9rem;">Logo Tersimpan:</p>
                             <img id="savedLogo" src="" alt="Logo Sekolah" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid var(--border-color); padding: 5px; background: rgba(255,255,255,0.05);">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h2>KOP Sekolah</h2>
+                    <div class="form-group">
+                        <label for="kop_sekolah" class="required">Upload KOP Sekolah</label>
+                        <div class="file-upload" id="kopUploadArea">
+                            <i class="fas fa-image"></i>
+                            <p><strong>Klik untuk memilih file</strong> atau drag & drop</p>
+                            <p>Format yang didukung: JPG, PNG, SVG (Maks. 5MB)</p>
+                        </div>
+                        <input type="file" id="kop_sekolah" name="kop_sekolah" accept=".jpg,.jpeg,.png,.svg,.gif" style="display: none;">
+                        <div id="kopFileInfo" class="file-info hidden">
+                            File terpilih: <span id="kopFileName"></span> (<span id="kopFileSize"></span>)
+                        </div>
+                        <div id="savedKopContainer" style="display: none; margin-top: 15px; text-align: center;">
+                            <p style="color: var(--text-muted); margin-bottom: 5px; font-size: 0.9rem;">KOP Tersimpan:</p>
+                            <img id="savedKop" src="" alt="KOP Sekolah" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--border-color); padding: 5px; background: rgba(255,255,255,0.05);">
                         </div>
                     </div>
                 </div>
@@ -813,6 +833,16 @@
         const savedLogoContainer = document.getElementById('savedLogoContainer');
         const savedLogo = document.getElementById('savedLogo');
         let currentLogoUrl = ''; // Menyimpan URL logo yang ada di database
+        
+        // DOM Elements for KOP
+        const kopInput = document.getElementById('kop_sekolah');
+        const kopUploadArea = document.getElementById('kopUploadArea');
+        const kopFileInfo = document.getElementById('kopFileInfo');
+        const kopFileName = document.getElementById('kopFileName');
+        const kopFileSize = document.getElementById('kopFileSize');
+        const savedKopContainer = document.getElementById('savedKopContainer');
+        const savedKop = document.getElementById('savedKop');
+        let currentKopUrl = ''; // Menyimpan URL KOP yang ada di database
 
         // --- Sidebar & Navbar Logic (dari dasboradmin.html) ---
         const menuToggle = document.getElementById('menuToggle');
@@ -877,6 +907,27 @@
                     handleFileSelect();
                 }
             });
+
+            // KOP upload area click
+            kopUploadArea.addEventListener('click', function() {
+                kopInput.click();
+            });
+            kopInput.addEventListener('change', handleKopSelect);
+            kopUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                kopUploadArea.classList.add('dragover');
+            });
+            kopUploadArea.addEventListener('dragleave', function() {
+                kopUploadArea.classList.remove('dragover');
+            });
+            kopUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                kopUploadArea.classList.remove('dragover');
+                if (e.dataTransfer.files.length) {
+                    kopInput.files = e.dataTransfer.files;
+                    handleKopSelect();
+                }
+            });
             
             // Form submit
             schoolForm.addEventListener('submit', handleFormSubmit);
@@ -926,9 +977,56 @@
                 fileName.textContent = file.name;
                 fileSize.textContent = `${fileSizeMB} MB`;
                 fileInfo.classList.remove('hidden');
+
+                // Preview Image
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    savedLogo.src = e.target.result;
+                    savedLogoContainer.style.display = 'block';
+                    const label = savedLogoContainer.querySelector('p');
+                    if(label) label.textContent = "Preview Logo:";
+                }
+                reader.readAsDataURL(file);
             }
         }
         
+        // Fungsi untuk menangani pemilihan file KOP
+        function handleKopSelect() {
+            if (kopInput.files.length > 0) {
+                const file = kopInput.files[0];
+                const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                
+                if (file.size > 5 * 1024 * 1024) {
+                    showMessage('Ukuran file KOP terlalu besar. Maksimal 5MB.', 'error');
+                    kopInput.value = '';
+                    kopFileInfo.classList.add('hidden');
+                    return;
+                }
+                
+                const validTypes = ['image/jpeg', 'image/png', 'image/svg+xml', 'image/gif'];
+                if (!validTypes.includes(file.type)) {
+                    showMessage('Format file KOP tidak didukung. Gunakan JPG, PNG, atau SVG.', 'error');
+                    kopInput.value = '';
+                    kopFileInfo.classList.add('hidden');
+                    return;
+                }
+                
+                kopFileName.textContent = file.name;
+                kopFileSize.textContent = `${fileSizeMB} MB`;
+                kopFileInfo.classList.remove('hidden');
+
+                // Preview Image
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    savedKop.src = e.target.result;
+                    savedKopContainer.style.display = 'block';
+                    const label = savedKopContainer.querySelector('p');
+                    if(label) label.textContent = "Preview KOP:";
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
         // Fungsi untuk menangani submit form
         async function handleFormSubmit(e) {
             e.preventDefault();
@@ -956,8 +1054,18 @@
                     throw new Error('Logo belum tersedia. Harap upload logo.');
                 }
                 
+                // Upload file KOP
+                let kopUrl = currentKopUrl;
+                if (kopInput.files.length > 0) {
+                    kopUrl = await uploadKop();
+                }
+                
+                if (!kopUrl) {
+                    throw new Error('KOP belum tersedia. Harap upload KOP.');
+                }
+                
                 // 2. Simpan data ke tabel 'identitassekolah'
-                const formData = getFormData(logoUrl);
+                const formData = getFormData(logoUrl, kopUrl);
                 const { data, error } = await supabaseClient
                     .from('identitassekolah')
                     .upsert([formData]);
@@ -975,6 +1083,12 @@
                     currentLogoUrl = logoUrl;
                     savedLogo.src = logoUrl;
                     savedLogoContainer.style.display = 'block';
+                }
+
+                if (kopUrl) {
+                    currentKopUrl = kopUrl;
+                    savedKop.src = kopUrl;
+                    savedKopContainer.style.display = 'block';
                 }
                 
             } catch (error) {
@@ -1020,6 +1134,19 @@
                         // Tampilkan gambar logo
                         savedLogo.src = data.logo;
                         savedLogoContainer.style.display = 'block';
+                        const label = savedLogoContainer.querySelector('p');
+                        if(label) label.textContent = "Logo Tersimpan:";
+                    }
+                    
+                    // Simpan URL KOP dan update UI
+                    if (data.kop_sekolah) {
+                        currentKopUrl = data.kop_sekolah;
+                        kopFileName.textContent = "KOP sudah tersimpan (Upload baru untuk mengganti)";
+                        kopFileInfo.classList.remove('hidden');
+                        savedKop.src = data.kop_sekolah;
+                        savedKopContainer.style.display = 'block';
+                        const label = savedKopContainer.querySelector('p');
+                        if(label) label.textContent = "KOP Tersimpan:";
                     }
 
                     // Update Navbar Identity (Nama Sekolah & Logo)
@@ -1075,6 +1202,29 @@
             return publicUrl;
         }
         
+        // Fungsi untuk upload KOP
+        async function uploadKop() {
+            const file = kopInput.files[0];
+            if (!file) throw new Error('File KOP tidak ditemukan');
+            
+            const npsn = document.getElementById('npsn').value;
+            const timestamp = Date.now();
+            const fileExt = file.name.split('.').pop();
+            const fileName = `kop_${npsn}_${timestamp}.${fileExt}`;
+            
+            const { data, error } = await supabaseClient.storage
+                .from('aset')
+                .upload(fileName, file);
+            
+            if (error) throw error;
+            
+            const { data: { publicUrl } } = supabaseClient.storage
+                .from('aset')
+                .getPublicUrl(fileName);
+            
+            return publicUrl;
+        }
+
         // Fungsi untuk menghapus data (Reset)
         async function deleteData() {
             const npsn = document.getElementById('npsn').value;
@@ -1103,6 +1253,22 @@
                             console.warn('Error parsing logo URL:', storageErr);
                         }
                     }
+                    
+                    // Hapus KOP dari Storage jika ada
+                    if (currentKopUrl) {
+                        try {
+                            const path = currentKopUrl.split('/aset/')[1];
+                            if (path) {
+                                const fileName = decodeURIComponent(path);
+                                const { error: storageError } = await supabaseClient.storage
+                                    .from('aset')
+                                    .remove([fileName]);
+                                if (storageError) console.warn('Gagal menghapus file KOP dari storage:', storageError);
+                            }
+                        } catch (storageErr) {
+                            console.warn('Error parsing KOP URL:', storageErr);
+                        }
+                    }
 
                     // 2. Hapus data dari tabel
                     const { error } = await supabaseClient
@@ -1114,6 +1280,7 @@
                     
                     showMessage('Data berhasil dihapus dari database.', 'success');
                     currentLogoUrl = ''; // Reset variabel logo
+                    currentKopUrl = ''; // Reset variabel kop
                     resetForm(); // Bersihkan form setelah dihapus
                 } catch (error) {
                     console.error('Error deleting data:', error);
@@ -1123,7 +1290,7 @@
         }
         
         // Fungsi untuk mendapatkan data dari form
-        function getFormData(logoUrl) {
+        function getFormData(logoUrl, kopUrl) {
             return {
                 npsn: document.getElementById('npsn').value,
                 nama_sekolah: document.getElementById('nama_sekolah').value,
@@ -1137,6 +1304,7 @@
                 slogan: document.getElementById('slogan').value,
                 tahun_pelajaran: document.getElementById('tahun_pelajaran').value,
                 logo: logoUrl,
+                kop_sekolah: kopUrl,
                 username: document.getElementById('username').value,
                 password: document.getElementById('password').value
             };
@@ -1166,6 +1334,12 @@
                 fileUploadArea.focus();
                 return false;
             }
+
+            if (!kopInput.files.length && !currentKopUrl) {
+                showMessage('Harap pilih file KOP', 'error');
+                document.getElementById('kopUploadArea').focus();
+                return false;
+            }
             
             return true;
         }
@@ -1191,6 +1365,8 @@
             fileInfo.classList.add('hidden');
             messageDiv.style.display = 'none';
             savedLogoContainer.style.display = 'none';
+            document.getElementById('kopFileInfo').classList.add('hidden');
+            document.getElementById('savedKopContainer').style.display = 'none';
         }
     </script>
 </body>
