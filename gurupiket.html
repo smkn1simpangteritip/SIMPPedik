@@ -979,15 +979,18 @@
         
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+        let schoolData = {}; // Menyimpan data sekolah untuk keperluan export
+
         async function loadSchoolIdentity() {
             try {
                 const { data, error } = await supabaseClient
                     .from('identitassekolah')
-                    .select('nama_sekolah, logo')
+                    .select('nama_sekolah, logo, kop_sekolah')
                     .limit(1)
                     .single();
                 
                 if (data) {
+                    schoolData = data; // Simpan data ke variabel global
                     if (data.nama_sekolah) {
                         document.querySelector('.navbar-brand span').textContent = data.nama_sekolah;
                     }
@@ -1365,17 +1368,43 @@
 
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
+                const pageWidth = doc.internal.pageSize.getWidth();
+                let yPos = 20;
+
+                // Tambahkan KOP Sekolah jika ada
+                if (schoolData.kop_sekolah) {
+                    try {
+                        const response = await fetch(schoolData.kop_sekolah);
+                        const blob = await response.blob();
+                        const base64data = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+
+                        const imgProps = doc.getImageProperties(base64data);
+                        const pdfWidth = pageWidth - 20; // Margin kiri kanan 10
+                        const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                        
+                        doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                        yPos = 10 + imgHeight + 10; // Update posisi Y di bawah gambar
+                    } catch (err) {
+                        console.error("Gagal memuat KOP Sekolah:", err);
+                    }
+                }
 
                 // Judul Dokumen
                 doc.setFontSize(18);
                 doc.setTextColor(40, 40, 40);
-                doc.text("LAPORAN DATA GURU PIKET", 105, 22, null, null, 'center');
+                doc.text("LAPORAN DATA GURU PIKET", pageWidth / 2, yPos, { align: 'center' });
+                yPos += 8;
                 
                 // Nama Sekolah
-                const schoolName = document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
+                const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
                 doc.setFontSize(12);
                 doc.setTextColor(100, 100, 100);
-                doc.text(schoolName, 105, 30, null, null, 'center');
+                doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
+                yPos += 8;
 
                 // Tanggal cetak
                 const now = new Date();
@@ -1386,7 +1415,8 @@
                     day: 'numeric'
                 });
                 doc.setFontSize(10);
-                doc.text(`Dicetak pada: ${dateStr}`, 105, 38, null, null, 'center');
+                doc.text(`Dicetak pada: ${dateStr}`, pageWidth / 2, yPos, { align: 'center' });
+                yPos += 10;
 
                 // Prepare Data Tabel
                 const tableData = data.map((piket, index) => [
@@ -1402,7 +1432,7 @@
                 doc.autoTable({
                     head: [['No', 'ID Guru Piket', 'Hari', 'Guru Piket 1', 'Guru Piket 2', 'Guru Piket 3']],
                     body: tableData,
-                    startY: 45,
+                    startY: yPos,
                     theme: 'grid',
                     styles: { 
                         fontSize: 10,
@@ -1421,7 +1451,7 @@
                 });
 
                 // Total data
-                const finalY = doc.lastAutoTable.finalY || 45;
+                const finalY = doc.lastAutoTable.finalY || yPos;
                 doc.setFontSize(10);
                 doc.setTextColor(100);
                 doc.text(`Total Data: ${data.length}`, 14, finalY + 10);
@@ -1478,4 +1508,3 @@
     </script>
 </body>
 </html>
-
