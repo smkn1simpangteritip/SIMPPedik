@@ -644,6 +644,9 @@
             <div class="card">
                 <div class="card-header">
                     <h3><i class="fas fa-user-clock" style="color: #ef4444; margin-right: 10px;"></i> Siswa Dalam Pengawasan</h3>
+                    <button id="btnExportTopAlpaPdf" style="background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 5px;">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
                 </div>
                 <div class="table-responsive">
                     <table class="custom-table">
@@ -1322,6 +1325,63 @@
                 doc.save(`Data_Kehadiran_${new Date().toISOString().slice(0,10)}.pdf`);
             });
 
+            // --- Export PDF Siswa Dalam Pengawasan ---
+            document.getElementById('btnExportTopAlpaPdf').addEventListener('click', () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                // Header
+                doc.setFontSize(16);
+                doc.text("Laporan Siswa Dalam Pengawasan", 14, 22);
+                
+                const schoolName = document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
+                doc.setFontSize(12);
+                doc.setTextColor(100);
+                doc.text(schoolName, 14, 30);
+                
+                // Tanggal
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                doc.setFontSize(10);
+                doc.setTextColor(0);
+                doc.text(`Tanggal Cetak: ${dateStr}`, 14, 38);
+
+                // Ambil data dari tabel
+                const rows = [];
+                const trs = document.querySelectorAll('#topAlpaTableBody tr');
+                
+                trs.forEach(tr => {
+                    if (tr.cells.length > 1) { // Pastikan bukan baris loading/kosong
+                        const no = tr.cells[0].innerText;
+                        const nama = tr.cells[1].innerText;
+                        const kelas = tr.cells[2].innerText;
+                        const jml = tr.cells[3].innerText;
+                        rows.push([no, nama, kelas, jml]);
+                    }
+                });
+
+                if (rows.length === 0) {
+                    alert("Tidak ada data untuk diexport.");
+                    return;
+                }
+
+                doc.autoTable({
+                    head: [['No', 'Nama Siswa', 'Kelas', 'Jml Alpa']],
+                    body: rows,
+                    startY: 45,
+                    theme: 'grid',
+                    headStyles: { fillColor: [239, 68, 68] }, // Warna merah sesuai header card
+                    styles: { fontSize: 10 },
+                    columnStyles: {
+                        0: { halign: 'center', cellWidth: 15 },
+                        2: { halign: 'center', cellWidth: 30 },
+                        3: { halign: 'center', cellWidth: 25 }
+                    }
+                });
+
+                doc.save(`Siswa_Dalam_Pengawasan_${now.toISOString().slice(0,10)}.pdf`);
+            });
+
             // Event Listeners
             document.getElementById('filterDate').addEventListener('change', loadDashboardData);
             document.getElementById('filterNama').addEventListener('input', filterDashboardData);
@@ -1399,4 +1459,3 @@
     </script>
 </body>
 </html>
-
