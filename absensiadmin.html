@@ -780,15 +780,18 @@
             const detailRowsPerPage = 50;
             let globalAttendanceData = [];
 
+            let schoolData = {}; // Menyimpan data sekolah untuk keperluan export
+
             async function loadSchoolIdentity() {
                 try {
                     const { data, error } = await supabaseClient
                         .from('identitassekolah')
-                        .select('nama_sekolah, logo')
+                        .select('nama_sekolah, logo, kop_sekolah')
                         .limit(1)
                         .single();
                     
                     if (data) {
+                        schoolData = data; // Simpan data ke variabel global
                         if (data.nama_sekolah) {
                             document.querySelector('.navbar-brand span').textContent = data.nama_sekolah;
                         }
@@ -1280,29 +1283,56 @@
                 XLSX.writeFile(workbook, `Data_Kehadiran_${new Date().toISOString().slice(0,10)}.xlsx`);
             });
 
-            document.getElementById('btnExportPdf').addEventListener('click', () => {
+            document.getElementById('btnExportPdf').addEventListener('click', async () => {
                 const data = getExportData();
                 if (!data) return;
 
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
+                const pageWidth = doc.internal.pageSize.getWidth();
+                let yPos = 20;
+
+                // Tambahkan KOP Sekolah jika ada
+                if (schoolData.kop_sekolah) {
+                    try {
+                        const response = await fetch(schoolData.kop_sekolah);
+                        const blob = await response.blob();
+                        const base64data = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+
+                        const imgProps = doc.getImageProperties(base64data);
+                        const pdfWidth = pageWidth - 20; // Margin kiri kanan 10
+                        const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                        
+                        doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                        yPos = 10 + imgHeight + 10; // Update posisi Y di bawah gambar
+                    } catch (err) {
+                        console.error("Gagal memuat KOP Sekolah:", err);
+                    }
+                }
 
                 // Header
                 doc.setFontSize(18);
-                doc.text("Laporan Data Kehadiran Siswa", 14, 22);
+                doc.text("Laporan Data Kehadiran Siswa", pageWidth / 2, yPos, { align: 'center' });
+                yPos += 8;
                 
-                const schoolName = document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
+                const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
                 doc.setFontSize(12);
                 doc.setTextColor(100);
-                doc.text(schoolName, 14, 30);
+                doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
+                yPos += 10;
 
                 const filterDate = document.getElementById('filterDate').value;
                 const filterKelas = document.getElementById('filterKelas').value || 'Semua Kelas';
                 
                 doc.setFontSize(10);
                 doc.setTextColor(0);
-                doc.text(`Tanggal: ${filterDate}`, 14, 38);
-                doc.text(`Kelas: ${filterKelas}`, 14, 43);
+                doc.text(`Tanggal: ${filterDate}`, 14, yPos);
+                doc.text(`Kelas: ${filterKelas}`, 14, yPos + 5);
+                yPos += 10;
 
                 // Table
                 const tableBody = data.map(row => [
@@ -1317,7 +1347,7 @@
                 doc.autoTable({
                     head: [['No', 'Tanggal', 'NISN', 'Nama Siswa', 'Kelas', 'Status']],
                     body: tableBody,
-                    startY: 50,
+                    startY: yPos,
                     theme: 'grid',
                     headStyles: { fillColor: [102, 126, 234] }
                 });
@@ -1326,25 +1356,52 @@
             });
 
             // --- Export PDF Siswa Dalam Pengawasan ---
-            document.getElementById('btnExportTopAlpaPdf').addEventListener('click', () => {
+            document.getElementById('btnExportTopAlpaPdf').addEventListener('click', async () => {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
+                const pageWidth = doc.internal.pageSize.getWidth();
+                let yPos = 20;
+
+                // Tambahkan KOP Sekolah jika ada
+                if (schoolData.kop_sekolah) {
+                    try {
+                        const response = await fetch(schoolData.kop_sekolah);
+                        const blob = await response.blob();
+                        const base64data = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+
+                        const imgProps = doc.getImageProperties(base64data);
+                        const pdfWidth = pageWidth - 20; // Margin kiri kanan 10
+                        const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                        
+                        doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                        yPos = 10 + imgHeight + 10; // Update posisi Y di bawah gambar
+                    } catch (err) {
+                        console.error("Gagal memuat KOP Sekolah:", err);
+                    }
+                }
 
                 // Header
                 doc.setFontSize(16);
-                doc.text("Laporan Siswa Dalam Pengawasan", 14, 22);
+                doc.text("Laporan Siswa Dalam Pengawasan", pageWidth / 2, yPos, { align: 'center' });
+                yPos += 8;
                 
-                const schoolName = document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
+                const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
                 doc.setFontSize(12);
                 doc.setTextColor(100);
-                doc.text(schoolName, 14, 30);
+                doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
+                yPos += 10;
                 
                 // Tanggal
                 const now = new Date();
                 const dateStr = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
                 doc.setFontSize(10);
                 doc.setTextColor(0);
-                doc.text(`Tanggal Cetak: ${dateStr}`, 14, 38);
+                doc.text(`Tanggal Cetak: ${dateStr}`, pageWidth / 2, yPos, { align: 'center' });
+                yPos += 10;
 
                 // Ambil data dari tabel
                 const rows = [];
@@ -1368,7 +1425,7 @@
                 doc.autoTable({
                     head: [['No', 'Nama Siswa', 'Kelas', 'Jml Alpa']],
                     body: rows,
-                    startY: 45,
+                    startY: yPos,
                     theme: 'grid',
                     headStyles: { fillColor: [239, 68, 68] }, // Warna merah sesuai header card
                     styles: { fontSize: 10 },
