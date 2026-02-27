@@ -538,15 +538,18 @@
         
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+        let schoolData = {}; // Menyimpan data sekolah untuk keperluan export
+
         async function loadSchoolIdentity() {
             try {
                 const { data, error } = await supabaseClient
                     .from('identitassekolah')
-                    .select('nama_sekolah, logo')
+                    .select('nama_sekolah, logo, kop_sekolah')
                     .limit(1)
                     .single();
                 
                 if (data) {
+                    schoolData = data; // Simpan data ke variabel global
                     if (data.nama_sekolah) {
                         document.querySelector('.navbar-brand span').textContent = data.nama_sekolah;
                     }
@@ -786,6 +789,79 @@
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
             }
+        });
+
+        // --- Export PDF Logic ---
+        document.getElementById('exportPdfBtn').addEventListener('click', async () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let yPos = 20;
+
+            // Tambahkan KOP Sekolah jika ada
+            if (schoolData.kop_sekolah) {
+                try {
+                    const response = await fetch(schoolData.kop_sekolah);
+                    const blob = await response.blob();
+                    const base64data = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+
+                    const imgProps = doc.getImageProperties(base64data);
+                    const pdfWidth = pageWidth - 20; // Margin kiri kanan 10
+                    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                    
+                    doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                    yPos = 10 + imgHeight + 10; // Update posisi Y di bawah gambar
+                } catch (err) {
+                    console.error("Gagal memuat KOP Sekolah:", err);
+                }
+            }
+
+            // Judul Dokumen
+            doc.setFontSize(18);
+            doc.text("Laporan Data Wali Kelas", pageWidth / 2, yPos, { align: 'center' });
+            yPos += 8;
+            
+            // Nama Sekolah (ambil dari navbar)
+            const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
+            doc.setFontSize(12);
+            doc.setTextColor(100);
+            doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 10;
+
+            // Persiapkan Data Tabel
+            const tableRows = [];
+            const rows = document.querySelectorAll('.custom-table tbody tr');
+
+            rows.forEach((row) => {
+                const cells = row.querySelectorAll('td');
+                // Pastikan bukan baris loading atau kosong (cek jika ada kolom data > 1)
+                if (cells.length > 1) {
+                    const rowData = [
+                        cells[0].innerText, // No
+                        cells[1].innerText, // NIP
+                        cells[2].innerText, // Nama Walikelas
+                        cells[3].innerText  // Kelas
+                    ];
+                    tableRows.push(rowData);
+                }
+            });
+
+            // Generate Tabel PDF
+            doc.autoTable({
+                head: [['No', 'NIP', 'Nama Walikelas', 'Kelas']],
+                body: tableRows,
+                startY: yPos,
+                theme: 'grid',
+                styles: { fontSize: 10 },
+                headStyles: { fillColor: [102, 126, 234] } // Warna primary-color
+            });
+
+            // Simpan File
+            doc.save('Data_Wali_Kelas.pdf');
         });
     </script>
 </body>
