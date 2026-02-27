@@ -597,6 +597,7 @@
 
         let supabaseClient;
         let simpedikClient;
+        let schoolData = {}; // Menyimpan data sekolah untuk keperluan export
 
         if (typeof supabase !== 'undefined') {
             supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
@@ -607,11 +608,12 @@
                     // Ambil identitas sekolah dari SIMPPedik
                     const { data, error } = await simpedikClient
                         .from('identitassekolah')
-                        .select('nama_sekolah, logo')
+                        .select('nama_sekolah, logo, kop_sekolah')
                         .limit(1)
                         .maybeSingle();
                     
                     if (data) {
+                        schoolData = data; // Simpan data ke variabel global
                         if (data.nama_sekolah) {
                             document.querySelector('.navbar-brand span').textContent = data.nama_sekolah;
                         }
@@ -989,6 +991,30 @@
         window.exportMappingPdf = async function(kelasName) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('l', 'mm', 'a4'); // Landscape orientation
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let yPos = 20;
+
+            // Tambahkan KOP Sekolah jika ada
+            if (schoolData.kop_sekolah) {
+                try {
+                    const response = await fetch(schoolData.kop_sekolah);
+                    const blob = await response.blob();
+                    const base64data = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+
+                    const imgProps = doc.getImageProperties(base64data);
+                    const pdfWidth = pageWidth - 20; // Margin kiri kanan 10
+                    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                    
+                    doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                    yPos = 10 + imgHeight + 10; // Update posisi Y di bawah gambar
+                } catch (err) {
+                    console.error("Gagal memuat KOP Sekolah:", err);
+                }
+            }
 
             try {
                 // Fetch data for this class specifically
@@ -1007,12 +1033,14 @@
 
                 // Header
                 doc.setFontSize(18);
-                doc.text(`Data Mapping Siswa - Kelas ${kelasName}`, 14, 22);
+                doc.text(`Data Mapping Siswa - Kelas ${kelasName}`, pageWidth / 2, yPos, { align: 'center' });
+                yPos += 8;
                 
-                const schoolName = document.querySelector('.navbar-brand span')?.textContent || 'SMK Negeri 1 Simpang Teritip';
+                const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span')?.textContent || 'SMK Negeri 1 Simpang Teritip';
                 doc.setFontSize(12);
                 doc.setTextColor(100);
-                doc.text(schoolName, 14, 30);
+                doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
+                yPos += 10;
 
                 // Prepare Table Data
                 const tableData = data.map((item, index) => [
@@ -1031,7 +1059,7 @@
                 doc.autoTable({
                     head: [['No', 'Kode', 'NISN', 'Nama Siswa', 'Alamat', 'Tempat Lahir', 'Tgl Lahir', 'Ayah', 'Ibu']],
                     body: tableData,
-                    startY: 40,
+                    startY: yPos,
                     theme: 'grid',
                     styles: { fontSize: 9 },
                     headStyles: { fillColor: [102, 126, 234] }
