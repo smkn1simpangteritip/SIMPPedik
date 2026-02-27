@@ -1232,6 +1232,7 @@
         let supabaseClient;
 
         let absensiClient;
+        let schoolData = {};
 
 
 
@@ -1251,13 +1252,14 @@
 
                         .from('identitassekolah')
 
-                        .select('nama_sekolah, logo')
+                        .select('nama_sekolah, logo, kop_sekolah')
 
                         .limit(1)
 
                         .single();
                    
                     if (data) {
+                        schoolData = data;
 
                         if (data.nama_sekolah) {
 
@@ -2591,9 +2593,10 @@
         // --- Export Preview PDF Logic ---
         const btnExportPreviewPdf = document.getElementById('btnExportPreviewPdf');
         if (btnExportPreviewPdf) {
-            btnExportPreviewPdf.addEventListener('click', function() {
+            btnExportPreviewPdf.addEventListener('click', async function() {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
+                const pageWidth = doc.internal.pageSize.getWidth();
                 
                 // Ambil Informasi Konteks
                 const mapelSelect = document.getElementById('pilihMapel');
@@ -2655,9 +2658,31 @@
                 // --- Generate PDF ---
                 let yPos = 20;
                 
+                // Tambahkan KOP Sekolah jika ada
+                if (schoolData.kop_sekolah) {
+                    try {
+                        const response = await fetch(schoolData.kop_sekolah);
+                        const blob = await response.blob();
+                        const base64data = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+
+                        const imgProps = doc.getImageProperties(base64data);
+                        const pdfWidth = pageWidth - 20; // Margin kiri kanan 10
+                        const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                        
+                        doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                        yPos = 10 + imgHeight + 10; // Update posisi Y di bawah gambar
+                    } catch (err) {
+                        console.error("Gagal memuat KOP Sekolah:", err);
+                    }
+                }
+
                 // Header
                 doc.setFontSize(16);
-                doc.text("Laporan Perkembangan Akademis", 105, yPos, { align: 'center' });
+                doc.text("Laporan Perkembangan Akademis", pageWidth / 2, yPos, { align: 'center' });
                 yPos += 10;
                 
                 doc.setFontSize(11);
