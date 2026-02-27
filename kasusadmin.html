@@ -503,7 +503,7 @@
         <div class="dashboard-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                 <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-danger"><i class="fas fa-file-pdf"></i> Export PDF</button>
+                    <button class="btn btn-danger" id="btnExportPdf"><i class="fas fa-file-pdf"></i> Export PDF</button>
                 </div>
                 <div>
                     <input type="text" id="searchInput" placeholder="Cari Siswa..." style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 250px;">
@@ -551,16 +551,19 @@
         const absensiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0YnNrdnlzdXFlY25hb3BxbGFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTAwODksImV4cCI6MjA4NjUyNjA4OX0.npr4SV6s8XFxXek0R0jNvdhlnIZrdTqrNvWGYVtMAcY';
         const absensiClient = supabase.createClient(absensiUrl, absensiKey);
         
+        let schoolData = {}; // Menyimpan data sekolah untuk keperluan export
+
         if (typeof supabase !== 'undefined') {
             async function loadSchoolIdentity() {
                 try {
                     const { data, error } = await supabaseClient
                         .from('identitassekolah')
-                        .select('nama_sekolah, logo')
+                        .select('nama_sekolah, logo, kop_sekolah')
                         .limit(1)
                         .single();
                     
                     if (data) {
+                        schoolData = data; // Simpan data ke variabel global
                         if (data.nama_sekolah) {
                             document.querySelector('.navbar-brand span').textContent = data.nama_sekolah;
                         }
@@ -713,6 +716,85 @@
             renderTable(filtered);
         });
 
+        // --- Export PDF Logic ---
+        document.getElementById('btnExportPdf').addEventListener('click', async () => {
+            // 1. Determine data to export
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            let dataToExport = allKasusData;
+
+            if (searchTerm) {
+                dataToExport = allKasusData.filter(item => 
+                    (item.nama_siswa && item.nama_siswa.toLowerCase().includes(searchTerm)) ||
+                    (item.kelas && item.kelas.toLowerCase().includes(searchTerm)) ||
+                    (item.jenis_kasus && item.jenis_kasus.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            if (dataToExport.length === 0) {
+                alert("Tidak ada data untuk diexport.");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let yPos = 20;
+
+            // 2. Add KOP
+            if (schoolData.kop_sekolah) {
+                try {
+                    const response = await fetch(schoolData.kop_sekolah);
+                    const blob = await response.blob();
+                    const base64data = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+
+                    const imgProps = doc.getImageProperties(base64data);
+                    const pdfWidth = pageWidth - 20; // Margin 10
+                    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                    
+                    doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                    yPos = 10 + imgHeight + 10;
+                } catch (err) {
+                    console.error("Gagal memuat KOP Sekolah:", err);
+                }
+            }
+
+            // 3. Header
+            doc.setFontSize(18);
+            doc.text("Laporan Data Kasus Siswa", pageWidth / 2, yPos, { align: 'center' });
+            yPos += 8;
+            
+            const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span').textContent || 'SMK Negeri 1 Simpang Teritip';
+            doc.setFontSize(12);
+            doc.setTextColor(100);
+            doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 10;
+
+            // 4. Table
+            const tableBody = dataToExport.map((item, index) => {
+                let tgl = item.tanggal;
+                if (tgl) {
+                    const d = new Date(tgl);
+                    tgl = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                }
+                return [index + 1, item.id_kasus || '-', item.nama_siswa || '-', item.nisn || '-', tgl, item.kelas || '-', item.jenis_kasus || '-', item.nama_guru || '-'];
+            });
+
+            doc.autoTable({
+                head: [['No', 'Id Kasus', 'Nama Siswa', 'NISN', 'Tanggal', 'Kelas', 'Jenis Kasus', 'Pelapor']],
+                body: tableBody,
+                startY: yPos,
+                theme: 'grid',
+                headStyles: { fillColor: [239, 68, 68] }, // Red header
+                styles: { fontSize: 9 }
+            });
+
+            doc.save(`Laporan_Kasus_Siswa_${new Date().toISOString().slice(0,10)}.pdf`);
+        });
+
         // Delete Function
         window.deleteKasus = async function(id) {
             if(confirm('Apakah Anda yakin ingin menghapus data kasus ini?')) {
@@ -768,4 +850,3 @@
     </script>
 </body>
 </html>
-
