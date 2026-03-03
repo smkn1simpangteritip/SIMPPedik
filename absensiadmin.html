@@ -1349,7 +1349,10 @@
                     body: tableBody,
                     startY: yPos,
                     theme: 'grid',
-                    headStyles: { fillColor: [102, 126, 234] }
+                    styles: { lineColor: [0, 0, 0], lineWidth: 0.3 },
+                    headStyles: { fillColor: [102, 126, 234], lineColor: [0, 0, 0], lineWidth: 0.3 },
+                    tableLineColor: [0, 0, 0],
+                    tableLineWidth: 0.3
                 });
 
                 doc.save(`Data_Kehadiran_${new Date().toISOString().slice(0,10)}.pdf`);
@@ -1427,8 +1430,10 @@
                     body: rows,
                     startY: yPos,
                     theme: 'grid',
-                    headStyles: { fillColor: [239, 68, 68] }, // Warna merah sesuai header card
-                    styles: { fontSize: 10 },
+                    headStyles: { fillColor: [239, 68, 68], lineColor: [0, 0, 0], lineWidth: 0.3 }, // Warna merah sesuai header card
+                    styles: { fontSize: 10, lineColor: [0, 0, 0], lineWidth: 0.3 },
+                    tableLineColor: [0, 0, 0],
+                    tableLineWidth: 0.3,
                     columnStyles: {
                         0: { halign: 'center', cellWidth: 15 },
                         2: { halign: 'center', cellWidth: 30 },
