@@ -918,25 +918,6 @@
         });
     }
     </script>
-<script>
-setInterval(() => {
-    const devtoolsOpen =
-        window.outerWidth - window.innerWidth > 100 ||
-        window.outerHeight - window.innerHeight > 100;
 
-    if (devtoolsOpen) {
-        document.body.innerHTML = "";
-        window.location.href = "about:blank";
-    }
-}, 500);
-
-// Disable klik kanan & shortcut
-document.addEventListener('contextmenu', e => e.preventDefault());
-document.onkeydown = function(e) {
-    if (e.key === "F12") return false;
-    if (e.ctrlKey && e.shiftKey && e.key === "I") return false;
-    if (e.ctrlKey && e.key === "U") return false;
-};
-</script>
 </body>
 </html>
