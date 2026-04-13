@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Page</title>
+
+        <!-- 🔥 PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <link rel="icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    
     <!-- Supabase JS SDK -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
@@ -900,5 +908,35 @@
             });
         });
     </script>
+             <!-- 🔥 SERVICE WORKER -->
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('service-worker.js')
+            .then(reg => console.log('Service Worker aktif'))
+            .catch(err => console.log('SW gagal:', err));
+        });
+    }
+    </script>
+<script>
+setInterval(() => {
+    const devtoolsOpen =
+        window.outerWidth - window.innerWidth > 100 ||
+        window.outerHeight - window.innerHeight > 100;
+
+    if (devtoolsOpen) {
+        document.body.innerHTML = "";
+        window.location.href = "about:blank";
+    }
+}, 500);
+
+// Disable klik kanan & shortcut
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.onkeydown = function(e) {
+    if (e.key === "F12") return false;
+    if (e.ctrlKey && e.shiftKey && e.key === "I") return false;
+    if (e.ctrlKey && e.key === "U") return false;
+};
+</script>
 </body>
 </html>
