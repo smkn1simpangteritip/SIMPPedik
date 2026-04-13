@@ -1,7 +1,7 @@
 {
   "name": "SIMPPedik",
   "short_name": "SIMPEDIK",
-  "start_url": "https://smkn1simpangteritip.github.io/SIMPPedik/",
+  "start_url": "/SIMPPedik/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#667eea",
