@@ -482,7 +482,15 @@
                     currentGuruData = data; // Simpan data ke variabel global
                     document.getElementById('biodataContainer').style.display = 'block';
                     document.getElementById('bioNama').textContent = data.nama_guru || '-';
-                    document.getElementById('bioNip').textContent = data.nip || '-';
+                    
+                    // Mask NIP: tampilkan 10 digit pertama, sisanya dengan *
+                    const nip = data.nip || '-';
+                    let maskedNip = nip;
+                    if (nip !== '-' && nip.length > 10) {
+                        maskedNip = nip.substring(0, 10) + '*'.repeat(nip.length - 10);
+                    }
+                    document.getElementById('bioNip').textContent = maskedNip;
+                    
                     document.getElementById('bioMapel').textContent = data.mapel || '-';
                     document.getElementById('bioTlp').textContent = data.tlp || '-';
                     
