@@ -252,6 +252,7 @@
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             margin-bottom: 20px;
+            overflow: visible;
         }
 
         /* --- Dashboard Widgets --- */
@@ -395,6 +396,181 @@
                 margin-left: 0; /* Tidak menggeser konten, tapi overlay */
             }
         }
+
+        /* --- Accordion Styles --- */
+        .accordion-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: #f8f9fa;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .accordion-header:hover {
+            background-color: #f1f3f5;
+        }
+
+        .accordion-header.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .accordion-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .accordion-icon {
+            transition: transform 0.3s;
+        }
+
+        .accordion-header.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, background-color 0.3s;
+            background-color: white;
+        }
+
+        .accordion-content.active {
+            max-height: 500px;
+            background-color: #F5F5F5;
+            overflow: visible;
+        }
+
+        .accordion-body {
+            padding: 20px;
+            color: #666;
+            line-height: 1.6;
+            overflow: visible;
+        }
+
+        /* --- Menu Icon Button Styles --- */
+        .menu-icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 20px;
+            padding: 30px 0 10px 0;
+        }
+
+        .menu-icon-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .menu-icon-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .menu-icon-circle:hover {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-color: transparent;
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Popover Tooltip */
+        .popover {
+            position: fixed;
+            background-color: #093C5D;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 10000;
+            pointer-events: none;
+            transform: translate(-50%, -100%);
+        }
+
+        .popover::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #093C5D;
+        }
+
+        .menu-icon-btn:hover .popover {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .popover.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* --- Responsive Mobile for Accordion --- */
+        @media (max-width: 768px) {
+            .accordion-header {
+                padding: 12px 15px;
+            }
+
+            .accordion-title {
+                font-size: 0.85rem;
+            }
+
+            .accordion-body {
+                padding: 15px;
+                font-size: 0.85rem;
+            }
+
+            .menu-icon-grid {
+                grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+                gap: 12px;
+                padding: 20px 0 5px 0;
+            }
+
+            .menu-icon-circle {
+                width: 45px;
+                height: 45px;
+                font-size: 1.2rem;
+                border-width: 1.5px;
+            }
+
+            .popover {
+                font-size: 0.75rem;
+                padding: 6px 10px;
+            }
+
+            .popover::after {
+                border-width: 5px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -520,6 +696,141 @@
             </div>
         </div>
 
+        <!-- Accordion Container -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3><i class="fas fa-info-circle" style="color: var(--primary-color);"></i> Pilih Menu</h3>
+            </div>
+            
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span class="accordion-title">Menu Sistem</span>
+                    <i class="fas fa-chevron-down accordion-icon"></i>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <div class="menu-icon-grid">
+                            <a href="identitassekolah.html" class="menu-icon-btn">
+                                <div class="popover">Identitas Sekolah</div>
+                                <div class="menu-icon-circle">
+                                    <i class="fas fa-school"></i>
+                                </div>
+                            </a>
+                            <a href="rombel.html" class="menu-icon-btn">
+                                <div class="popover">Rombongan Belajar</div>
+                                <div class="menu-icon-circle">
+                                    <i class="fas fa-layer-group"></i>
+                                </div>
+                            </a>
+                            <a href="dataguru.html" class="menu-icon-btn">
+                                <div class="popover">Data Guru</div>
+                                <div class="menu-icon-circle">
+                                    <i class="fas fa-chalkboard-teacher"></i>
+                                </div>
+                            </a>
+                            <a href="datasiswa.html" class="menu-icon-btn">
+                                <div class="popover">Data Siswa</div>
+                                <div class="menu-icon-circle">
+                                    <i class="fas fa-user-graduate"></i>
+                                </div>
+                            </a>
+                            <a href="walikelas.html" class="menu-icon-btn">
+                                <div class="popover">Walikelas</div>
+                                <div class="menu-icon-circle">
+                                    <i class="fas fa-user-tie"></i>
+                                </div>
+                            </a>
+                            <a href="gurupiket.html" class="menu-icon-btn">
+                                <div class="popover">Guru Piket</div>
+                                <div class="menu-icon-circle">
+                                    <i class="fas fa-clipboard-list"></i>
+                                </div>
+                            </a>
+                            <a href="guruwali.html" class="menu-icon-btn">
+                                <div class="popover">Guru Wali</div>
+                                <div class="menu-icon-circle">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                            </a>
+                            <a href="mappingsiswa.html" class="menu-icon-btn">
+                                <div class="popover">Mapping Siswa</div>
+                                <div class="menu-icon-circle">
+                                    <i class="fas fa-sitemap"></i>
+                                </div>
+                            </a>
+                            <a href="datamapel.html" class="menu-icon-btn">
+                                <div class="popover">Mata Pelajaran</div>
+                                <div class="menu-icon-circle">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                            </a>
+                            <a href="Arsipadmin.html" class="menu-icon-btn">
+                                <div class="popover">Arsip</div>
+                                <div class="menu-icon-circle">
+                                    <i class="fas fa-archive"></i>
+                                </div>
+                            </a>
+                            <a href="#" class="menu-icon-btn">
+                                <div class="popover">Backup & Reset</div>
+                                <div class="menu-icon-circle">
+                                    <i class="fas fa-history"></i>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span class="accordion-title">Laporan</span>
+                    <i class="fas fa-chevron-down accordion-icon"></i>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <div class="menu-icon-grid">
+                            <a href="piketharianadmin.html" class="menu-icon-btn">
+                                <div class="popover">Piket Harian</div>
+                                <div class="menu-icon-circle">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                            </a>
+                            <a href="absensiadmin.html" class="menu-icon-btn">
+                                <div class="popover">Kehadiran Siswa</div>
+                                <div class="menu-icon-circle">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                            </a>
+                            <a href="pembinaanwaliadmin.html" class="menu-icon-btn">
+                                <div class="popover">Pembinaan Guru Wali</div>
+                                <div class="menu-icon-circle">
+                                    <i class="fas fa-chalkboard-teacher"></i>
+                                </div>
+                            </a>
+                            <a href="nilaiakademisadmin.html" class="menu-icon-btn">
+                                <div class="popover">Nilai Akademis</div>
+                                <div class="menu-icon-circle">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                            </a>
+                            <a href="kasusadmin.html" class="menu-icon-btn">
+                                <div class="popover">Kasus</div>
+                                <div class="menu-icon-circle">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                            </a>
+                            <a href="dispensasiadmin.html" class="menu-icon-btn">
+                                <div class="popover">Dispensasi</div>
+                                <div class="menu-icon-circle">
+                                    <i class="fas fa-file-signature"></i>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Rombel Table Card -->
         <div class="dashboard-card card-dark">
             <div class="card-header">
@@ -618,6 +929,45 @@
     </main>
 
     <script>
+        // --- Accordion Toggle Function ---
+        function toggleAccordion(header) {
+            const content = header.nextElementSibling;
+            const isActive = header.classList.contains('active');
+            
+            // Close all accordion items
+            document.querySelectorAll('.accordion-header').forEach(h => {
+                h.classList.remove('active');
+                h.nextElementSibling.classList.remove('active');
+            });
+            
+            // Open clicked item if it was closed
+            if (!isActive) {
+                header.classList.add('active');
+                content.classList.add('active');
+            }
+        }
+
+        // --- Popover Position Function ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuIconBtns = document.querySelectorAll('.menu-icon-btn');
+            
+            menuIconBtns.forEach(btn => {
+                const popover = btn.querySelector('.popover');
+                
+                btn.addEventListener('mouseenter', () => {
+                    const rect = btn.getBoundingClientRect();
+                    const popoverRect = popover.getBoundingClientRect();
+                    
+                    // Position popover above the button
+                    const left = rect.left + rect.width / 2;
+                    const top = rect.top - 10; // 10px gap above button
+                    
+                    popover.style.left = left + 'px';
+                    popover.style.top = top + 'px';
+                });
+            });
+        });
+
         // --- Supabase Integration for Navbar ---
         const supabaseUrl = 'https://mjvobqfcoutazqcovtlp.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdm9icWZjb3V0YXpxY292dGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzEwMzYsImV4cCI6MjA4NjE0NzAzNn0.jz6JaC9mMTMhLVhXSh1OCnFWDPZ0Cy2tUnHEmWxAR8o';
