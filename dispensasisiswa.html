@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dispensasi Siswa - SMKN 1 Simpang Teritip</title>
+    <!-- Font Awesome untuk Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase JS SDK -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --header-height: 60px;
+            --bg-light: #f4f6f9;
+            --navbar-bg: #dc2626;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Navbar --- */
+        .navbar {
+            height: var(--header-height);
+            background-color: var(--navbar-bg);
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1002;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+            width: auto;
+            background-color: white;
+            border-radius: 50%;
+            padding: 2px;
+        }
+
+        .navbar-brand span {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: white;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            max-width: 1200px;
+            margin: var(--header-height) auto 0;
+            padding: 2rem;
+            flex: 1;
+            overflow-y: auto;
+            width: 100%;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .main-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        /* --- Form Styles --- */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.95rem;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: #4b5563;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d1d5db;
+        }
+
+        /* --- Table Styles --- */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .custom-table th, .custom-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .custom-table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .custom-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        /* --- Modal Styles --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            animation: slideDown 0.3s ease;
+            text-align: center;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* --- Access Denied Styles --- */
+        .access-denied {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .access-denied i {
+            font-size: 5rem;
+            color: #ef4444;
+            margin-bottom: 20px;
+        }
+
+        .access-denied h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .access-denied p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .dashboard-card {
+                padding: 15px;
+            }
+
+            .custom-table {
+                font-size: 0.85rem;
+            }
+
+            .custom-table th, .custom-table td {
+                padding: 8px;
+            }
+        }
+
+        /* --- Searchable Dropdown Styles --- */
+        .searchable-dropdown { position: relative; }
+        .dropdown-options { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 0 0 6px 6px; max-height: 200px; overflow-y: auto; z-index: 10; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .dropdown-options.show { display: block; }
+        .dropdown-option { padding: 10px; cursor: pointer; border-bottom: 1px solid #f1f1f1; font-size: 0.95rem; color: #333; }
+        .dropdown-option:hover { background-color: #f3f4f6; color: var(--primary-color); }
+        .no-results { padding: 10px; color: #888; font-size: 0.9rem; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="adminguru.html" class="navbar-brand">
+            <img src="" alt="Logo Sekolah" style="display: none;">
+            <span></span>
+        </a>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Access Denied Message (Hidden by default) -->
+        <div id="accessDenied" class="dashboard-card access-denied" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h2>Akses Ditolak</h2>
+            <p>Maaf, halaman ini hanya dapat diakses oleh Guru Piket yang bertugas hari ini.</p>
+            <a href="adminguru.html" class="btn-primary">Kembali ke Dashboard</a>
+        </div>
+
+        <!-- Main Content (Hidden until authorized) -->
+        <div id="mainContent" style="display: none;">
+            <div class="dashboard-card">
+                <h2 style="color: #333; margin-bottom: 10px;">
+                    <i class="fas fa-file-signature" style="color: var(--navbar-bg); margin-right: 10px;"></i>
+                    Dispensasi Siswa
+                </h2>
+                <p style="color: #666;">Kelola data dispensasi siswa untuk hari ini.</p>
+            </div>
+
+            <!-- Form Tambah Dispensasi -->
+            <div class="dashboard-card">
+                <h3 style="color: #333; margin-bottom: 20px; font-size: 1.1rem;">Tambah Dispensasi Baru</h3>
+                <form id="dispensasiForm">
+                    <div class="form-group">
+                        <label for="idDispen">Id Dispen</label>
+                        <input type="text" id="idDispen" placeholder="Otomatis digenerate" readonly style="background-color: #f3f4f6; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label for="namaSiswa">Nama Siswa</label>
+                        <div class="searchable-dropdown">
+                            <input type="text" id="namaSiswaSearch" placeholder="Ketik nama siswa..." autocomplete="off" required>
+                            <input type="hidden" id="namaSiswa" name="namaSiswa">
+                            <div id="siswaDropdown" class="dropdown-options"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="nisn">NISN</label>
+                        <input type="text" id="nisn" placeholder="NISN Siswa" readonly style="background-color: #f3f4f6; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label for="kelas">Kelas</label>
+                        <input type="text" id="kelas" placeholder="Contoh: X TKJ 1" readonly style="background-color: #f3f4f6; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label for="tanggal">Tanggal</label>
+                        <input type="date" id="tanggal" readonly style="background-color: #f3f4f6; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label for="mapel">Mata Pelajaran</label>
+                        <input type="text" id="mapel" placeholder="Mata Pelajaran" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="guruMapel">Guru Mata Pelajaran</label>
+                        <input type="text" id="guruMapel" placeholder="Nama Guru Mata Pelajaran" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nipGuruMapel">NIP Guru Mata Pelajaran</label>
+                        <input type="text" id="nipGuruMapel" placeholder="NIP Guru Mata Pelajaran" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="alasan">Alasan Dispensasi</label>
+                        <textarea id="alasan" rows="3" placeholder="Jelaskan alasan dispensasi..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="guruPiket">Guru Piket</label>
+                        <input type="text" id="guruPiket" readonly style="background-color: #f3f4f6; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label for="nipGuruPiket">NIP Guru Piket</label>
+                        <input type="text" id="nipGuruPiket" readonly style="background-color: #f3f4f6; cursor: not-allowed;">
+                    </div>
+                    <div style="text-align: right;">
+                        <button type="button" class="btn-secondary" onclick="document.getElementById('dispensasiForm').reset()">Reset</button>
+                        <button type="submit" class="btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tabel Dispensasi -->
+            <div class="dashboard-card">
+                <h3 style="color: #333; margin-bottom: 20px; font-size: 1.1rem;">Daftar Dispensasi Hari Ini</h3>
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Id Dispen</th>
+                                <th>Nama Siswa</th>
+                                <th>NISN</th>
+                                <th>Kelas</th>
+                                <th>Tanggal</th>
+                                <th>Mapel</th>
+                                <th>Guru Mapel</th>
+                                <th>Alasan</th>
+                                <th>Guru Piket</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dispensasiTableBody">
+                            <tr>
+                                <td colspan="11" style="text-align: center; color: #888;">Belum ada data dispensasi</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div style="margin-bottom: 20px;">
+                <i class="fas fa-exclamation-circle" style="font-size: 4rem; color: #ef4444;"></i>
+            </div>
+            <h3 style="color: #333; margin-bottom: 10px;">Hapus Dispensasi?</h3>
+            <p style="color: #666; margin-bottom: 25px;">Apakah Anda yakin ingin menghapus data dispensasi ini?</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button onclick="document.getElementById('deleteModal').classList.remove('active')" class="btn-secondary">Batal</button>
+                <button id="confirmDeleteBtn" class="btn-primary" style="background-color: #ef4444;">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Supabase Integration ---
+        const supabaseUrl = 'https://mjvobqfcoutazqcovtlp.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdm9icWZjb3V0YXpxY292dGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzEwMzYsImV4cCI6MjA4NjE0NzAzNn0.jz6JaC9mMTMhLVhXSh1OCnFWDPZ0Cy2tUnHEmWxAR8o';
+
+        // --- Supabase Integration for Mappingsiswa ---
+        const mappingUrl = 'https://ctbskvysuqecnaopqlam.supabase.co';
+        const mappingKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0YnNrdnlzdXFlY25hb3BxbGFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTAwODksImV4cCI6MjA4NjUyNjA4OX0.npr4SV6s8XFxXek0R0jNvdhlnIZrdTqrNvWGYVtMAcY';
+
+        let supabaseClient;
+        let mappingClient;
+        if (typeof supabase !== 'undefined') {
+            supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+            mappingClient = supabase.createClient(mappingUrl, mappingKey);
+        }
+
+        let currentGuruData = null;
+        let deleteId = null;
+
+        // --- Load School Identity ---
+        async function loadSchoolIdentity() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('identitassekolah')
+                    .select('nama_sekolah, logo')
+                    .limit(1)
+                    .single();
+                
+                if (data) {
+                    if (data.nama_sekolah) {
+                        document.querySelector('.navbar-brand span').textContent = data.nama_sekolah;
+                    }
+                    if (data.logo) {
+                        const img = document.querySelector('.navbar-brand img');
+                        img.src = data.logo;
+                        img.style.display = 'block';
+                    }
+                }
+            } catch (err) {
+                console.error("Error loading school identity:", err);
+            }
+        }
+
+        // --- Check if Guru is Piket Today ---
+        async function checkPiketAccess() {
+            const session = JSON.parse(sessionStorage.getItem('guru_session'));
+            if (!session || !session.nama) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            currentGuruData = session;
+
+            try {
+                // Get today's day name in Indonesian
+                const now = new Date();
+                const days = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'];
+                const hariIni = days[now.getDay()];
+
+                // Check if guru is piket today
+                const { data, error } = await supabaseClient
+                    .from('gurupiket')
+                    .select('piket1, piket2, piket3')
+                    .eq('hari', hariIni);
+
+                if (error) throw error;
+
+                // Check if current guru is in today's piket schedule
+                let isScheduled = false;
+                if (data && data.length > 0) {
+                    isScheduled = data.some(piket =>
+                        piket.piket1 === session.nama ||
+                        piket.piket2 === session.nama ||
+                        piket.piket3 === session.nama
+                    );
+                }
+
+                if (isScheduled) {
+                    // Access granted
+                    document.getElementById('mainContent').style.display = 'block';
+                    initializeFormFields();
+                    loadSiswaData();
+                    loadDispensasiData();
+                } else {
+                    // Access denied
+                    document.getElementById('accessDenied').style.display = 'block';
+                }
+            } catch (err) {
+                console.error("Error checking piket access:", err);
+                document.getElementById('accessDenied').style.display = 'block';
+            }
+        }
+
+        // --- Load Siswa Data for Dropdown ---
+        let siswaList = [];
+
+        async function loadSiswaData() {
+            try {
+                const { data, error } = await mappingClient
+                    .from('mappingsiswa')
+                    .select('nama_siswa, nisn, kelas')
+                    .order('nama_siswa');
+
+                if (error) throw error;
+                siswaList = data || [];
+            } catch (err) {
+                console.error('Error loading siswa:', err);
+            }
+        }
+
+        // --- Dropdown Logic ---
+        const namaSiswaSearch = document.getElementById('namaSiswaSearch');
+        const namaSiswaHidden = document.getElementById('namaSiswa');
+        const siswaDropdown = document.getElementById('siswaDropdown');
+        const nisnInput = document.getElementById('nisn');
+        const kelasInput = document.getElementById('kelas');
+
+        if (namaSiswaSearch) {
+            namaSiswaSearch.addEventListener('input', function() {
+                const filter = this.value.toLowerCase();
+                const filtered = siswaList.filter(s => s.nama_siswa.toLowerCase().includes(filter));
+                renderDropdown(filtered);
+            });
+
+            namaSiswaSearch.addEventListener('focus', function() {
+                const filter = this.value.toLowerCase();
+                const filtered = filter ? siswaList.filter(s => s.nama_siswa.toLowerCase().includes(filter)) : siswaList;
+                renderDropdown(filtered);
+            });
+        }
+
+        function renderDropdown(data) {
+            siswaDropdown.innerHTML = '';
+            if (data.length === 0) {
+                siswaDropdown.innerHTML = '<div class="no-results">Tidak ditemukan</div>';
+            } else {
+                data.forEach(siswa => {
+                    const div = document.createElement('div');
+                    div.className = 'dropdown-option';
+                    div.textContent = `${siswa.nama_siswa} (${siswa.kelas || '-'})`;
+                    div.onclick = () => selectSiswa(siswa);
+                    siswaDropdown.appendChild(div);
+                });
+            }
+            siswaDropdown.classList.add('show');
+        }
+
+        function selectSiswa(siswa) {
+            namaSiswaSearch.value = siswa.nama_siswa;
+            namaSiswaHidden.value = siswa.nama_siswa;
+            if (nisnInput) nisnInput.value = siswa.nisn || '';
+            if (kelasInput) kelasInput.value = siswa.kelas || '';
+            siswaDropdown.classList.remove('show');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (namaSiswaSearch && !namaSiswaSearch.contains(e.target) && !siswaDropdown.contains(e.target)) {
+                siswaDropdown.classList.remove('show');
+            }
+        });
+
+        // --- Initialize Form Fields ---
+        function initializeFormFields() {
+            // Generate ID Dispen
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            const idDispen = `DSP${year}${month}${day}${random}`;
+            document.getElementById('idDispen').value = idDispen;
+
+            // Set Tanggal to today
+            const today = now.toISOString().split('T')[0];
+            document.getElementById('tanggal').value = today;
+
+            // Set Guru Piket from session
+            if (currentGuruData) {
+                document.getElementById('guruPiket').value = currentGuruData.nama || '';
+                document.getElementById('nipGuruPiket').value = currentGuruData.nip || '';
+            }
+        }
+
+        // --- Load Dispensasi Data ---
+        async function loadDispensasiData() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+
+                const { data, error } = await supabaseClient
+                    .from('dispensasi')
+                    .select('*')
+                    .eq('tanggal', today)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const tbody = document.getElementById('dispensasiTableBody');
+                tbody.innerHTML = '';
+
+                if (data && data.length > 0) {
+                    data.forEach((item, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${item.id_dispen || '-'}</td>
+                            <td>${item.nama_siswa}</td>
+                            <td>${item.nisn || '-'}</td>
+                            <td>${item.kelas}</td>
+                            <td>${item.tanggal}</td>
+                            <td>${item.mapel || '-'}</td>
+                            <td>${item.guru_mapel || '-'}</td>
+                            <td>${item.alasan}</td>
+                            <td>${item.guru_piket || '-'}</td>
+                            <td>
+                                <button onclick="deleteDispensasi('${item.id}')" style="background-color: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: #888;">Belum ada data dispensasi</td></tr>';
+                }
+            } catch (err) {
+                console.error('Error loading dispensasi data:', err);
+            }
+        }
+
+        // --- Submit Dispensasi Form ---
+        document.getElementById('dispensasiForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const idDispen = document.getElementById('idDispen').value;
+            const namaSiswa = document.getElementById('namaSiswa').value; // Hidden input
+            const nisn = document.getElementById('nisn').value;
+            const kelas = document.getElementById('kelas').value;
+            const tanggal = document.getElementById('tanggal').value;
+            const mapel = document.getElementById('mapel').value;
+            const guruMapel = document.getElementById('guruMapel').value;
+            const nipGuruMapel = document.getElementById('nipGuruMapel').value;
+            const alasan = document.getElementById('alasan').value;
+            const guruPiket = document.getElementById('guruPiket').value;
+            const nipGuruPiket = document.getElementById('nipGuruPiket').value;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('dispensasi')
+                    .insert({
+                        id_dispen: idDispen,
+                        nama_siswa: namaSiswa,
+                        nisn: nisn,
+                        kelas: kelas,
+                        tanggal: tanggal,
+                        mapel: mapel,
+                        guru_mapel: guruMapel,
+                        nip_guru_mapel: nipGuruMapel,
+                        alasan: alasan,
+                        guru_piket: guruPiket,
+                        nip_guru_piket: nipGuruPiket
+                    });
+
+                if (error) throw error;
+
+                alert('Dispensasi berhasil ditambahkan!');
+                document.getElementById('dispensasiForm').reset();
+                document.getElementById('namaSiswaSearch').value = '';
+                initializeFormFields();
+                loadDispensasiData();
+            } catch (err) {
+                console.error('Error adding dispensasi:', err);
+                alert('Gagal menambahkan dispensasi: ' + err.message);
+            }
+        });
+
+        // --- Delete Dispensasi ---
+        function deleteDispensasi(id) {
+            deleteId = id;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+            if (!deleteId) return;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('dispensasi')
+                    .delete()
+                    .eq('id', deleteId);
+
+                if (error) throw error;
+
+                document.getElementById('deleteModal').classList.remove('active');
+                alert('Dispensasi berhasil dihapus!');
+                loadDispensasiData();
+            } catch (err) {
+                console.error('Error deleting dispensasi:', err);
+                alert('Gagal menghapus dispensasi: ' + err.message);
+            }
+        });
+
+        // --- Initialize ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSchoolIdentity();
+            checkPiketAccess();
+        });
+    </script>
+</body>
+</html>
