@@ -27,9 +27,10 @@
             background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('bg1.png');
             background-size: cover;
             background-position: center;
-            height: 100vh;
+            min-height: 100vh;
+            padding: 2rem 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
         }
 
@@ -308,9 +309,25 @@
             font-size: 0.9rem;
             text-align: center;
         }
+
+        /* --- Responsive Mobile for Logo --- */
+        @media (max-width: 768px) {
+            body > img {
+                width: 60px !important;
+                height: 60px !important;
+                margin: 0 auto 0.5rem auto !important;
+            }
+            body > p {
+                font-size: 0.7rem !important;
+                margin-bottom: 1rem !important;
+            }
+        }
     </style>
 </head>
 <body>
+
+    <img src="icon-512.png" alt="Logo" style="display: block; margin: 0 auto 1rem auto; width: 100px; height: 100px; object-fit: contain; border-radius: 15px;">
+    <p style="text-align: center; color: white; font-size: 0.85rem; font-weight: 600; margin-bottom: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">SISTEM INFORMASI MANAJEMEN PERKEMBANGAN PESERTA DIDIK</p>
 
     <div class="login-container">
         <!-- Bagian Kiri: Identitas Sekolah -->
@@ -335,6 +352,7 @@
                     <div class="role-tabs">
                         <button type="button" class="role-tab active" data-role="Siswa">Siswa</button>
                         <button type="button" class="role-tab" data-role="Guru">Guru</button>
+                        <button type="button" class="role-tab" data-role="PKL">PKL</button>
                         <button type="button" class="role-tab" data-role="Administrator">Admin</button>
                     </div>
                     <input type="hidden" id="role" value="Siswa">
@@ -356,7 +374,9 @@
             </form>
 
             <div class="footer-text">
-                <p>Belum punya akun? <a href="#" id="registerLink">Daftar sekarang</a></p>
+                <p style="font-size: 0.8rem; color: #666;">Copyright : SMKN 1 Simpang Teritip-2026</p>
+                <p style="font-size: 0.75rem; color: #888;">Product Manager : Hasdiah, S.Pd, Ing., M.M.</p>
+                <p style="font-size: 0.75rem; color: #888;">Software Engineer : KenjiStudioDeveloper</p>
             </div>
         </div>
     </div>
@@ -523,18 +543,24 @@
             // Konfigurasi Field berdasarkan Role
             const roleConfig = {
                 'Siswa': {
-                    label1: 'Nama Lengkap', 
+                    label1: 'Nama Lengkap',
                     isSelect1: true,
                     options1: [], // Akan diisi dari database
                     label2: 'NISN', placeholder2: 'Masukkan NISN', type2: 'number',
                     isPassword: false
                 },
                 'Guru': {
-                    label1: 'Nama Lengkap', 
+                    label1: 'Nama Lengkap',
                     isSelect1: true,
                     options1: [], // Akan diisi dari database
                     label2: 'NIP', placeholder2: 'Masukkan NIP', type2: 'number',
                     isPassword: false
+                },
+                'PKL': {
+                    label1: 'Username', placeholder1: 'Masukkan Username', type1: 'text',
+                    isSelect1: false,
+                    label2: 'Password', placeholder2: 'Masukkan Password', type2: 'password',
+                    isPassword: true
                 },
                 'Administrator': {
                     label1: 'Username', placeholder1: 'Masukkan Username', type1: 'text',
@@ -780,6 +806,25 @@
                         setTimeout(() => { window.location.href = 'adminsiswa.html'; }, 1000);
                     } catch (err) {
                         showMessage('Nama atau NISN tidak ditemukan.', 'error');
+                        submitBtn.textContent = originalBtnText;
+                        submitBtn.disabled = false;
+                    }
+                } else if (role === 'PKL') {
+                    try {
+                        // Query Supabase untuk cek Username dan Password
+                        const { data, error } = await supabaseClient
+                            .from('identitassekolah')
+                            .select('username, password')
+                            .eq('username', val1)
+                            .eq('password', val2)
+                            .single();
+
+                        if (error || !data) throw new Error('Username atau Password salah.');
+
+                        showMessage('Login Berhasil! Mengalihkan...', 'success');
+                        setTimeout(() => { window.location.href = 'adminpkl.html'; }, 1000);
+                    } catch (err) {
+                        showMessage(err.message || 'Login gagal.', 'error');
                         submitBtn.textContent = originalBtnText;
                         submitBtn.disabled = false;
                     }
