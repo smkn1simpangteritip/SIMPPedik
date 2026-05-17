@@ -337,6 +337,25 @@
                     </div>
                     <span>Kasus Pembelajaran</span>
                 </a>
+                <a href="dispensasisiswa.html" class="menu-card">
+                    <div class="icon-box" style="background-color: #06b6d4;">
+                        <i class="fas fa-file-signature"></i>
+                    </div>
+                    <span>Dispensasi Siswa</span>
+                </a>
+                <a href="#" class="menu-card" id="ruangUjiLink" style="position: relative;">
+                    <div style="position: absolute; top: 8px; right: 8px; background-color: #ec4899; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; z-index: 10;">Beta 1.1</div>
+                    <div class="icon-box" style="background-color: transparent; border-radius: 0; box-shadow: none;">
+                        <img src="ruanguji.png" alt="Ruang Uji" style="width: 60px; height: 60px; object-fit: contain;">
+                    </div>
+                    <span>Ruang Uji</span>
+                </a>
+                <a href="perpustakaan.html" class="menu-card">
+                    <div class="icon-box" style="background-color: #14b8a6;">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <span>Perpustakaan</span>
+                </a>
                 <a href="index.html" class="menu-card" onclick="return confirm('Apakah Anda yakin ingin keluar?');">
                     <div class="icon-box" style="background-color: #64748b;">
                         <i class="fas fa-sign-out-alt"></i>
@@ -403,6 +422,20 @@
             <h3 style="color: #333; margin-bottom: 10px;">Akses Ditolak</h3>
             <p style="color: #666; margin-bottom: 25px;">Maaf, anda tidak memiliki tugas tambahan sebagai walikelas...!</p>
             <button onclick="document.getElementById('walikelasWarningModal').classList.remove('active')" style="background: #f59e0b; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: 600; width: 100%;">Tutup</button>
+        </div>
+    </div>
+
+    <!-- Modal Countdown Ruang Uji -->
+    <div id="ruangUjiModal" class="modal">
+        <div class="modal-content" style="text-align: center; max-width: 500px;">
+            <div style="margin-bottom: 20px;">
+                <img src="ruanguji.png" alt="Ruang Uji" style="width: 80px; height: 80px; object-fit: contain;">
+            </div>
+            <h3 style="color: #333; margin-bottom: 15px; font-size: 1.4rem;">Ruang Uji</h3>
+            <p style="color: #666; margin-bottom: 10px; line-height: 1.6;">Ruang Uji adalah platform bagi guru untuk melakukan test baik Ulangan Harian, Sumatif Tengah Semester atau Sumatif Akhir semester</p>
+            <p style="color: #888; margin-bottom: 25px; font-style: italic; font-size: 0.9rem;">Dikembangkan oleh IT Staff SMKN 1 Simpang Teritip</p>
+            <div id="countdownDisplay" style="font-size: 4rem; font-weight: bold; color: #ec4899; margin-bottom: 20px;">5</div>
+            <p style="color: #666; font-size: 0.9rem;">Membuka dalam...</p>
         </div>
     </div>
 
@@ -666,6 +699,33 @@
                 } catch (err) {
                     console.error("Error validating walikelas:", err);
                 }
+            });
+        }
+
+        // --- Ruang Uji Countdown Logic ---
+        const ruangUjiLink = document.getElementById('ruangUjiLink');
+        const ruangUjiModal = document.getElementById('ruangUjiModal');
+        const countdownDisplay = document.getElementById('countdownDisplay');
+        let countdownInterval;
+
+        if (ruangUjiLink) {
+            ruangUjiLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                ruangUjiModal.classList.add('active');
+                
+                let count = 5;
+                countdownDisplay.textContent = count;
+                
+                countdownInterval = setInterval(() => {
+                    count--;
+                    countdownDisplay.textContent = count;
+                    
+                    if (count <= 0) {
+                        clearInterval(countdownInterval);
+                        ruangUjiModal.classList.remove('active');
+                        window.open('https://kenjistudiodev.github.io/RuangUji/', '_blank');
+                    }
+                }, 1000);
             });
         }
     </script>
