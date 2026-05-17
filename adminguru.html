@@ -350,7 +350,7 @@
                     </div>
                     <span>Ruang Uji</span>
                 </a>
-                <a href="perpustakaan.html" class="menu-card">
+                <a href="#" class="menu-card" id="perpustakaanLink">
                     <div class="icon-box" style="background-color: #14b8a6;">
                         <i class="fas fa-book"></i>
                     </div>
@@ -436,6 +436,18 @@
             <p style="color: #888; margin-bottom: 25px; font-style: italic; font-size: 0.9rem;">Dikembangkan oleh IT Staff SMKN 1 Simpang Teritip</p>
             <div id="countdownDisplay" style="font-size: 4rem; font-weight: bold; color: #ec4899; margin-bottom: 20px;">5</div>
             <p style="color: #666; font-size: 0.9rem;">Membuka dalam...</p>
+        </div>
+    </div>
+
+    <!-- Modal Perpustakaan -->
+    <div id="perpustakaanModal" class="modal">
+        <div class="modal-content" style="text-align: center; max-width: 400px;">
+            <div style="margin-bottom: 20px;">
+                <i class="fas fa-book" style="font-size: 4rem; color: #14b8a6;"></i>
+            </div>
+            <h3 style="color: #333; margin-bottom: 15px; font-size: 1.3rem;">Fitur Perpustakaan</h3>
+            <p style="color: #666; margin-bottom: 25px; line-height: 1.6;">sabar ya, Fitur manajemen perpustakaan akan segera hadir.., Admin lagi ngopi dulu bentar</p>
+            <button onclick="document.getElementById('perpustakaanModal').classList.remove('active')" style="background: #14b8a6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: 600; width: 100%;">Tutup</button>
         </div>
     </div>
 
@@ -712,20 +724,31 @@
             ruangUjiLink.addEventListener('click', (e) => {
                 e.preventDefault();
                 ruangUjiModal.classList.add('active');
-                
+
                 let count = 5;
                 countdownDisplay.textContent = count;
-                
+
                 countdownInterval = setInterval(() => {
                     count--;
                     countdownDisplay.textContent = count;
-                    
+
                     if (count <= 0) {
                         clearInterval(countdownInterval);
                         ruangUjiModal.classList.remove('active');
                         window.open('https://kenjistudiodev.github.io/RuangUji/', '_blank');
                     }
                 }, 1000);
+            });
+        }
+
+        // --- Perpustakaan Modal Logic ---
+        const perpustakaanLink = document.getElementById('perpustakaanLink');
+        const perpustakaanModal = document.getElementById('perpustakaanModal');
+
+        if (perpustakaanLink) {
+            perpustakaanLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                perpustakaanModal.classList.add('active');
             });
         }
     </script>
