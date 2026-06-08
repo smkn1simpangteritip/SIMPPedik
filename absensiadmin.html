@@ -841,22 +841,40 @@
                         });
                     }
 
-                    // 2. Ambil data absensi dari tabel absensiswa (ABSENSI) berdasarkan tanggal
-                    let query = attendanceClient
-                        .from('absensiswa')
-                        .select('*');
+                    // 2. Ambil SEMUA data absensi dari tabel absensiswa (ABSENSI)
+                    // Supabase default limit 1000 baris, jadi gunakan loop pagination
+                    let allAttendanceData = [];
+                    let from = 0;
+                    const batchSize = 1000;
+                    let hasMore = true;
 
-                    if (filterDate) {
-                        query = query.eq('tanggal', filterDate);
-                    } else {
-                        query = query.order('tanggal', { ascending: false });
+                    while (hasMore) {
+                        let query = attendanceClient
+                            .from('absensiswa')
+                            .select('*')
+                            .range(from, from + batchSize - 1);
+
+                        if (filterDate) {
+                            query = query.eq('tanggal', filterDate);
+                        } else {
+                            query = query.order('tanggal', { ascending: false });
+                        }
+
+                        const { data: batch, error: attError } = await query;
+
+                        if (attError) throw attError;
+
+                        if (batch && batch.length > 0) {
+                            allAttendanceData = allAttendanceData.concat(batch);
+                            from += batchSize;
+                            // Jika data yang dikembalikan kurang dari batchSize, berarti sudah habis
+                            if (batch.length < batchSize) hasMore = false;
+                        } else {
+                            hasMore = false;
+                        }
                     }
                     
-                    const { data: attendanceData, error: attError } = await query;
-
-                    if (attError) throw attError;
-                    
-                    globalAttendanceData = attendanceData || [];
+                    globalAttendanceData = allAttendanceData;
 
                     // --- Process Summary Data (Cards Only - Daily) ---
                     let totalHadir = 0, totalSakit = 0, totalIzin = 0, totalAlpha = 0;
