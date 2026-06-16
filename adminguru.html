@@ -149,54 +149,74 @@
         /* --- Menu Grid Styles --- */
         .menu-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 16px;
+            padding: 10px 0;
         }
-        
+
         .menu-card {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 25px 15px;
-            text-align: center;
-            text-decoration: none;
-            color: #333;
-            transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            height: 100%;
+            justify-content: flex-start;
+            text-decoration: none;
+            gap: 8px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
         }
-        
-        .menu-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            border-color: var(--navbar-bg);
-        }
-        
+
         .icon-box {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
+            width: 64px;
+            height: 64px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 15px;
             color: white;
             font-size: 1.6rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.25s ease;
         }
-        
+
+        .menu-card:hover .icon-box {
+            transform: translateY(-5px) scale(1.07);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+            filter: brightness(1.1);
+        }
+
+        /* Palet warna gradient per tombol */
+        .ic-blue     { background: linear-gradient(135deg, #2980b9, #6dd5fa); }
+        .ic-emerald  { background: linear-gradient(135deg, #0ba360, #3cba92); }
+        .ic-amber    { background: linear-gradient(135deg, #f7971e, #ffd200); }
+        .ic-orange   { background: linear-gradient(135deg, #f46b45, #eea849); }
+        .ic-purple   { background: linear-gradient(135deg, #8e2de2, #4a00e0); }
+        .ic-violet   { background: linear-gradient(135deg, #a18cd1, #fbc2eb); }
+        .ic-indigo   { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .ic-rose     { background: linear-gradient(135deg, #ff416c, #ff4b2b); }
+        .ic-cyan     { background: linear-gradient(135deg, #00b4db, #0083b0); }
+        .ic-teal     { background: linear-gradient(135deg, #11998e, #38ef7d); }
+        .ic-slate    { background: linear-gradient(135deg, #485563, #29323c); }
+        .ic-danger   { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+
         .menu-card span {
+            font-size: 0.72rem;
+            color: #444;
+            text-align: center;
+            line-height: 1.3;
+            width: 84px;
+            word-wrap: break-word;
             font-weight: 600;
-            font-size: 0.95rem;
-            color: #4b5563;
+            height: 2.6em; /* Kunci: tinggi tetap 2 baris, semua label sejajar */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        
+
         .menu-card:hover span {
-            color: var(--navbar-bg);
+            color: #333;
         }
 
         @media (max-width: 768px) {
@@ -204,26 +224,95 @@
                 font-size: 1rem;
             }
 
-            /* Penyesuaian Tampilan Mobile untuk Menu Grid */
             .menu-grid {
-                grid-template-columns: repeat(2, 1fr); /* Memaksa 2 kolom di layar HP */
-                gap: 10px; /* Jarak antar card lebih kecil */
-            }
-
-            .menu-card {
-                padding: 15px 10px; /* Padding dalam card diperkecil */
+                grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+                gap: 12px;
             }
 
             .icon-box {
-                width: 45px; /* Ukuran box ikon diperkecil */
-                height: 45px;
-                font-size: 1.2rem; /* Ukuran ikon font diperkecil */
-                margin-bottom: 10px;
+                width: 52px;
+                height: 52px;
+                font-size: 1.3rem;
+                border-radius: 10px;
             }
 
             .menu-card span {
-                font-size: 0.85rem; /* Ukuran teks diperkecil */
+                font-size: 0.65rem;
+                width: 68px;
+                height: 2.6em;
             }
+        }
+
+
+        /* --- Modal Guru Piket --- */
+        .guru-piket-modal-overlay {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+        .guru-piket-modal-overlay.active { display: flex; }
+
+        .guru-piket-modal {
+            background: white;
+            width: 90%;
+            max-width: 420px;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s ease;
+            overflow: hidden;
+        }
+
+        .guru-piket-modal-header {
+            background: linear-gradient(135deg, #2980b9, #6dd5fa);
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+        }
+
+        .guru-piket-modal-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .guru-piket-modal-close {
+            background: rgba(255,255,255,0.25);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .guru-piket-modal-close:hover { background: rgba(255,255,255,0.4); }
+
+        .guru-piket-modal-body {
+            padding: 16px 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            justify-items: center;
+        }
+
+        .guru-piket-modal-body .menu-card {
+            width: 100%;
+            align-items: center;
         }
 
         /* --- Modal Styles --- */
@@ -295,69 +384,66 @@
         <!-- Container Menu Grid -->
         <div class="dashboard-card">
             <div class="menu-grid">
-                <a href="piketharin.html" class="menu-card" id="piketLink">
-                    <div class="icon-box" style="background-color: #3b82f6;">
-                        <i class="fas fa-calendar-check"></i>
+
+
+                <a href="#" class="menu-card" id="guruPiketLink">
+                    <div class="icon-box ic-blue">
+                        <i class="fas fa-clipboard-list"></i>
                     </div>
-                    <span>Piket Umum</span>
-                </a>
-                <a href="absensisiswa.html" class="menu-card">
-                    <div class="icon-box" style="background-color: #10b981;">
-                        <i class="fas fa-user-check"></i>
-                    </div>
-                    <span>Absensi Kehadiran</span>
+                    <span>Guru Piket</span>
                 </a>
                 <a href="#" class="menu-card" id="walikelasLink">
-                    <div class="icon-box" style="background-color: #f59e0b;">
+                    <div class="icon-box ic-amber">
                         <i class="fas fa-chalkboard-teacher"></i>
                     </div>
                     <span>Walikelas</span>
                 </a>
                 <a href="guruwaliguru.html" class="menu-card">
-                    <div class="icon-box" style="background-color: #8b5cf6;">
+                    <div class="icon-box ic-purple">
                         <i class="fas fa-user-tie"></i>
                     </div>
                     <span>Guru Wali</span>
                 </a>
                 <a href="nilaisiswaguru.html" class="menu-card">
-                    <div class="icon-box" style="background-color: #8b5cf6;">
+                    <div class="icon-box ic-violet">
                         <i class="fas fa-newspaper"></i>
                     </div>
                     <span>Nilai Mata Pelajaran</span>
                 </a>
                 <a href="arsipguru.html" class="menu-card">
-                    <div class="icon-box" style="background-color: #6366f1;">
+                    <div class="icon-box ic-indigo">
                         <i class="fas fa-archive"></i>
                     </div>
                     <span>Arsip Guru</span>
                 </a>
                 <a href="kasussiswaguru.html" class="menu-card">
-                    <div class="icon-box" style="background-color: #ef4444;">
+                    <div class="icon-box ic-rose">
                         <i class="fas fa-exclamation-triangle"></i>
                     </div>
                     <span>Kasus Pembelajaran</span>
                 </a>
-                <a href="dispensasisiswa.html" class="menu-card">
-                    <div class="icon-box" style="background-color: #06b6d4;">
-                        <i class="fas fa-file-signature"></i>
-                    </div>
-                    <span>Dispensasi Siswa</span>
-                </a>
+
                 <a href="#" class="menu-card" id="ruangUjiLink" style="position: relative;">
-                    <div style="position: absolute; top: 8px; right: 8px; background-color: #ec4899; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; z-index: 10;">Beta 1.1</div>
-                    <div class="icon-box" style="background-color: transparent; border-radius: 0; box-shadow: none;">
-                        <img src="ruanguji.png" alt="Ruang Uji" style="width: 60px; height: 60px; object-fit: contain;">
+                    <div style="position: absolute; top: -6px; right: -6px; background-color: #ec4899; color: white; padding: 3px 7px; border-radius: 4px; font-size: 0.65rem; font-weight: bold; z-index: 10;">Beta</div>
+                    <div class="icon-box" style="background: linear-gradient(135deg, #f093fb, #f5576c); border-radius: 14px; overflow: hidden; padding: 6px;">
+                        <img src="ruanguji.png" alt="Ruang Uji" style="width: 44px; height: 44px; object-fit: contain;">
                     </div>
                     <span>Ruang Uji</span>
                 </a>
                 <a href="#" class="menu-card" id="perpustakaanLink">
-                    <div class="icon-box" style="background-color: #14b8a6;">
+                    <div class="icon-box ic-teal">
                         <i class="fas fa-book"></i>
                     </div>
                     <span>Perpustakaan</span>
                 </a>
+                <a href="#" class="menu-card" id="pklLink">
+                    <div class="icon-box ic-orange">
+                        <i class="fas fa-hard-hat"></i>
+                    </div>
+                    <span>Praktik Kerja Lapangan</span>
+                </a>
                 <a href="index.html" class="menu-card" onclick="return confirm('Apakah Anda yakin ingin keluar?');">
-                    <div class="icon-box" style="background-color: #64748b;">
+                    <div class="icon-box ic-slate">
                         <i class="fas fa-sign-out-alt"></i>
                     </div>
                     <span>Log Out</span>
@@ -371,6 +457,68 @@
             <p>CopyRight Kenji Studio Developer.</p>
         </footer>
     </main>
+
+
+    <!-- Modal Guru Piket -->
+    <div id="guruPiketModal" class="guru-piket-modal-overlay">
+        <div class="guru-piket-modal">
+            <div class="guru-piket-modal-header">
+                <h3><i class="fas fa-clipboard-list"></i> Guru Piket</h3>
+                <button class="guru-piket-modal-close" id="closeGuruPiketModal">&times;</button>
+            </div>
+            <div class="guru-piket-modal-body">
+                <a href="piketharin.html" class="menu-card">
+                    <div class="icon-box ic-blue">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <span>Piket Umum</span>
+                </a>
+                <a href="absensisiswa.html" class="menu-card">
+                    <div class="icon-box ic-emerald">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <span>Absensi Kehadiran</span>
+                </a>
+                <a href="dispensasisiswa.html" class="menu-card">
+                    <div class="icon-box ic-cyan">
+                        <i class="fas fa-file-signature"></i>
+                    </div>
+                    <span>Dispensasi Siswa</span>
+                </a>
+                <a href="cetakmbg.html" class="menu-card">
+                    <div class="icon-box ic-amber">
+                        <i class="fas fa-print"></i>
+                    </div>
+                    <span>Cetak Daftar MBG</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal Praktik Kerja Lapangan -->
+    <div id="pklModal" class="guru-piket-modal-overlay">
+        <div class="guru-piket-modal">
+            <div class="guru-piket-modal-header" style="background: linear-gradient(135deg, #f46b45, #eea849);">
+                <h3><i class="fas fa-hard-hat"></i> Praktik Kerja Lapangan</h3>
+                <button class="guru-piket-modal-close" id="closePklModal">&times;</button>
+            </div>
+            <div class="guru-piket-modal-body">
+                <a href="koordinatorpkl.html" class="menu-card">
+                    <div class="icon-box ic-orange">
+                        <i class="fas fa-user-cog"></i>
+                    </div>
+                    <span>Koordinator PKL</span>
+                </a>
+                <a href="pembimbingpkl.html" class="menu-card">
+                    <div class="icon-box ic-teal">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <span>Guru Pembimbing</span>
+                </a>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal Update Profil -->
     <div id="updateProfilModal" class="modal">
@@ -682,6 +830,56 @@
             });
         }
 
+
+
+        // --- PKL Modal Logic ---
+        const pklLink = document.getElementById('pklLink');
+        const pklModal = document.getElementById('pklModal');
+        const closePklModal = document.getElementById('closePklModal');
+
+        if (pklLink) {
+            pklLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                pklModal.classList.add('active');
+            });
+        }
+
+        if (closePklModal) {
+            closePklModal.addEventListener('click', () => {
+                pklModal.classList.remove('active');
+            });
+        }
+
+        pklModal.addEventListener('click', (e) => {
+            if (e.target === pklModal) {
+                pklModal.classList.remove('active');
+            }
+        });
+
+        // --- Guru Piket Modal Logic ---
+        const guruPiketLink = document.getElementById('guruPiketLink');
+        const guruPiketModal = document.getElementById('guruPiketModal');
+        const closeGuruPiketModal = document.getElementById('closeGuruPiketModal');
+
+        if (guruPiketLink) {
+            guruPiketLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                guruPiketModal.classList.add('active');
+            });
+        }
+
+        if (closeGuruPiketModal) {
+            closeGuruPiketModal.addEventListener('click', () => {
+                guruPiketModal.classList.remove('active');
+            });
+        }
+
+        guruPiketModal.addEventListener('click', (e) => {
+            if (e.target === guruPiketModal) {
+                guruPiketModal.classList.remove('active');
+            }
+        });
+
         // --- Walikelas Validation ---
         const walikelasLink = document.getElementById('walikelasLink');
         const walikelasWarningModal = document.getElementById('walikelasWarningModal');
@@ -754,4 +952,3 @@
     </script>
 </body>
 </html>
-
