@@ -28,7 +28,7 @@
             background-size: cover;
             background-position: center;
             min-height: 100vh;
-            padding: 2rem 0;
+            padding: 2rem 0 80px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -44,6 +44,7 @@
             transition: transform 0.3s ease;
             display: flex;
             overflow: hidden;
+            display: none;
         }
 
         .login-header {
@@ -247,12 +248,93 @@
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
         .modal.active { display: flex; }
         .modal-content { background-color: white; width: 95%; max-width: 850px; padding: 25px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: slideDown 0.3s ease; max-height: 90vh; overflow-y: auto; }
+
+        /* --- Login Modal Specific --- */
+        #loginModal .modal-content {
+            padding: 0;
+            max-width: 900px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #loginModal .login-container {
+            display: flex;
+            width: 100%;
+        }
+
+        /* --- Sticky Footer --- */
+        .sticky-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        .btn-login-footer {
+            background: white;
+            color: #667eea;
+            padding: 12px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .btn-login-footer:hover {
+            background: #22c55e;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-cancel {
+            width: 100%;
+            padding: 0.9rem;
+            background: #e2e8f0;
+            color: #475569;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+        .btn-cancel:hover {
+            background: #cbd5e1;
+        }
         @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .modal-header h3 { margin: 0; color: #333; font-size: 1.4rem; }
-        .close-modal { font-size: 1.5rem; cursor: pointer; color: #888; transition: color 0.2s; }
-        .close-modal:hover { color: #ef4444; }
+        .close-modal { 
+            font-size: 2rem; 
+            cursor: pointer; 
+            color: #666; 
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: #f5f5f5;
+            line-height: 1;
+        }
+        .close-modal:hover { 
+            color: #fff; 
+            background-color: #ef4444;
+            transform: rotate(90deg);
+        }
 
         .reg-section-title { font-size: 1rem; color: #667eea; margin: 15px 0 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; font-weight: 600; }
         .reg-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
@@ -322,6 +404,161 @@
                 margin-bottom: 1rem !important;
             }
         }
+
+        /* --- News Container --- */
+        .news-container {
+            width: calc(100% - 20px);
+            max-width: none;
+            margin: 2rem auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px 10px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .news-title {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .headline-news {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+        }
+
+        .headline-news:hover {
+            transform: translateY(-5px);
+        }
+
+        .headline-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .headline-content {
+            padding: 20px;
+        }
+
+        .headline-tag {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .headline-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .headline-excerpt {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .small-news-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .small-news-item {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .small-news-item:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .small-news-tag {
+            background: #e0e7ff;
+            color: #667eea;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .small-news-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .small-news-date {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        @media (min-width: 769px) {
+            .news-container {
+                padding: 25px 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .news-container {
+                grid-template-columns: 1fr;
+                margin: 1rem auto;
+            }
+            .headline-image {
+                height: 180px;
+            }
+            .headline-title {
+                font-size: 1.1rem;
+            }
+            
+            /* Carousel for small news on mobile */
+            .small-news-list {
+                flex-direction: row;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                gap: 15px;
+                padding: 5px;
+            }
+            
+            .small-news-item {
+                flex: 0 0 280px;
+                scroll-snap-align: start;
+            }
+            
+            .small-news-item:hover {
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -329,56 +566,106 @@
     <img src="icon-512.png" alt="Logo" style="display: block; margin: 0 auto 1rem auto; width: 100px; height: 100px; object-fit: contain; border-radius: 15px;">
     <p style="text-align: center; color: white; font-size: 0.85rem; font-weight: 600; margin-bottom: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">SISTEM INFORMASI MANAJEMEN PERKEMBANGAN PESERTA DIDIK</p>
 
-    <div class="login-container">
-        <!-- Bagian Kiri: Identitas Sekolah -->
-        <div class="login-left">
-            <img src="" alt="Logo Sekolah" class="school-logo" style="display: none;">
-            <h1></h1>
-            <p></p>
+    <!-- News Container -->
+    <div class="news-container">
+        <h2 class="news-title">Berita Sekolah</h2>
+        
+        <!-- Headline News -->
+        <div class="headline-news">
+            <div class="headline-image"></div>
+            <div class="headline-content">
+                <span class="headline-tag">Berita Utama</span>
+                <h3 class="headline-title">SMKN 1 Simpang Teritip Raih Prestasi Gemilang di Kompetisi Nasional</h3>
+                <p class="headline-excerpt">Siswa-siswi SMKN 1 Simpang Teritip berhasil membawa pulang berbagai penghargaan dalam kompetisi tingkat nasional tahun 2026...</p>
+            </div>
         </div>
 
-        <!-- Bagian Kanan: Form Login -->
-        <div class="login-right">
-            <div class="login-header">
-                <h2>Selamat Datang</h2>
-                <p>Silakan masuk ke akun Anda</p>
+        <!-- Small News List -->
+        <div class="small-news-list">
+            <div class="small-news-item">
+                <span class="small-news-tag">Prestasi</span>
+                <h4 class="small-news-title">Tim Robotik Raih Medali Emas</h4>
+                <span class="small-news-date">15 Juni 2026</span>
             </div>
+            <div class="small-news-item">
+                <span class="small-news-tag">Kegiatan</span>
+                <h4 class="small-news-title">Kunjungan Industri ke Jakarta</h4>
+                <span class="small-news-date">12 Juni 2026</span>
+            </div>
+            <div class="small-news-item">
+                <span class="small-news-tag">Akademik</span>
+                <h4 class="small-news-title">Penerimaan Siswa Baru Dibuka</h4>
+                <span class="small-news-date">10 Juni 2026</span>
+            </div>
+            <div class="small-news-item">
+                <span class="small-news-tag">Pengumuman</span>
+                <h4 class="small-news-title">Libur Semester Ganjil</h4>
+                <span class="small-news-date">8 Juni 2026</span>
+            </div>
+        </div>
+    </div>
 
-            <div id="messageBox" class="message"></div>
+    <!-- Modal Login -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="login-container">
+                <!-- Bagian Kiri: Identitas Sekolah -->
+                <div class="login-left">
+                    <img src="" alt="Logo Sekolah" class="school-logo" style="display: none;">
+                    <h1></h1>
+                    <p></p>
+                </div>
 
-            <form id="loginForm">
-                <div class="form-group">
-                    <label>Masuk Sebagai</label>
-                    <div class="role-tabs">
-                        <button type="button" class="role-tab active" data-role="Siswa">Siswa</button>
-                        <button type="button" class="role-tab" data-role="Guru">Guru</button>
-                        <button type="button" class="role-tab" data-role="PKL">PKL</button>
-                        <button type="button" class="role-tab" data-role="Administrator">Admin</button>
+                <!-- Bagian Kanan: Form Login -->
+                <div class="login-right">
+                    <div class="login-header">
+                        <h2>Selamat Datang</h2>
+                        <p>Silakan masuk ke akun Anda</p>
                     </div>
-                    <input type="hidden" id="role" value="Siswa">
+
+                    <div id="messageBox" class="message"></div>
+
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label>Masuk Sebagai</label>
+                            <div class="role-tabs">
+                                <button type="button" class="role-tab active" data-role="Siswa">Siswa</button>
+                                <button type="button" class="role-tab" data-role="Guru">Guru</button>
+                                <button type="button" class="role-tab" data-role="PKL">PKL</button>
+                                <button type="button" class="role-tab" data-role="Administrator">Admin</button>
+                            </div>
+                            <input type="hidden" id="role" value="Siswa">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="field1" id="label1">Nama Lengkap</label>
+                            <input type="text" id="field1" placeholder="Masukkan Nama Lengkap" required autocomplete="off">
+                            <div id="field1-dropdown" class="dropdown-options"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="field2" id="label2">NISN</label>
+                            <input type="number" id="field2" placeholder="Masukkan NISN" required>
+                            <button type="button" class="toggle-password" id="togglePassword" style="display: none;">Lihat</button>
+                        </div>
+
+                        <button type="submit" class="btn-login" id="submitBtn">Masuk</button>
+                        <button type="button" class="btn-cancel" id="cancelLoginBtn">Batal</button>
+                    </form>
+
+                    <div class="footer-text">
+                        <p style="font-size: 0.8rem; color: #666;">Copyright : SMKN 1 Simpang Teritip-2026</p>
+                        <p style="font-size: 0.75rem; color: #888;">Product Manager : Hasdiah, S.Pd, Ing., M.M.</p>
+                        <p style="font-size: 0.75rem; color: #888;">Software Engineer : KenjiStudioDeveloper</p>
+                    </div>
                 </div>
-
-                <div class="form-group">
-                    <label for="field1" id="label1">Nama Lengkap</label>
-                    <input type="text" id="field1" placeholder="Masukkan Nama Lengkap" required autocomplete="off">
-                    <div id="field1-dropdown" class="dropdown-options"></div>
-                </div>
-
-                <div class="form-group">
-                    <label for="field2" id="label2">NISN</label>
-                    <input type="number" id="field2" placeholder="Masukkan NISN" required>
-                    <button type="button" class="toggle-password" id="togglePassword" style="display: none;">Lihat</button>
-                </div>
-
-                <button type="submit" class="btn-login" id="submitBtn">Masuk</button>
-            </form>
-
-            <div class="footer-text">
-                <p style="font-size: 0.8rem; color: #666;">Copyright : SMKN 1 Simpang Teritip-2026</p>
-                <p style="font-size: 0.75rem; color: #888;">Product Manager : Hasdiah, S.Pd, Ing., M.M.</p>
-                <p style="font-size: 0.75rem; color: #888;">Software Engineer : KenjiStudioDeveloper</p>
             </div>
         </div>
+    </div>
+
+    <!-- Sticky Footer -->
+    <div class="sticky-footer">
+        <button class="btn-login-footer" id="openLoginModal">Login</button>
     </div>
 
     <!-- Modal Selamat Datang -->
@@ -837,6 +1124,26 @@
                 messageBox.className = `message ${type}`;
                 messageBox.style.display = 'block';
             }
+
+            // --- Logic Modal Login ---
+            const loginModal = document.getElementById('loginModal');
+            const openLoginBtn = document.getElementById('openLoginModal');
+            const cancelLoginBtn = document.getElementById('cancelLoginBtn');
+
+            // Buka Modal Login
+            openLoginBtn.addEventListener('click', () => {
+                loginModal.classList.add('active');
+            });
+
+            // Tutup Modal Login
+            function closeLoginModal() {
+                loginModal.classList.remove('active');
+            }
+
+            cancelLoginBtn.addEventListener('click', closeLoginModal);
+            window.addEventListener('click', (e) => {
+                if (e.target === loginModal) closeLoginModal();
+            });
 
             // --- Logic Modal Pendaftaran ---
             const regModal = document.getElementById('registerModal');
