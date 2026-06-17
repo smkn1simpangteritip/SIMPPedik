@@ -370,6 +370,147 @@
             .reg-form-grid { grid-template-columns: 1fr; }
         }
 
+        /* --- Modal Detail Berita --- */
+        .news-detail-modal {
+            display: none;
+            position: fixed;
+            z-index: 10002;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .news-detail-modal.active { display: flex; }
+        .news-detail-box {
+            background: #fff;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 700px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            animation: ndmSlideUp 0.3s ease;
+        }
+        @keyframes ndmSlideUp {
+            from { transform: translateY(40px); opacity: 0; }
+            to   { transform: translateY(0);    opacity: 1; }
+        }
+        /* Header modal: judul + tombol tutup */
+        .news-detail-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            flex-shrink: 0;
+        }
+        .news-detail-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .news-detail-tag {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+        .news-detail-date {
+            font-size: 0.78rem;
+            color: #94a3b8;
+        }
+        .news-detail-close {
+            width: 34px;
+            height: 34px;
+            background: #f1f5f9;
+            color: #475569;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, color 0.2s;
+            flex-shrink: 0;
+        }
+        .news-detail-close:hover { background: #ef4444; color: #fff; }
+        /* Body scrollable */
+        .news-detail-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+            -webkit-overflow-scrolling: touch;
+        }
+        .news-detail-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #1e293b;
+            line-height: 1.45;
+            margin-bottom: 16px;
+            text-align: justify;
+        }
+        .news-detail-divider {
+            height: 2px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            border-radius: 2px;
+            margin-bottom: 16px;
+            opacity: 0.2;
+            clear: both;
+        }
+        /* Gambar float kiri, teks mengalir di kanan */
+        .news-detail-img-wrap {
+            float: left;
+            width: 45%;
+            margin: 0 16px 12px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+        }
+        .news-detail-img-wrap img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .news-detail-img-placeholder {
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+        .news-detail-content {
+            font-size: 0.92rem;
+            color: #374151;
+            line-height: 1.85;
+            white-space: pre-wrap;
+            word-break: break-word;
+            text-align: justify;
+        }
+        /* Clearfix setelah konten */
+        .news-detail-clearfix { clear: both; }
+        /* Mobile */
+        @media (max-width: 480px) {
+            .news-detail-modal { padding: 0; align-items: flex-end; }
+            .news-detail-box { border-radius: 20px 20px 0 0; max-height: 92vh; }
+            .news-detail-title { font-size: 1rem; }
+            .news-detail-body { padding: 16px 14px; }
+            .news-detail-img-wrap {
+                float: none;
+                width: 100%;
+                margin: 0 0 14px 0;
+            }
+        }
+
         /* Custom Searchable Dropdown */
         .dropdown-options {
             position: absolute;
@@ -930,38 +1071,15 @@
         <div class="news-container">
             <h2 class="news-title">Berita Sekolah</h2>
             
-            <!-- Headline News -->
-            <div class="headline-news">
-                <img src="b1.jpeg" class="headline-image" alt="Berita Utama">
-                <div class="headline-content">
-                    <span class="headline-tag">Berita Utama</span>
-                    <h3 class="headline-title">SMKN 1 Simpang Teritip Raih Prestasi Gemilang di Kompetisi Nasional</h3>
-                    <p class="headline-excerpt">Siswa-siswi SMKN 1 Simpang Teritip berhasil membawa pulang berbagai penghargaan dalam kompetisi tingkat nasional tahun 2026...</p>
+            <!-- Headline News (Berita Utama) -->
+            <div class="headline-news" id="headlineNews">
+                <div style="width:100%;height:250px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;">
+                    <span style="color:white;font-size:1rem;opacity:0.7;">Memuat berita...</span>
                 </div>
             </div>
 
             <!-- Small News List -->
-            <div class="small-news-list">
-                <div class="small-news-item">
-                    <span class="small-news-tag">Prestasi</span>
-                    <h4 class="small-news-title">Tim Robotik Raih Medali Emas</h4>
-                    <span class="small-news-date">15 Juni 2026</span>
-                </div>
-                <div class="small-news-item">
-                    <span class="small-news-tag">Kegiatan</span>
-                    <h4 class="small-news-title">Kunjungan Industri ke Jakarta</h4>
-                    <span class="small-news-date">12 Juni 2026</span>
-                </div>
-                <div class="small-news-item">
-                    <span class="small-news-tag">Akademik</span>
-                    <h4 class="small-news-title">Penerimaan Siswa Baru Dibuka</h4>
-                    <span class="small-news-date">10 Juni 2026</span>
-                </div>
-                <div class="small-news-item">
-                    <span class="small-news-tag">Pengumuman</span>
-                    <h4 class="small-news-title">Libur Semester Ganjil</h4>
-                    <span class="small-news-date">8 Juni 2026</span>
-                </div>
+            <div class="small-news-list" id="smallNewsList">
             </div>
             
             <button class="btn-lihat-semua" id="newsLihatSemuaBtn">Lihat Semua</button>
@@ -1071,62 +1189,39 @@
         </div>
     </div>
 
-    <!-- Carousel Modal: Berita Sekolah (5 item, termasuk headline dan small news) -->
+    <!-- Modal Detail Berita -->
+    <div class="news-detail-modal" id="newsDetailModal">
+        <div class="news-detail-box" id="newsDetailBox">
+            <!-- Header: meta + tombol tutup -->
+            <div class="news-detail-header">
+                <div class="news-detail-meta">
+                    <span class="news-detail-tag" id="newsDetailTag"></span>
+                    <span class="news-detail-date" id="newsDetailDate"></span>
+                </div>
+                <button class="news-detail-close" id="newsDetailClose">&times;</button>
+            </div>
+            <!-- Body scrollable -->
+            <div class="news-detail-body">
+                <h2 class="news-detail-title" id="newsDetailTitle"></h2>
+                <div class="news-detail-divider"></div>
+                <!-- Gambar float kiri, teks mengalir di kanan -->
+                <div class="news-detail-img-wrap" id="newsDetailImgWrap">
+                    <div class="news-detail-img-placeholder" id="newsDetailImgPlaceholder">📰</div>
+                    <img id="newsDetailImg" src="" alt="" style="display:none;">
+                </div>
+                <div class="news-detail-content" id="newsDetailContent"></div>
+                <div class="news-detail-clearfix"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carousel Modal: Berita Sekolah (dinamis dari Supabase) -->
     <div class="carousel-modal" id="newsCarouselModal">
         <div class="carousel-content">
             <button class="carousel-close" id="newsCarouselClose">&times;</button>
             <button class="carousel-nav carousel-prev" id="newsCarouselPrev">&#10094;</button>
             <button class="carousel-nav carousel-next" id="newsCarouselNext">&#10095;</button>
-
-            <div class="carousel-slide active" data-index="0">
-                <img src="b1.jpeg" class="carousel-image" alt="Berita Utama">
-                <div class="carousel-info">
-                    <span class="carousel-tag">Berita Utama</span>
-                    <h3 class="carousel-title">SMKN 1 Simpang Teritip Raih Prestasi Gemilang di Kompetisi Nasional</h3>
-                    <p class="carousel-year">16 Juni 2026</p>
-                    <p class="carousel-description">Siswa-siswi SMKN 1 Simpang Teritip berhasil membawa pulang berbagai penghargaan dalam kompetisi tingkat nasional tahun 2026.</p>
-                </div>
-            </div>
-
-            <div class="carousel-slide" data-index="1">
-                <img src="b2.jpeg" class="carousel-image" alt="Prestasi">
-                <div class="carousel-info">
-                    <span class="carousel-tag">Prestasi</span>
-                    <h3 class="carousel-title">Tim Robotik Raih Medali Emas</h3>
-                    <p class="carousel-year">15 Juni 2026</p>
-                    <p class="carousel-description">Tim robotik sekolah berhasil meraih medali emas dalam kompetisi robotik tingkat nasional dengan inovasi robot pemilah sampah otomatis.</p>
-                </div>
-            </div>
-
-            <div class="carousel-slide" data-index="2">
-                <img src="b3.jpeg" class="carousel-image" alt="Kegiatan">
-                <div class="carousel-info">
-                    <span class="carousel-tag">Kegiatan</span>
-                    <h3 class="carousel-title">Kunjungan Industri ke Jakarta</h3>
-                    <p class="carousel-year">12 Juni 2026</p>
-                    <p class="carousel-description">Siswa kelas XII melakukan kunjungan industri ke beberapa perusahaan mitra di Jakarta untuk menambah wawasan dunia kerja.</p>
-                </div>
-            </div>
-
-            <div class="carousel-slide" data-index="3">
-                <img src="b4.jpeg" class="carousel-image" alt="Akademik">
-                <div class="carousel-info">
-                    <span class="carousel-tag">Akademik</span>
-                    <h3 class="carousel-title">Penerimaan Siswa Baru Dibuka</h3>
-                    <p class="carousel-year">10 Juni 2026</p>
-                    <p class="carousel-description">Pendaftaran Penerimaan Peserta Didik Baru (PPDB) tahun pelajaran 2026/2027 resmi dibuka mulai hari ini.</p>
-                </div>
-            </div>
-
-            <div class="carousel-slide" data-index="4">
-                <img src="b1.jpeg" class="carousel-image" alt="Pengumuman">
-                <div class="carousel-info">
-                    <span class="carousel-tag">Pengumuman</span>
-                    <h3 class="carousel-title">Libur Semester Ganjil</h3>
-                    <p class="carousel-year">8 Juni 2026</p>
-                    <p class="carousel-description">Libur semester ganjil tahun pelajaran 2025/2026 akan dimulai minggu depan, kegiatan belajar mengajar akan kembali aktif sesuai kalender akademik.</p>
-                </div>
-            </div>
+            <!-- Slides akan diisi secara dinamis oleh JS -->
         </div>
     </div>
 
@@ -1304,8 +1399,8 @@
         /* --- JavaScript: Logika Halaman --- */
         
         // --- Supabase Integration ---
-        const supabaseUrl = 'https://mjvobqfcoutazqcovtlp.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdm9icWZjb3V0YXpxY292dGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzEwMzYsImV4cCI6MjA4NjE0NzAzNn0.jz6JaC9mMTMhLVhXSh1OCnFWDPZ0Cy2tUnHEmWxAR8o';
+        const supabaseUrl = 'https://ctbskvysuqecnaopqlam.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0YnNrdnlzdXFlY25hb3BxbGFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTAwODksImV4cCI6MjA4NjUyNjA4OX0.npr4SV6s8XFxXek0R0jNvdhlnIZrdTqrNvWGYVtMAcY';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
         
         async function loadSchoolIdentity() {
@@ -1333,6 +1428,227 @@
             }
         }
         document.addEventListener('DOMContentLoaded', loadSchoolIdentity);
+        document.addEventListener('DOMContentLoaded', loadBeritaSekolah);
+
+        // ============================================================
+        // Load Berita Sekolah dari Supabase
+        // ============================================================
+        async function loadBeritaSekolah() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('berita')
+                    .select('id, judul, kategori, tanggal, isiberita, photo')
+                    .order('tanggal', { ascending: false })
+                    .limit(10);
+
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    renderBeritaKosong();
+                    return;
+                }
+
+                renderBeritaSekolah(data);
+                renderNewsCarousel(data);
+                setupNewsCarouselDynamic();
+
+            } catch (err) {
+                console.error('Error loading berita:', err);
+                renderBeritaKosong();
+            }
+        }
+
+        function formatTanggalBerita(tgl) {
+            if (!tgl) return '';
+            const d = new Date(tgl);
+            return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        function truncateBerita(str, n) {
+            if (!str) return '';
+            return str.length > n ? str.substring(0, n) + '...' : str;
+        }
+
+        function renderBeritaSekolah(data) {
+            // Pisahkan: Berita Utama (headline) dan lainnya (small)
+            const beritaUtama = data.find(d => d.kategori === 'Berita Utama') || data[0];
+            const beritaLain  = data.filter(d => d.id !== beritaUtama.id).slice(0, 4);
+
+            // --- Render Headline ---
+            const headlineEl = document.getElementById('headlineNews');
+            const imgSrc = beritaUtama.photo || '';
+            headlineEl.innerHTML = `
+                ${imgSrc
+                    ? `<img src="${imgSrc}" class="headline-image" alt="${beritaUtama.judul}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+                    : ''}
+                <div class="headline-image" style="${imgSrc ? 'display:none;' : ''}align-items:center;justify-content:center;background:linear-gradient(135deg,#667eea,#764ba2);">
+                    <span style="color:white;font-size:2rem;">📰</span>
+                </div>
+                <div class="headline-content">
+                    <span class="headline-tag">${beritaUtama.kategori}</span>
+                    <h3 class="headline-title">${beritaUtama.judul}</h3>
+                    <p class="headline-excerpt">${truncateBerita(beritaUtama.isiberita, 150)}</p>
+                </div>`;
+            // Klik headline → buka modal detail
+            headlineEl.style.cursor = 'pointer';
+            headlineEl.addEventListener('click', () => openNewsDetail(beritaUtama));
+
+            // --- Render Small News ---
+            const smallEl = document.getElementById('smallNewsList');
+            if (beritaLain.length === 0) {
+                smallEl.innerHTML = '<p style="color:rgba(255,255,255,0.7);font-size:0.85rem;padding:10px;">Belum ada berita lainnya.</p>';
+                return;
+            }
+            smallEl.innerHTML = beritaLain.map((item, i) => `
+                <div class="small-news-item" data-idx="${i}">
+                    <span class="small-news-tag">${item.kategori}</span>
+                    <h4 class="small-news-title">${item.judul}</h4>
+                    <span class="small-news-date">${formatTanggalBerita(item.tanggal)}</span>
+                </div>`).join('');
+
+            // Pasang event click tiap small-news-item
+            smallEl.querySelectorAll('.small-news-item').forEach((el, i) => {
+                el.addEventListener('click', () => openNewsDetail(beritaLain[i]));
+            });
+        }
+
+        // ============================================================
+        // Buka Modal Detail Berita
+        // ============================================================
+        function openNewsDetail(item) {
+            const img         = document.getElementById('newsDetailImg');
+            const placeholder = document.getElementById('newsDetailImgPlaceholder');
+            const imgWrap     = document.getElementById('newsDetailImgWrap');
+
+            if (item.photo) {
+                img.src   = item.photo;
+                img.alt   = item.judul;
+                img.style.display = 'block';
+                placeholder.style.display = 'none';
+                img.onerror = function() {
+                    img.style.display = 'none';
+                    placeholder.style.display = 'flex';
+                };
+            } else {
+                img.style.display = 'none';
+                placeholder.style.display = 'flex';
+            }
+
+            document.getElementById('newsDetailTag').textContent     = item.kategori;
+            document.getElementById('newsDetailDate').textContent    = '📅 ' + formatTanggalBerita(item.tanggal);
+            document.getElementById('newsDetailTitle').textContent   = item.judul;
+            document.getElementById('newsDetailContent').textContent = item.isiberita || 'Tidak ada isi berita.';
+
+            // Scroll body ke atas
+            document.getElementById('newsDetailBox').querySelector('.news-detail-body').scrollTop = 0;
+
+            document.getElementById('newsDetailModal').classList.add('active');
+        }
+
+        // Tutup modal detail
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('newsDetailClose').addEventListener('click', () => {
+                document.getElementById('newsDetailModal').classList.remove('active');
+            });
+            document.getElementById('newsDetailModal').addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('active');
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') document.getElementById('newsDetailModal').classList.remove('active');
+            });
+        });
+
+        function renderBeritaKosong() {
+            const headlineEl = document.getElementById('headlineNews');
+            headlineEl.innerHTML = `
+                <div style="width:100%;height:250px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;">
+                    <span style="font-size:2.5rem;">📰</span>
+                    <span style="color:white;font-size:0.9rem;opacity:0.8;">Belum ada berita</span>
+                </div>
+                <div class="headline-content">
+                    <span class="headline-tag">-</span>
+                    <h3 class="headline-title">Berita belum tersedia</h3>
+                    <p class="headline-excerpt">Berita sekolah akan segera hadir.</p>
+                </div>`;
+            document.getElementById('smallNewsList').innerHTML = '';
+        }
+
+        // Render slides carousel berita secara dinamis
+        function renderNewsCarousel(data) {
+            const carouselContent = document.querySelector('#newsCarouselModal .carousel-content');
+            // Hapus slide lama jika ada
+            carouselContent.querySelectorAll('.carousel-slide').forEach(s => s.remove());
+
+            // Susun: Berita Utama duluan
+            const sorted = [
+                ...data.filter(d => d.kategori === 'Berita Utama'),
+                ...data.filter(d => d.kategori !== 'Berita Utama')
+            ];
+
+            sorted.forEach((item, index) => {
+                const slide = document.createElement('div');
+                slide.className = 'carousel-slide' + (index === 0 ? ' active' : '');
+                slide.setAttribute('data-index', index);
+                const imgSrc = item.photo || '';
+                slide.innerHTML = `
+                    ${imgSrc
+                        ? `<img src="${imgSrc}" class="carousel-image" alt="${item.judul}" onerror="this.style.background='linear-gradient(135deg,#667eea,#764ba2)';this.removeAttribute('src')">`
+                        : `<div class="carousel-image" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#667eea,#764ba2);"><span style="font-size:4rem;">📰</span></div>`
+                    }
+                    <div class="carousel-info">
+                        <span class="carousel-tag">${item.kategori}</span>
+                        <h3 class="carousel-title">${item.judul}</h3>
+                        <p class="carousel-year">${formatTanggalBerita(item.tanggal)}</p>
+                        <p class="carousel-description">${truncateBerita(item.isiberita, 300)}</p>
+                    </div>`;
+                carouselContent.appendChild(slide);
+            });
+        }
+
+        // Setup carousel berita (dinamis — dipanggil setelah slides di-render)
+        function setupNewsCarouselDynamic() {
+            const modal    = document.getElementById('newsCarouselModal');
+            const closeBtn = document.getElementById('newsCarouselClose');
+            const prevBtn  = document.getElementById('newsCarouselPrev');
+            const nextBtn  = document.getElementById('newsCarouselNext');
+            let currentSlide = 0;
+
+            function getSlides() {
+                return modal.querySelectorAll('.carousel-slide');
+            }
+
+            function updateCarousel() {
+                const slides = getSlides();
+                slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
+            }
+
+            document.getElementById('newsLihatSemuaBtn').addEventListener('click', () => {
+                currentSlide = 0;
+                updateCarousel();
+                modal.classList.add('active');
+            });
+
+            closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+
+            nextBtn.addEventListener('click', () => {
+                const slides = getSlides();
+                currentSlide = (currentSlide + 1) % slides.length;
+                updateCarousel();
+            });
+
+            prevBtn.addEventListener('click', () => {
+                const slides = getSlides();
+                currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+                updateCarousel();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (!modal.classList.contains('active')) return;
+                const slides = getSlides();
+                if (e.key === 'ArrowRight') { currentSlide = (currentSlide + 1) % slides.length; updateCarousel(); }
+                else if (e.key === 'ArrowLeft') { currentSlide = (currentSlide - 1 + slides.length) % slides.length; updateCarousel(); }
+                else if (e.key === 'Escape') modal.classList.remove('active');
+            });
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             const loginForm = document.getElementById('loginForm');
@@ -1795,13 +2111,7 @@
                 nextId: 'galleryCarouselNext'
             });
 
-            setupCarousel({
-                btnId: 'newsLihatSemuaBtn',
-                modalId: 'newsCarouselModal',
-                closeId: 'newsCarouselClose',
-                prevId: 'newsCarouselPrev',
-                nextId: 'newsCarouselNext'
-            });
+            // Berita Sekolah carousel dihandle secara dinamis oleh setupNewsCarouselDynamic()
 
             // --- Logic Modal Pendaftaran ---
             const regModal = document.getElementById('registerModal');
