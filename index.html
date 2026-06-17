@@ -1399,13 +1399,17 @@
         /* --- JavaScript: Logika Halaman --- */
         
         // --- Supabase Integration ---
-        const supabaseUrl = 'https://ctbskvysuqecnaopqlam.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0YnNrdnlzdXFlY25hb3BxbGFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTAwODksImV4cCI6MjA4NjUyNjA4OX0.npr4SV6s8XFxXek0R0jNvdhlnIZrdTqrNvWGYVtMAcY';
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        const simpedikUrl = 'https://mjvobqfcoutazqcovtlp.supabase.co';
+        const simpedikKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdm9icWZjb3V0YXpxY292dGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzEwMzYsImV4cCI6MjA4NjE0NzAzNn0.jz6JaC9mMTMhLVhXSh1OCnFWDPZ0Cy2tUnHEmWxAR8o';
+        const simpedikClient = supabase.createClient(simpedikUrl, simpedikKey);
+
+        const absensiUrl = 'https://ctbskvysuqecnaopqlam.supabase.co';
+        const absensiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0YnNrdnlzdXFlY25hb3BxbGFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTAwODksImV4cCI6MjA4NjUyNjA4OX0.npr4SV6s8XFxXek0R0jNvdhlnIZrdTqrNvWGYVtMAcY';
+        const absensiClient = supabase.createClient(absensiUrl, absensiKey);
         
         async function loadSchoolIdentity() {
             try {
-                const { data, error } = await supabaseClient
+                const { data, error } = await simpedikClient
                     .from('identitassekolah')
                     .select('nama_sekolah, logo, slogan')
                     .limit(1)
@@ -1435,7 +1439,7 @@
         // ============================================================
         async function loadBeritaSekolah() {
             try {
-                const { data, error } = await supabaseClient
+                const { data, error } = await absensiClient
                     .from('berita')
                     .select('id, judul, kategori, tanggal, isiberita, photo')
                     .order('tanggal', { ascending: false })
@@ -1701,7 +1705,7 @@
             // --- Fetch Data Guru untuk Dropdown ---
             async function loadGuruData() {
                 try {
-                    const { data, error } = await supabaseClient
+                    const { data, error } = await simpedikClient
                         .from('dataguru')
                         .select('nama_guru')
                         .order('nama_guru');
@@ -1725,7 +1729,7 @@
             // --- Fetch Data Siswa untuk Dropdown ---
             async function loadSiswaData() {
                 try {
-                    const { data, error } = await supabaseClient
+                    const { data, error } = await simpedikClient
                         .from('datasiswa')
                         .select('nama_siswa')
                         .order('nama_siswa');
@@ -1864,7 +1868,7 @@
 
                 if (role === 'Administrator') {
                     try {
-                        const { data, error } = await supabaseClient
+                        const { data, error } = await simpedikClient
                             .from('identitassekolah')
                             .select('username, password')
                             .eq('username', val1)
@@ -1883,7 +1887,7 @@
                 } else if (role === 'Guru') {
                     try {
                         // Query Supabase untuk cek Nama dan NIP
-                        const { data, error } = await supabaseClient
+                        const { data, error } = await simpedikClient
                             .from('dataguru')
                             .select('*')
                             .eq('nama_guru', val1)
@@ -1918,7 +1922,7 @@
                 } else if (role === 'Siswa') {
                     try {
                         // Query Supabase untuk cek Nama dan NISN
-                        const { data, error } = await supabaseClient
+                        const { data, error } = await simpedikClient
                             .from('datasiswa')
                             .select('*')
                             .eq('nama_siswa', val1)
@@ -1940,7 +1944,7 @@
                 } else if (role === 'PKL') {
                     try {
                         // Query Supabase untuk cek Username dan Password
-                        const { data, error } = await supabaseClient
+                        const { data, error } = await simpedikClient
                             .from('identitassekolah')
                             .select('username, password')
                             .eq('username', val1)
@@ -2178,13 +2182,13 @@
                     const fileExt = file.name.split('.').pop();
                     const fileName = `logo_${npsn}_${timestamp}.${fileExt}`;
 
-                    const { error: uploadError } = await supabaseClient.storage
+                    const { error: uploadError } = await simpedikClient.storage
                         .from('aset')
                         .upload(fileName, file);
                     
                     if (uploadError) throw new Error('Gagal upload logo: ' + uploadError.message);
 
-                    const { data: urlData } = supabaseClient.storage
+                    const { data: urlData } = simpedikClient.storage
                         .from('aset')
                         .getPublicUrl(fileName);
                     
@@ -2208,7 +2212,7 @@
                         password: password
                     };
 
-                    const { error: insertError } = await supabaseClient
+                    const { error: insertError } = await simpedikClient
                         .from('identitassekolah')
                         .upsert([formData]); // Menggunakan upsert sesuai logika identitassekolah.html
 
