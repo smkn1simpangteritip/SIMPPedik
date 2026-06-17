@@ -419,8 +419,162 @@
             }
         }
 
-        /* --- News & Galeri Prestasi Container (shared card layout) --- */
-        .news-container,
+        /* --- News Container --- */
+        .news-container {
+            width: calc(100% - 20px);
+            max-width: none;
+            margin: 2rem auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px 10px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .news-title {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .headline-news {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+        }
+
+        .headline-news:hover {
+            transform: translateY(-5px);
+        }
+
+        .headline-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .headline-content {
+            padding: 20px;
+        }
+
+        .headline-tag {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .headline-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .headline-excerpt {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .small-news-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .small-news-item {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .small-news-item:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .small-news-tag {
+            background: #e0e7ff;
+            color: #667eea;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .small-news-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .small-news-date {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        @media (min-width: 769px) {
+            .news-container {
+                padding: 25px 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .news-container {
+                grid-template-columns: 1fr;
+                margin: 1rem auto;
+            }
+            .headline-image {
+                height: 180px;
+            }
+            .headline-title {
+                font-size: 1.1rem;
+            }
+            
+            /* Carousel for small news on mobile */
+            .small-news-list {
+                flex-direction: row;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                gap: 15px;
+                padding: 5px;
+            }
+            
+            .small-news-item {
+                flex: 0 0 280px;
+                scroll-snap-align: start;
+            }
+            
+            .small-news-item:hover {
+                transform: translateX(0);
+            }
+        }
+
+        /* --- Galeri Prestasi Container --- */
         .gallery-container {
             width: calc(100% - 20px);
             max-width: 460px;
@@ -435,7 +589,6 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
-        .news-title,
         .gallery-title {
             text-align: center;
             color: white;
@@ -465,12 +618,6 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             cursor: pointer;
             position: relative;
-        }
-
-        .gallery-item:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-            z-index: 10;
         }
 
         .gallery-image {
@@ -762,49 +909,41 @@
         <!-- News Container -->
         <div class="news-container">
             <h2 class="news-title">Berita Sekolah</h2>
-
-            <div class="collage-grid" id="newsCollageGrid">
-                <div class="gallery-item">
-                    <div class="gallery-image"></div>
-                    <div class="gallery-content">
-                        <span class="gallery-tag">Berita Utama</span>
-                        <h4 class="gallery-title-text">SMKN 1 Simpang Teritip Raih Prestasi Gemilang di Kompetisi Nasional</h4>
-                        <span class="gallery-year">16 Juni 2026</span>
-                        <p class="gallery-description">Siswa-siswi SMKN 1 Simpang Teritip berhasil membawa pulang berbagai penghargaan dalam kompetisi tingkat nasional tahun 2026.</p>
-                    </div>
-                </div>
-
-                <div class="gallery-item">
-                    <div class="gallery-image"></div>
-                    <div class="gallery-content">
-                        <span class="gallery-tag">Prestasi</span>
-                        <h4 class="gallery-title-text">Tim Robotik Raih Medali Emas</h4>
-                        <span class="gallery-year">15 Juni 2026</span>
-                        <p class="gallery-description">Tim robotik sekolah berhasil meraih medali emas dalam kompetisi robotik tingkat nasional dengan inovasi robot pemilah sampah otomatis.</p>
-                    </div>
-                </div>
-
-                <div class="gallery-item">
-                    <div class="gallery-image"></div>
-                    <div class="gallery-content">
-                        <span class="gallery-tag">Kegiatan</span>
-                        <h4 class="gallery-title-text">Kunjungan Industri ke Jakarta</h4>
-                        <span class="gallery-year">12 Juni 2026</span>
-                        <p class="gallery-description">Siswa kelas XII melakukan kunjungan industri ke beberapa perusahaan mitra di Jakarta untuk menambah wawasan dunia kerja.</p>
-                    </div>
-                </div>
-
-                <div class="gallery-item">
-                    <div class="gallery-image"></div>
-                    <div class="gallery-content">
-                        <span class="gallery-tag">Akademik</span>
-                        <h4 class="gallery-title-text">Penerimaan Siswa Baru Dibuka</h4>
-                        <span class="gallery-year">10 Juni 2026</span>
-                        <p class="gallery-description">Pendaftaran Penerimaan Peserta Didik Baru (PPDB) tahun pelajaran 2026/2027 resmi dibuka mulai hari ini.</p>
-                    </div>
+            
+            <!-- Headline News -->
+            <div class="headline-news">
+                <img src="b1.jpeg" class="headline-image" alt="Berita Utama">
+                <div class="headline-content">
+                    <span class="headline-tag">Berita Utama</span>
+                    <h3 class="headline-title">SMKN 1 Simpang Teritip Raih Prestasi Gemilang di Kompetisi Nasional</h3>
+                    <p class="headline-excerpt">Siswa-siswi SMKN 1 Simpang Teritip berhasil membawa pulang berbagai penghargaan dalam kompetisi tingkat nasional tahun 2026...</p>
                 </div>
             </div>
 
+            <!-- Small News List -->
+            <div class="small-news-list">
+                <div class="small-news-item">
+                    <span class="small-news-tag">Prestasi</span>
+                    <h4 class="small-news-title">Tim Robotik Raih Medali Emas</h4>
+                    <span class="small-news-date">15 Juni 2026</span>
+                </div>
+                <div class="small-news-item">
+                    <span class="small-news-tag">Kegiatan</span>
+                    <h4 class="small-news-title">Kunjungan Industri ke Jakarta</h4>
+                    <span class="small-news-date">12 Juni 2026</span>
+                </div>
+                <div class="small-news-item">
+                    <span class="small-news-tag">Akademik</span>
+                    <h4 class="small-news-title">Penerimaan Siswa Baru Dibuka</h4>
+                    <span class="small-news-date">10 Juni 2026</span>
+                </div>
+                <div class="small-news-item">
+                    <span class="small-news-tag">Pengumuman</span>
+                    <h4 class="small-news-title">Libur Semester Ganjil</h4>
+                    <span class="small-news-date">8 Juni 2026</span>
+                </div>
+            </div>
+            
             <button class="btn-lihat-semua" id="newsLihatSemuaBtn">Lihat Semua</button>
         </div>
 
@@ -814,7 +953,7 @@
 
             <div class="collage-grid" id="galleryCollageGrid">
                 <div class="gallery-item">
-                    <div class="gallery-image"></div>
+                    <img src="b1.jpeg" class="gallery-image" alt="Kompetisi Robotik Nasional">
                     <div class="gallery-content">
                         <span class="gallery-tag">Juara 1</span>
                         <h4 class="gallery-title-text">Kompetisi Robotik Nasional</h4>
@@ -824,7 +963,7 @@
                 </div>
 
                 <div class="gallery-item">
-                    <div class="gallery-image"></div>
+                    <img src="b2.jpeg" class="gallery-image" alt="Olimpiade Matematika">
                     <div class="gallery-content">
                         <span class="gallery-tag">Medali Emas</span>
                         <h4 class="gallery-title-text">Olimpiade Matematika</h4>
@@ -834,7 +973,7 @@
                 </div>
 
                 <div class="gallery-item">
-                    <div class="gallery-image"></div>
+                    <img src="b3.jpeg" class="gallery-image" alt="Kompetisi Debat Bahasa">
                     <div class="gallery-content">
                         <span class="gallery-tag">Juara 1</span>
                         <h4 class="gallery-title-text">Kompetisi Debat Bahasa</h4>
@@ -844,7 +983,7 @@
                 </div>
 
                 <div class="gallery-item">
-                    <div class="gallery-image"></div>
+                    <img src="b4.jpeg" class="gallery-image" alt="Lomba Karya Ilmiah">
                     <div class="gallery-content">
                         <span class="gallery-tag">Juara 2</span>
                         <h4 class="gallery-title-text">Lomba Karya Ilmiah</h4>
@@ -869,7 +1008,7 @@
             <button class="carousel-nav carousel-next" id="galleryCarouselNext">&#10095;</button>
             
             <div class="carousel-slide active" data-index="0">
-                <div class="carousel-image"></div>
+                <img src="b1.jpeg" class="carousel-image" alt="Kompetisi Robotik Nasional">
                 <div class="carousel-info">
                     <span class="carousel-tag">Juara 1</span>
                     <h3 class="carousel-title">Kompetisi Robotik Nasional</h3>
@@ -879,7 +1018,7 @@
             </div>
             
             <div class="carousel-slide" data-index="1">
-                <div class="carousel-image"></div>
+                <img src="b2.jpeg" class="carousel-image" alt="Olimpiade Matematika">
                 <div class="carousel-info">
                     <span class="carousel-tag">Medali Emas</span>
                     <h3 class="carousel-title">Olimpiade Matematika</h3>
@@ -889,7 +1028,7 @@
             </div>
             
             <div class="carousel-slide" data-index="2">
-                <div class="carousel-image"></div>
+                <img src="b3.jpeg" class="carousel-image" alt="Kompetisi Debat Bahasa">
                 <div class="carousel-info">
                     <span class="carousel-tag">Juara 1</span>
                     <h3 class="carousel-title">Kompetisi Debat Bahasa</h3>
@@ -899,7 +1038,7 @@
             </div>
             
             <div class="carousel-slide" data-index="3">
-                <div class="carousel-image"></div>
+                <img src="b4.jpeg" class="carousel-image" alt="Lomba Karya Ilmiah">
                 <div class="carousel-info">
                     <span class="carousel-tag">Juara 2</span>
                     <h3 class="carousel-title">Lomba Karya Ilmiah</h3>
@@ -909,7 +1048,7 @@
             </div>
             
             <div class="carousel-slide" data-index="4">
-                <div class="carousel-image"></div>
+                <img src="b1.jpeg" class="carousel-image" alt="Sekolah Adiwiyata">
                 <div class="carousel-info">
                     <span class="carousel-tag">Best School</span>
                     <h3 class="carousel-title">Sekolah Adiwiyata</h3>
@@ -920,7 +1059,7 @@
         </div>
     </div>
 
-    <!-- Carousel Modal: Berita Sekolah (5 item, termasuk yang tidak tampil di grid) -->
+    <!-- Carousel Modal: Berita Sekolah (5 item, termasuk headline dan small news) -->
     <div class="carousel-modal" id="newsCarouselModal">
         <div class="carousel-content">
             <button class="carousel-close" id="newsCarouselClose">&times;</button>
@@ -928,7 +1067,7 @@
             <button class="carousel-nav carousel-next" id="newsCarouselNext">&#10095;</button>
 
             <div class="carousel-slide active" data-index="0">
-                <div class="carousel-image"></div>
+                <img src="b1.jpeg" class="carousel-image" alt="Berita Utama">
                 <div class="carousel-info">
                     <span class="carousel-tag">Berita Utama</span>
                     <h3 class="carousel-title">SMKN 1 Simpang Teritip Raih Prestasi Gemilang di Kompetisi Nasional</h3>
@@ -938,7 +1077,7 @@
             </div>
 
             <div class="carousel-slide" data-index="1">
-                <div class="carousel-image"></div>
+                <img src="b2.jpeg" class="carousel-image" alt="Prestasi">
                 <div class="carousel-info">
                     <span class="carousel-tag">Prestasi</span>
                     <h3 class="carousel-title">Tim Robotik Raih Medali Emas</h3>
@@ -948,7 +1087,7 @@
             </div>
 
             <div class="carousel-slide" data-index="2">
-                <div class="carousel-image"></div>
+                <img src="b3.jpeg" class="carousel-image" alt="Kegiatan">
                 <div class="carousel-info">
                     <span class="carousel-tag">Kegiatan</span>
                     <h3 class="carousel-title">Kunjungan Industri ke Jakarta</h3>
@@ -958,7 +1097,7 @@
             </div>
 
             <div class="carousel-slide" data-index="3">
-                <div class="carousel-image"></div>
+                <img src="b4.jpeg" class="carousel-image" alt="Akademik">
                 <div class="carousel-info">
                     <span class="carousel-tag">Akademik</span>
                     <h3 class="carousel-title">Penerimaan Siswa Baru Dibuka</h3>
@@ -968,7 +1107,7 @@
             </div>
 
             <div class="carousel-slide" data-index="4">
-                <div class="carousel-image"></div>
+                <img src="b1.jpeg" class="carousel-image" alt="Pengumuman">
                 <div class="carousel-info">
                     <span class="carousel-tag">Pengumuman</span>
                     <h3 class="carousel-title">Libur Semester Ganjil</h3>
