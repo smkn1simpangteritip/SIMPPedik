@@ -577,19 +577,20 @@
         /* --- Galeri Prestasi Container --- */
         .gallery-container {
             width: calc(100% - 20px);
-            max-width: 460px;
+            max-width: none;
             margin: 2rem auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
             border-radius: 16px;
-            padding: 25px 20px;
+            padding: 25px 10px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         .gallery-title {
+            grid-column: 1 / -1;
             text-align: center;
             color: white;
             font-size: 1.8rem;
@@ -598,55 +599,80 @@
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
-        /* --- Photo Collage Grid (2x2), size & position like reference image --- */
-        .collage-grid {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(2, 1fr);
-            gap: 6px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 20px;
+        /* --- Gallery Headline (mirip headline-news) --- */
+        .gallery-headline {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
         }
 
-        .gallery-item {
-            background: #fff;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-            position: relative;
+        .gallery-headline:hover {
+            transform: translateY(-5px);
         }
 
-        .gallery-image {
+        .gallery-headline-image {
             width: 100%;
-            height: 100%;
+            height: 250px;
             object-fit: cover;
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
 
-        .gallery-content {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-            padding: 20px 15px 15px;
-            color: white;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+        .gallery-headline-content {
+            padding: 20px;
         }
 
-        .gallery-item:hover .gallery-content {
-            opacity: 1;
-        }
-
-        .gallery-tag {
+        .gallery-headline-tag {
             background: linear-gradient(to right, #f093fb, #f5576c);
             color: white;
-            padding: 3px 10px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .gallery-headline-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .gallery-headline-excerpt {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* --- Gallery Small List (mirip small-news-list) --- */
+        .gallery-small-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .gallery-small-item {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .gallery-small-item:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .gallery-small-tag {
+            background: #fce7f3;
+            color: #f093fb;
+            padding: 3px 8px;
             border-radius: 12px;
             font-size: 0.7rem;
             font-weight: 600;
@@ -654,57 +680,49 @@
             margin-bottom: 8px;
         }
 
-        .gallery-title-text {
+        .gallery-small-title {
             font-size: 0.95rem;
             font-weight: 600;
-            color: white;
+            color: #333;
             margin-bottom: 5px;
             line-height: 1.4;
         }
 
-        .gallery-year {
+        .gallery-small-year {
             font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.8);
+            color: #888;
         }
 
-        /* Expanded/Lightbox State */
-        .gallery-item.expanded {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(1);
-            width: 80%;
-            max-width: 800px;
-            height: auto;
-            max-height: 80vh;
-            border-radius: 16px;
-            z-index: 10000;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        /* Responsive gallery-container */
+        @media (max-width: 768px) {
+            .gallery-container {
+                grid-template-columns: 1fr;
+                margin: 1rem auto;
+            }
+            .gallery-headline-image {
+                height: 180px;
+            }
+            .gallery-headline-title {
+                font-size: 1.1rem;
+            }
+            .gallery-small-list {
+                flex-direction: row;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                gap: 15px;
+                padding: 5px;
+            }
+            .gallery-small-item {
+                flex: 0 0 280px;
+                scroll-snap-align: start;
+            }
+            .gallery-small-item:hover {
+                transform: translateX(0);
+            }
         }
 
-        .gallery-item.expanded .gallery-image {
-            height: 60vh;
-            object-fit: cover;
-        }
-
-        .gallery-item.expanded .gallery-content {
-            opacity: 1;
-            background: rgba(0, 0, 0, 0.9);
-            padding: 25px;
-        }
-
-        .gallery-item.expanded .gallery-description {
-            display: block;
-            margin-top: 10px;
-            font-size: 0.9rem;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .gallery-description {
-            display: none;
-        }
-
+        /* Lama - gallery-overlay tetap dipertahankan agar tidak error JS */
         .gallery-overlay {
             display: none;
             position: fixed;
@@ -734,6 +752,8 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             margin-top: 20px;
+            grid-column: 1 / -1;
+            justify-self: center;
         }
         .btn-lihat-semua:hover {
             opacity: 0.9;
@@ -951,45 +971,37 @@
         <div class="gallery-container">
             <h2 class="gallery-title">Galeri Prestasi</h2>
 
-            <div class="collage-grid" id="galleryCollageGrid">
-                <div class="gallery-item">
-                    <img src="b1.jpeg" class="gallery-image" alt="Kompetisi Robotik Nasional">
-                    <div class="gallery-content">
-                        <span class="gallery-tag">Juara 1</span>
-                        <h4 class="gallery-title-text">Kompetisi Robotik Nasional</h4>
-                        <span class="gallery-year">2026</span>
-                        <p class="gallery-description">Tim robotik SMKN 1 Simpang Teritip berhasil meraih juara pertama dalam Kompetisi Robotik Nasional 2026 dengan inovasi robot pemilah sampah otomatis yang berbasis AI.</p>
-                    </div>
+            <!-- Gallery Headline -->
+            <div class="gallery-headline">
+                <img src="b1.jpeg" class="gallery-headline-image" alt="Kompetisi Robotik Nasional">
+                <div class="gallery-headline-content">
+                    <span class="gallery-headline-tag">Juara 1</span>
+                    <h3 class="gallery-headline-title">Kompetisi Robotik Nasional</h3>
+                    <p class="gallery-headline-excerpt">Tim robotik SMKN 1 Simpang Teritip berhasil meraih juara pertama dalam Kompetisi Robotik Nasional 2026 dengan inovasi robot pemilah sampah otomatis yang berbasis AI...</p>
                 </div>
+            </div>
 
-                <div class="gallery-item">
-                    <img src="b2.jpeg" class="gallery-image" alt="Olimpiade Matematika">
-                    <div class="gallery-content">
-                        <span class="gallery-tag">Medali Emas</span>
-                        <h4 class="gallery-title-text">Olimpiade Matematika</h4>
-                        <span class="gallery-year">2025</span>
-                        <p class="gallery-description">Siswa kami berhasil memenangkan medali emas dalam Olimpiade Matematika Tingkat Nasional 2025 setelah melalui seleksi ketat dari ribuan peserta.</p>
-                    </div>
+            <!-- Gallery Small List -->
+            <div class="gallery-small-list">
+                <div class="gallery-small-item">
+                    <span class="gallery-small-tag">Medali Emas</span>
+                    <h4 class="gallery-small-title">Olimpiade Matematika</h4>
+                    <span class="gallery-small-year">2025</span>
                 </div>
-
-                <div class="gallery-item">
-                    <img src="b3.jpeg" class="gallery-image" alt="Kompetisi Debat Bahasa">
-                    <div class="gallery-content">
-                        <span class="gallery-tag">Juara 1</span>
-                        <h4 class="gallery-title-text">Kompetisi Debat Bahasa</h4>
-                        <span class="gallery-year">2024</span>
-                        <p class="gallery-description">Tim debat bahasa Indonesia berhasil membawa pulang piala emas dalam Kompetisi Debat Bahasa Tingkat Provinsi.</p>
-                    </div>
+                <div class="gallery-small-item">
+                    <span class="gallery-small-tag">Juara 1</span>
+                    <h4 class="gallery-small-title">Kompetisi Debat Bahasa</h4>
+                    <span class="gallery-small-year">2024</span>
                 </div>
-
-                <div class="gallery-item">
-                    <img src="b4.jpeg" class="gallery-image" alt="Lomba Karya Ilmiah">
-                    <div class="gallery-content">
-                        <span class="gallery-tag">Juara 2</span>
-                        <h4 class="gallery-title-text">Lomba Karya Ilmiah</h4>
-                        <span class="gallery-year">2025</span>
-                        <p class="gallery-description">Penelitian tentang pengolahan limbah plastik menjadi bahan bakar alternatif mendapatkan juara kedua dalam Lomba Karya Ilmiah Remaja.</p>
-                    </div>
+                <div class="gallery-small-item">
+                    <span class="gallery-small-tag">Juara 2</span>
+                    <h4 class="gallery-small-title">Lomba Karya Ilmiah</h4>
+                    <span class="gallery-small-year">2025</span>
+                </div>
+                <div class="gallery-small-item">
+                    <span class="gallery-small-tag">Best School</span>
+                    <h4 class="gallery-small-title">Sekolah Adiwiyata Nasional</h4>
+                    <span class="gallery-small-year">2024</span>
                 </div>
             </div>
 
