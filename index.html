@@ -257,6 +257,20 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            transform-origin: bottom center;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+        }
+        #loginModal .modal-content.modal-opening {
+            transform: translateY(100px) scale(0.8);
+            opacity: 0;
+        }
+        #loginModal .modal-content.modal-opened {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+        #loginModal .modal-content.modal-closing {
+            transform: translateY(100px) scale(0.8);
+            opacity: 0;
         }
         #loginModal .login-container {
             display: flex;
@@ -405,23 +419,24 @@
             }
         }
 
-        /* --- News Container --- */
-        .news-container {
+        /* --- News & Galeri Prestasi Container (shared card layout) --- */
+        .news-container,
+        .gallery-container {
             width: calc(100% - 20px);
-            max-width: none;
+            max-width: 460px;
             margin: 2rem auto;
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
             border-radius: 16px;
-            padding: 25px 10px;
+            padding: 25px 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
-        .news-title {
-            grid-column: 1 / -1;
+        .news-title,
+        .gallery-title {
             text-align: center;
             color: white;
             font-size: 1.8rem;
@@ -430,78 +445,61 @@
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
-        .headline-news {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
+        /* --- Photo Collage Grid (2x2), size & position like reference image --- */
+        .collage-grid {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-            transition: transform 0.3s ease;
         }
 
-        .headline-news:hover {
-            transform: translateY(-5px);
-        }
-
-        .headline-image {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .headline-content {
-            padding: 20px;
-        }
-
-        .headline-tag {
-            background: linear-gradient(to right, #667eea, #764ba2);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: inline-block;
-            margin-bottom: 10px;
-        }
-
-        .headline-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 10px;
-            line-height: 1.4;
-        }
-
-        .headline-excerpt {
-            font-size: 0.9rem;
-            color: #666;
-            line-height: 1.6;
-        }
-
-        .small-news-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .small-news-item {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        .gallery-item {
+            background: #fff;
+            overflow: hidden;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             cursor: pointer;
+            position: relative;
         }
 
-        .small-news-item:hover {
-            transform: translateX(-5px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        .gallery-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+            z-index: 10;
         }
 
-        .small-news-tag {
-            background: #e0e7ff;
-            color: #667eea;
-            padding: 3px 8px;
+        .gallery-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .gallery-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 20px 15px 15px;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-item:hover .gallery-content {
+            opacity: 1;
+        }
+
+        .gallery-tag {
+            background: linear-gradient(to right, #f093fb, #f5576c);
+            color: white;
+            padding: 3px 10px;
             border-radius: 12px;
             font-size: 0.7rem;
             font-weight: 600;
@@ -509,54 +507,247 @@
             margin-bottom: 8px;
         }
 
-        .small-news-title {
+        .gallery-title-text {
             font-size: 0.95rem;
             font-weight: 600;
-            color: #333;
+            color: white;
             margin-bottom: 5px;
             line-height: 1.4;
         }
 
-        .small-news-date {
+        .gallery-year {
             font-size: 0.75rem;
-            color: #888;
+            color: rgba(255, 255, 255, 0.8);
         }
 
-        @media (min-width: 769px) {
-            .news-container {
-                padding: 25px 10px;
+        /* Expanded/Lightbox State */
+        .gallery-item.expanded {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            width: 80%;
+            max-width: 800px;
+            height: auto;
+            max-height: 80vh;
+            border-radius: 16px;
+            z-index: 10000;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .gallery-item.expanded .gallery-image {
+            height: 60vh;
+            object-fit: cover;
+        }
+
+        .gallery-item.expanded .gallery-content {
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 25px;
+        }
+
+        .gallery-item.expanded .gallery-description {
+            display: block;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .gallery-description {
+            display: none;
+        }
+
+        .gallery-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+        }
+
+        .gallery-overlay.active {
+            display: block;
+        }
+
+        /* --- Lihat Semua Button --- */
+        .btn-lihat-semua {
+            background: #2a2a35;
+            color: white;
+            padding: 14px 40px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+        }
+        .btn-lihat-semua:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* --- Carousel Modal --- */
+        .carousel-modal {
+            display: none;
+            position: fixed;
+            z-index: 10001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            align-items: center;
+            justify-content: center;
+        }
+        .carousel-modal.active {
+            display: flex;
+        }
+        .carousel-content {
+            width: 90%;
+            max-width: 1200px;
+            height: 80vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .carousel-slide {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .carousel-slide.active {
+            display: flex;
+        }
+        .carousel-image {
+            width: 100%;
+            height: 70%;
+            object-fit: contain;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 12px;
+        }
+        .carousel-info {
+            margin-top: 20px;
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+        .carousel-tag {
+            background: linear-gradient(to right, #f093fb, #f5576c);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .carousel-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .carousel-year {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+        }
+        .carousel-description {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 800px;
+        }
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .carousel-nav:hover {
+            opacity: 0.9;
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        .carousel-prev {
+            left: 10px;
+        }
+        .carousel-next {
+            right: 10px;
+        }
+        .carousel-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .carousel-close:hover {
+            opacity: 0.9;
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* --- Main Content Wrapper --- */
+        .main-content-wrapper {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: none;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content-wrapper {
+                grid-template-columns: 1fr;
             }
         }
 
         @media (max-width: 768px) {
-            .news-container {
-                grid-template-columns: 1fr;
+            .news-container,
+            .gallery-container {
                 margin: 1rem auto;
+                padding: 20px 15px;
             }
-            .headline-image {
-                height: 180px;
-            }
-            .headline-title {
-                font-size: 1.1rem;
-            }
-            
-            /* Carousel for small news on mobile */
-            .small-news-list {
-                flex-direction: row;
-                overflow-x: auto;
-                scroll-snap-type: x mandatory;
-                -webkit-overflow-scrolling: touch;
-                gap: 15px;
-                padding: 5px;
-            }
-            
-            .small-news-item {
-                flex: 0 0 280px;
-                scroll-snap-align: start;
-            }
-            
-            .small-news-item:hover {
-                transform: translateX(0);
+            .news-title,
+            .gallery-title {
+                font-size: 1.4rem;
             }
         }
     </style>
@@ -566,41 +757,224 @@
     <img src="icon-512.png" alt="Logo" style="display: block; margin: 0 auto 1rem auto; width: 100px; height: 100px; object-fit: contain; border-radius: 15px;">
     <p style="text-align: center; color: white; font-size: 0.85rem; font-weight: 600; margin-bottom: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">SISTEM INFORMASI MANAJEMEN PERKEMBANGAN PESERTA DIDIK</p>
 
-    <!-- News Container -->
-    <div class="news-container">
-        <h2 class="news-title">Berita Sekolah</h2>
-        
-        <!-- Headline News -->
-        <div class="headline-news">
-            <div class="headline-image"></div>
-            <div class="headline-content">
-                <span class="headline-tag">Berita Utama</span>
-                <h3 class="headline-title">SMKN 1 Simpang Teritip Raih Prestasi Gemilang di Kompetisi Nasional</h3>
-                <p class="headline-excerpt">Siswa-siswi SMKN 1 Simpang Teritip berhasil membawa pulang berbagai penghargaan dalam kompetisi tingkat nasional tahun 2026...</p>
+    <!-- Main Content Wrapper -->
+    <div class="main-content-wrapper">
+        <!-- News Container -->
+        <div class="news-container">
+            <h2 class="news-title">Berita Sekolah</h2>
+
+            <div class="collage-grid" id="newsCollageGrid">
+                <div class="gallery-item">
+                    <div class="gallery-image"></div>
+                    <div class="gallery-content">
+                        <span class="gallery-tag">Berita Utama</span>
+                        <h4 class="gallery-title-text">SMKN 1 Simpang Teritip Raih Prestasi Gemilang di Kompetisi Nasional</h4>
+                        <span class="gallery-year">16 Juni 2026</span>
+                        <p class="gallery-description">Siswa-siswi SMKN 1 Simpang Teritip berhasil membawa pulang berbagai penghargaan dalam kompetisi tingkat nasional tahun 2026.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <div class="gallery-image"></div>
+                    <div class="gallery-content">
+                        <span class="gallery-tag">Prestasi</span>
+                        <h4 class="gallery-title-text">Tim Robotik Raih Medali Emas</h4>
+                        <span class="gallery-year">15 Juni 2026</span>
+                        <p class="gallery-description">Tim robotik sekolah berhasil meraih medali emas dalam kompetisi robotik tingkat nasional dengan inovasi robot pemilah sampah otomatis.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <div class="gallery-image"></div>
+                    <div class="gallery-content">
+                        <span class="gallery-tag">Kegiatan</span>
+                        <h4 class="gallery-title-text">Kunjungan Industri ke Jakarta</h4>
+                        <span class="gallery-year">12 Juni 2026</span>
+                        <p class="gallery-description">Siswa kelas XII melakukan kunjungan industri ke beberapa perusahaan mitra di Jakarta untuk menambah wawasan dunia kerja.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <div class="gallery-image"></div>
+                    <div class="gallery-content">
+                        <span class="gallery-tag">Akademik</span>
+                        <h4 class="gallery-title-text">Penerimaan Siswa Baru Dibuka</h4>
+                        <span class="gallery-year">10 Juni 2026</span>
+                        <p class="gallery-description">Pendaftaran Penerimaan Peserta Didik Baru (PPDB) tahun pelajaran 2026/2027 resmi dibuka mulai hari ini.</p>
+                    </div>
+                </div>
             </div>
+
+            <button class="btn-lihat-semua" id="newsLihatSemuaBtn">Lihat Semua</button>
         </div>
 
-        <!-- Small News List -->
-        <div class="small-news-list">
-            <div class="small-news-item">
-                <span class="small-news-tag">Prestasi</span>
-                <h4 class="small-news-title">Tim Robotik Raih Medali Emas</h4>
-                <span class="small-news-date">15 Juni 2026</span>
+        <!-- Gallery Container -->
+        <div class="gallery-container">
+            <h2 class="gallery-title">Galeri Prestasi</h2>
+
+            <div class="collage-grid" id="galleryCollageGrid">
+                <div class="gallery-item">
+                    <div class="gallery-image"></div>
+                    <div class="gallery-content">
+                        <span class="gallery-tag">Juara 1</span>
+                        <h4 class="gallery-title-text">Kompetisi Robotik Nasional</h4>
+                        <span class="gallery-year">2026</span>
+                        <p class="gallery-description">Tim robotik SMKN 1 Simpang Teritip berhasil meraih juara pertama dalam Kompetisi Robotik Nasional 2026 dengan inovasi robot pemilah sampah otomatis yang berbasis AI.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <div class="gallery-image"></div>
+                    <div class="gallery-content">
+                        <span class="gallery-tag">Medali Emas</span>
+                        <h4 class="gallery-title-text">Olimpiade Matematika</h4>
+                        <span class="gallery-year">2025</span>
+                        <p class="gallery-description">Siswa kami berhasil memenangkan medali emas dalam Olimpiade Matematika Tingkat Nasional 2025 setelah melalui seleksi ketat dari ribuan peserta.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <div class="gallery-image"></div>
+                    <div class="gallery-content">
+                        <span class="gallery-tag">Juara 1</span>
+                        <h4 class="gallery-title-text">Kompetisi Debat Bahasa</h4>
+                        <span class="gallery-year">2024</span>
+                        <p class="gallery-description">Tim debat bahasa Indonesia berhasil membawa pulang piala emas dalam Kompetisi Debat Bahasa Tingkat Provinsi.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <div class="gallery-image"></div>
+                    <div class="gallery-content">
+                        <span class="gallery-tag">Juara 2</span>
+                        <h4 class="gallery-title-text">Lomba Karya Ilmiah</h4>
+                        <span class="gallery-year">2025</span>
+                        <p class="gallery-description">Penelitian tentang pengolahan limbah plastik menjadi bahan bakar alternatif mendapatkan juara kedua dalam Lomba Karya Ilmiah Remaja.</p>
+                    </div>
+                </div>
             </div>
-            <div class="small-news-item">
-                <span class="small-news-tag">Kegiatan</span>
-                <h4 class="small-news-title">Kunjungan Industri ke Jakarta</h4>
-                <span class="small-news-date">12 Juni 2026</span>
+
+            <button class="btn-lihat-semua" id="galleryLihatSemuaBtn">Lihat Semua</button>
+        </div>
+    </div>
+
+    <!-- Gallery Overlay -->
+    <div class="gallery-overlay" id="galleryOverlay"></div>
+
+    <!-- Carousel Modal: Galeri Prestasi (5 item, termasuk yang tidak tampil di grid) -->
+    <div class="carousel-modal" id="galleryCarouselModal">
+        <div class="carousel-content">
+            <button class="carousel-close" id="galleryCarouselClose">&times;</button>
+            <button class="carousel-nav carousel-prev" id="galleryCarouselPrev">&#10094;</button>
+            <button class="carousel-nav carousel-next" id="galleryCarouselNext">&#10095;</button>
+            
+            <div class="carousel-slide active" data-index="0">
+                <div class="carousel-image"></div>
+                <div class="carousel-info">
+                    <span class="carousel-tag">Juara 1</span>
+                    <h3 class="carousel-title">Kompetisi Robotik Nasional</h3>
+                    <p class="carousel-year">2026</p>
+                    <p class="carousel-description">Tim robotik SMKN 1 Simpang Teritip berhasil meraih juara pertama dalam Kompetisi Robotik Nasional 2026 dengan inovasi robot pemilah sampah otomatis yang berbasis AI.</p>
+                </div>
             </div>
-            <div class="small-news-item">
-                <span class="small-news-tag">Akademik</span>
-                <h4 class="small-news-title">Penerimaan Siswa Baru Dibuka</h4>
-                <span class="small-news-date">10 Juni 2026</span>
+            
+            <div class="carousel-slide" data-index="1">
+                <div class="carousel-image"></div>
+                <div class="carousel-info">
+                    <span class="carousel-tag">Medali Emas</span>
+                    <h3 class="carousel-title">Olimpiade Matematika</h3>
+                    <p class="carousel-year">2025</p>
+                    <p class="carousel-description">Siswa kami berhasil memenangkan medali emas dalam Olimpiade Matematika Tingkat Nasional 2025 setelah melalui seleksi ketat dari ribuan peserta.</p>
+                </div>
             </div>
-            <div class="small-news-item">
-                <span class="small-news-tag">Pengumuman</span>
-                <h4 class="small-news-title">Libur Semester Ganjil</h4>
-                <span class="small-news-date">8 Juni 2026</span>
+            
+            <div class="carousel-slide" data-index="2">
+                <div class="carousel-image"></div>
+                <div class="carousel-info">
+                    <span class="carousel-tag">Juara 1</span>
+                    <h3 class="carousel-title">Kompetisi Debat Bahasa</h3>
+                    <p class="carousel-year">2024</p>
+                    <p class="carousel-description">Tim debat bahasa Indonesia berhasil membawa pulang piala emas dalam Kompetisi Debat Bahasa Tingkat Provinsi.</p>
+                </div>
+            </div>
+            
+            <div class="carousel-slide" data-index="3">
+                <div class="carousel-image"></div>
+                <div class="carousel-info">
+                    <span class="carousel-tag">Juara 2</span>
+                    <h3 class="carousel-title">Lomba Karya Ilmiah</h3>
+                    <p class="carousel-year">2025</p>
+                    <p class="carousel-description">Penelitian tentang pengolahan limbah plastik menjadi bahan bakar alternatif mendapatkan juara kedua dalam Lomba Karya Ilmiah Remaja.</p>
+                </div>
+            </div>
+            
+            <div class="carousel-slide" data-index="4">
+                <div class="carousel-image"></div>
+                <div class="carousel-info">
+                    <span class="carousel-tag">Best School</span>
+                    <h3 class="carousel-title">Sekolah Adiwiyata</h3>
+                    <p class="carousel-year">2024</p>
+                    <p class="carousel-description">SMKN 1 Simpang Teritip dinobatkan sebagai Sekolah Adiwiyata Tingkat Nasional berkat komitmen dalam pelestarian lingkungan.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carousel Modal: Berita Sekolah (5 item, termasuk yang tidak tampil di grid) -->
+    <div class="carousel-modal" id="newsCarouselModal">
+        <div class="carousel-content">
+            <button class="carousel-close" id="newsCarouselClose">&times;</button>
+            <button class="carousel-nav carousel-prev" id="newsCarouselPrev">&#10094;</button>
+            <button class="carousel-nav carousel-next" id="newsCarouselNext">&#10095;</button>
+
+            <div class="carousel-slide active" data-index="0">
+                <div class="carousel-image"></div>
+                <div class="carousel-info">
+                    <span class="carousel-tag">Berita Utama</span>
+                    <h3 class="carousel-title">SMKN 1 Simpang Teritip Raih Prestasi Gemilang di Kompetisi Nasional</h3>
+                    <p class="carousel-year">16 Juni 2026</p>
+                    <p class="carousel-description">Siswa-siswi SMKN 1 Simpang Teritip berhasil membawa pulang berbagai penghargaan dalam kompetisi tingkat nasional tahun 2026.</p>
+                </div>
+            </div>
+
+            <div class="carousel-slide" data-index="1">
+                <div class="carousel-image"></div>
+                <div class="carousel-info">
+                    <span class="carousel-tag">Prestasi</span>
+                    <h3 class="carousel-title">Tim Robotik Raih Medali Emas</h3>
+                    <p class="carousel-year">15 Juni 2026</p>
+                    <p class="carousel-description">Tim robotik sekolah berhasil meraih medali emas dalam kompetisi robotik tingkat nasional dengan inovasi robot pemilah sampah otomatis.</p>
+                </div>
+            </div>
+
+            <div class="carousel-slide" data-index="2">
+                <div class="carousel-image"></div>
+                <div class="carousel-info">
+                    <span class="carousel-tag">Kegiatan</span>
+                    <h3 class="carousel-title">Kunjungan Industri ke Jakarta</h3>
+                    <p class="carousel-year">12 Juni 2026</p>
+                    <p class="carousel-description">Siswa kelas XII melakukan kunjungan industri ke beberapa perusahaan mitra di Jakarta untuk menambah wawasan dunia kerja.</p>
+                </div>
+            </div>
+
+            <div class="carousel-slide" data-index="3">
+                <div class="carousel-image"></div>
+                <div class="carousel-info">
+                    <span class="carousel-tag">Akademik</span>
+                    <h3 class="carousel-title">Penerimaan Siswa Baru Dibuka</h3>
+                    <p class="carousel-year">10 Juni 2026</p>
+                    <p class="carousel-description">Pendaftaran Penerimaan Peserta Didik Baru (PPDB) tahun pelajaran 2026/2027 resmi dibuka mulai hari ini.</p>
+                </div>
+            </div>
+
+            <div class="carousel-slide" data-index="4">
+                <div class="carousel-image"></div>
+                <div class="carousel-info">
+                    <span class="carousel-tag">Pengumuman</span>
+                    <h3 class="carousel-title">Libur Semester Ganjil</h3>
+                    <p class="carousel-year">8 Juni 2026</p>
+                    <p class="carousel-description">Libur semester ganjil tahun pelajaran 2025/2026 akan dimulai minggu depan, kegiatan belajar mengajar akan kembali aktif sesuai kalender akademik.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -1129,20 +1503,153 @@
             const loginModal = document.getElementById('loginModal');
             const openLoginBtn = document.getElementById('openLoginModal');
             const cancelLoginBtn = document.getElementById('cancelLoginBtn');
+            const loginModalContent = loginModal.querySelector('.modal-content');
 
-            // Buka Modal Login
+            // Buka Modal Login dengan animasi dari bawah
             openLoginBtn.addEventListener('click', () => {
+                // Tambahkan class untuk animasi opening
+                loginModalContent.classList.add('modal-opening');
                 loginModal.classList.add('active');
+                
+                // Trigger reflow dan animasi
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        loginModalContent.classList.remove('modal-opening');
+                        loginModalContent.classList.add('modal-opened');
+                    });
+                });
             });
 
-            // Tutup Modal Login
+            // Tutup Modal Login dengan animasi ke bawah
             function closeLoginModal() {
-                loginModal.classList.remove('active');
+                // Tambahkan class untuk animasi closing
+                loginModalContent.classList.remove('modal-opened');
+                loginModalContent.classList.add('modal-closing');
+                
+                // Sembunyikan modal setelah animasi selesai
+                setTimeout(() => {
+                    loginModal.classList.remove('active');
+                    loginModalContent.classList.remove('modal-closing');
+                }, 300);
             }
 
             cancelLoginBtn.addEventListener('click', closeLoginModal);
             window.addEventListener('click', (e) => {
                 if (e.target === loginModal) closeLoginModal();
+            });
+
+            // --- Logic Galeri Prestasi (Collage) ---
+            const galleryItems = document.querySelectorAll('.gallery-item');
+            const galleryOverlay = document.getElementById('galleryOverlay');
+            let expandedItem = null;
+            let originalParent = null;
+
+            galleryItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    if (expandedItem && expandedItem !== item) {
+                        // Return previous item to original position
+                        if (originalParent) {
+                            originalParent.appendChild(expandedItem);
+                        }
+                        expandedItem.classList.remove('expanded');
+                    }
+                    
+                    // Store original parent
+                    originalParent = item.parentElement;
+                    
+                    // Move item to body to escape stacking contexts
+                    document.body.appendChild(item);
+                    
+                    item.classList.add('expanded');
+                    galleryOverlay.classList.add('active');
+                    expandedItem = item;
+                });
+            });
+
+            galleryOverlay.addEventListener('click', () => {
+                if (expandedItem) {
+                    expandedItem.classList.remove('expanded');
+                    
+                    // Return item to original position
+                    if (originalParent) {
+                        originalParent.appendChild(expandedItem);
+                    }
+                    
+                    expandedItem = null;
+                    originalParent = null;
+                }
+                galleryOverlay.classList.remove('active');
+            });
+
+            // --- Logic Carousel Modal (reusable untuk Galeri Prestasi & Berita Sekolah) ---
+            function setupCarousel({ btnId, modalId, closeId, prevId, nextId }) {
+                const btn = document.getElementById(btnId);
+                const modal = document.getElementById(modalId);
+                const closeBtn = document.getElementById(closeId);
+                const prevBtn = document.getElementById(prevId);
+                const nextBtn = document.getElementById(nextId);
+                const slides = modal.querySelectorAll('.carousel-slide');
+                let currentSlide = 0;
+
+                function updateCarousel() {
+                    slides.forEach((slide, index) => {
+                        slide.classList.toggle('active', index === currentSlide);
+                    });
+                }
+
+                // Buka Carousel Modal
+                btn.addEventListener('click', () => {
+                    modal.classList.add('active');
+                    currentSlide = 0;
+                    updateCarousel();
+                });
+
+                // Tutup Carousel Modal
+                closeBtn.addEventListener('click', () => {
+                    modal.classList.remove('active');
+                });
+
+                // Navigasi Next
+                nextBtn.addEventListener('click', () => {
+                    currentSlide = (currentSlide + 1) % slides.length;
+                    updateCarousel();
+                });
+
+                // Navigasi Previous
+                prevBtn.addEventListener('click', () => {
+                    currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+                    updateCarousel();
+                });
+
+                // Keyboard navigation
+                document.addEventListener('keydown', (e) => {
+                    if (!modal.classList.contains('active')) return;
+                    if (e.key === 'ArrowRight') {
+                        currentSlide = (currentSlide + 1) % slides.length;
+                        updateCarousel();
+                    } else if (e.key === 'ArrowLeft') {
+                        currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+                        updateCarousel();
+                    } else if (e.key === 'Escape') {
+                        modal.classList.remove('active');
+                    }
+                });
+            }
+
+            setupCarousel({
+                btnId: 'galleryLihatSemuaBtn',
+                modalId: 'galleryCarouselModal',
+                closeId: 'galleryCarouselClose',
+                prevId: 'galleryCarouselPrev',
+                nextId: 'galleryCarouselNext'
+            });
+
+            setupCarousel({
+                btnId: 'newsLihatSemuaBtn',
+                modalId: 'newsCarouselModal',
+                closeId: 'newsCarouselClose',
+                prevId: 'newsCarouselPrev',
+                nextId: 'newsCarouselNext'
             });
 
             // --- Logic Modal Pendaftaran ---
