@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Berita & Prestasi - Admin</title>
+    <title>Berita Sekolah - Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary-color: #667eea;
             --secondary-color: #764ba2;
+            --sidebar-bg: #2c3e50;
+            --sidebar-text: #ecf0f1;
+            --sidebar-hover: #34495e;
             --header-height: 60px;
+            --sidebar-width: 260px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -48,7 +52,16 @@
             top: 0; left: 0; right: 0;
         }
 
-.navbar-brand {
+        .menu-toggle {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #333;
+            margin-right: 1rem;
+            background: none;
+            border: none;
+        }
+
+        .navbar-brand {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -78,6 +91,113 @@
             .navbar-brand span { font-size: 1rem; }
             .navbar-date { display: none !important; }
         }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            position: fixed;
+            top: var(--header-height);
+            left: 0; bottom: 0;
+            width: var(--sidebar-width);
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(-100%);
+        }
+
+        .sidebar.active { transform: translateX(0); }
+
+        .sidebar-menu { flex: 1; padding-top: 1rem; list-style: none; }
+
+        .menu-item { border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            transition: background 0.2s;
+            justify-content: space-between;
+        }
+
+        .menu-link:hover, .menu-link.active {
+            background-color: var(--sidebar-hover);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .menu-content { display: flex; align-items: center; gap: 10px; }
+        .menu-icon { width: 20px; text-align: center; }
+
+        .dropdown-icon { font-size: 0.8rem; transition: transform 0.3s; }
+
+        .submenu {
+            list-style: none;
+            background-color: rgba(0,0,0,0.2);
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .submenu.open { max-height: 600px; }
+
+        .submenu-link {
+            display: block;
+            padding: 10px 20px 10px 50px;
+            color: #bdc3c7;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .submenu-link:hover, .submenu-link.active {
+            color: #fff;
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            background-color: rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .admin-avatar {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .admin-info { flex: 1; overflow: hidden; }
+        .admin-name { font-size: 0.9rem; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+
+        .btn-logout {
+            background: none; border: none;
+            color: #e74c3c; cursor: pointer;
+            font-size: 1.1rem; transition: color 0.2s;
+        }
+        .btn-logout:hover { color: #c0392b; }
+
+        /* --- Overlay --- */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        .overlay.active { display: block; }
 
         /* --- Main Content --- */
         .main-content {
@@ -225,17 +345,6 @@
             color: white;
         }
 
-        /* Tab panel for Prestasi: pink accent */
-        .tab-btn[data-tab="prestasi"].active {
-            color: #f5576c;
-            border-bottom-color: #f5576c;
-        }
-        .tab-btn[data-tab="prestasi"].active .tab-count {
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-            color: white;
-        }
-        .tab-btn[data-tab="prestasi"] .tab-count { background: #fce7f3; color: #f5576c; }
-        .tab-btn[data-tab="prestasi"]:hover { color: #f5576c; }
 
         /* --- Tab Content --- */
         .tab-content { display: none; padding: 20px; }
@@ -288,9 +397,6 @@
             color: white;
         }
 
-        .custom-table.prestasi-table thead tr {
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-        }
 
         .custom-table th {
             padding: 12px 16px;
@@ -321,14 +427,6 @@
         }
 
         .badge-berita { background: #dbeafe; color: #2563eb; }
-        .badge-prestasi { background: #fce7f3; color: #db2777; }
-        .badge-pengumuman { background: #d1fae5; color: #059669; }
-        .badge-kegiatan { background: #fef3c7; color: #d97706; }
-        .badge-juara1 { background: #fef3c7; color: #b45309; }
-        .badge-juara2 { background: #e0e7ff; color: #4338ca; }
-        .badge-juara3 { background: #f3f4f6; color: #6b7280; }
-        .badge-emas { background: #fef9c3; color: #854d0e; }
-        .badge-perak { background: #f1f5f9; color: #64748b; }
 
         /* Action buttons */
         .action-btns { display: flex; gap: 6px; }
@@ -407,18 +505,21 @@
             z-index: 2000;
             align-items: center;
             justify-content: center;
+            padding: 16px;
         }
         .modal-overlay.active { display: flex; }
 
         .modal-box {
             background: white;
             border-radius: 14px;
-            width: 95%;
+            width: 100%;
             max-width: 640px;
             max-height: 90vh;
             overflow-y: auto;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             animation: slideUp 0.3s ease;
+            display: flex;
+            flex-direction: column;
         }
 
         @keyframes slideUp {
@@ -446,7 +547,7 @@
         }
         .modal-close:hover { background: #ef4444; color: white; }
 
-        .modal-body { padding: 20px 24px; }
+        .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
 
         /* Tab toggle in modal */
         .modal-tab-group {
@@ -476,7 +577,6 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         }
 
-        .modal-tab-opt.active.prestasi-opt { color: #f5576c; }
 
         .modal-form { display: none; }
         .modal-form.active { display: block; }
@@ -518,7 +618,24 @@
 
         .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
-        @media (max-width: 520px) { .form-grid-2 { grid-template-columns: 1fr; } }
+        @media (max-width: 520px) {
+            .form-grid-2 { grid-template-columns: 1fr; }
+            .modal-overlay { padding: 0; align-items: flex-end; }
+            .modal-box {
+                max-height: 92vh;
+                border-radius: 18px 18px 0 0;
+                width: 100%;
+            }
+            .modal-header { padding: 16px 18px 12px; }
+            .modal-body { padding: 16px 18px; }
+            .modal-footer {
+                padding: 12px 18px;
+                flex-direction: row;
+                justify-content: stretch;
+            }
+            .modal-footer button { flex: 1; justify-content: center; }
+            .btn-cancel-modal, .btn-save { padding: 11px 16px; font-size: 0.9rem; }
+        }
 
         .modal-footer {
             padding: 16px 24px;
@@ -526,6 +643,7 @@
             display: flex;
             justify-content: flex-end;
             gap: 10px;
+            flex-shrink: 0;
         }
 
         .btn-cancel-modal {
@@ -546,10 +664,6 @@
             box-shadow: 0 4px 12px rgba(102,126,234,0.3);
         }
         .btn-save:hover { opacity: 0.9; }
-        .btn-save.prestasi-save {
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-            box-shadow: 0 4px 12px rgba(240,147,251,0.3);
-        }
 
         /* --- Upload Photo Area --- */
         .upload-area {
@@ -647,20 +761,26 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-    </style>
+        /* --- Main Footer --- */
+        .main-footer {
             text-align: center;
             padding: 20px;
             color: #888;
             font-size: 0.85rem;
             border-top: 1px solid #eee;
             margin-top: 20px;
+            width: 100%;
         }
+        .main-footer p { margin: 2px 0; }
     </style>
 </head>
 <body>
 
     <!-- Navbar -->
     <nav class="navbar">
+        <button class="menu-toggle" id="menuToggle" title="Toggle Sidebar Menu">
+            <i class="fas fa-bars"></i>
+        </button>
         <a href="#" class="navbar-brand">
             <img src="" alt="Logo Sekolah" style="display:none;">
             <span></span>
@@ -670,6 +790,93 @@
             <span id="navbarDate"></span>
         </div>
     </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <ul class="sidebar-menu">
+            <li class="menu-item">
+                <a href="adminguru.html" class="menu-link">
+                    <div class="menu-content">
+                        <i class="fas fa-home menu-icon"></i>
+                        <span>Dashboard</span>
+                    </div>
+                </a>
+            </li>
+
+            <!-- Menu Pengaturan (Dropdown) -->
+            <li class="menu-item">
+                <a href="#" class="menu-link dropdown-toggle">
+                    <div class="menu-content">
+                        <i class="fas fa-cogs menu-icon"></i>
+                        <span>Pengaturan</span>
+                    </div>
+                    <i class="fas fa-chevron-right dropdown-icon"></i>
+                </a>
+                <ul class="submenu open">
+                    <li><a href="identitassekolah.html" class="submenu-link">Identitas Sekolah</a></li>
+                    <li><a href="rombel.html" class="submenu-link">Rombongan Belajar</a></li>
+                    <li><a href="dataguru.html" class="submenu-link">Data Guru</a></li>
+                    <li><a href="datasiswa.html" class="submenu-link">Data Siswa</a></li>
+                    <li><a href="walikelas.html" class="submenu-link">Walikelas</a></li>
+                    <li><a href="guruwali.html" class="submenu-link">Guru Wali</a></li>
+                    <li><a href="gurupiket.html" class="submenu-link">Guru Piket</a></li>
+                    <li><a href="mappingsiswa.html" class="submenu-link">Mapping Kelas Siswa</a></li>
+                    <li><a href="datamapel.html" class="submenu-link">Mata Pelajaran</a></li>
+                    <li><a href="jadwalpelajaran.html" class="submenu-link">Jadwal Pelajaran</a></li>
+                    <li><a href="beritaprestasi.html" class="submenu-link active">Berita &amp; Prestasi</a></li>
+                </ul>
+            </li>
+
+            <!-- Menu Laporan (Dropdown) -->
+            <li class="menu-item">
+                <a href="#" class="menu-link dropdown-toggle">
+                    <div class="menu-content">
+                        <i class="fas fa-file-alt menu-icon"></i>
+                        <span>Laporan</span>
+                    </div>
+                    <i class="fas fa-chevron-right dropdown-icon"></i>
+                </a>
+                <ul class="submenu">
+                    <li><a href="piketharianadmin.html" class="submenu-link">Piket Harian</a></li>
+                    <li><a href="absensiadmin.html" class="submenu-link">Kehadiran Siswa</a></li>
+                    <li><a href="pembinaanwaliadmin.html" class="submenu-link">Pembinaan Guru Wali</a></li>
+                    <li><a href="nilaiakademisadmin.html" class="submenu-link">Nilai Akademis</a></li>
+                    <li><a href="kasusadmin.html" class="submenu-link">Kasus</a></li>
+                </ul>
+            </li>
+            <li class="menu-item">
+                <a href="Arsipadmin.html" class="menu-link">
+                    <div class="menu-content">
+                        <i class="fas fa-archive menu-icon"></i>
+                        <span>Arsip</span>
+                    </div>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <div class="menu-content">
+                        <i class="fas fa-history menu-icon"></i>
+                        <span>Backup dan Reset</span>
+                    </div>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="admin-avatar">A</div>
+            <div class="admin-info">
+                <div class="admin-name">Administrator</div>
+                <div style="font-size: 0.75rem; color: #bdc3c7;">Online</div>
+            </div>
+            <button class="btn-logout" title="Logout"
+                onclick="if(confirm('Apakah Anda yakin ingin keluar?')) window.location.href = 'index.html'">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
 
     <!-- Main Content -->
     <main class="main-content">
@@ -681,8 +888,8 @@
                     <i class="fas fa-newspaper"></i>
                 </div>
                 <div class="page-header-text">
-                    <h1>Berita Sekolah &amp; Prestasi Siswa</h1>
-                    <p>Kelola berita sekolah dan pencapaian prestasi siswa</p>
+                    <h1>Berita Sekolah</h1>
+                    <p>Kelola berita sekolah</p>
                 </div>
             </div>
             <div class="page-header-actions">
@@ -690,7 +897,7 @@
                     <i class="fas fa-home"></i> Dashboard
                 </a>
                 <button class="btn-tambah" onclick="openModal()">
-                    <i class="fas fa-plus"></i> Tambah Berita &amp; Prestasi
+                    <i class="fas fa-plus"></i> Tambah Berita
                 </button>
             </div>
         </div>
@@ -704,11 +911,6 @@
                     <i class="fas fa-newspaper"></i>
                     Berita Sekolah
                     <span class="tab-count" id="countBerita">0</span>
-                </button>
-                <button class="tab-btn" data-tab="prestasi" onclick="switchTab('prestasi')">
-                    <i class="fas fa-trophy"></i>
-                    Prestasi Siswa
-                    <span class="tab-count" id="countPrestasi">0</span>
                 </button>
             </div>
 
@@ -750,44 +952,6 @@
                 </div>
             </div>
 
-            <!-- Tab: Prestasi Siswa -->
-            <div class="tab-content" id="tab-prestasi">
-                <div class="table-toolbar">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="searchPrestasi" placeholder="Cari prestasi..." oninput="filterPrestasi()">
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table class="custom-table prestasi-table" id="tablePrestasi">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Gambar</th>
-                                <th>Nama Prestasi</th>
-                                <th>Kategori</th>
-                                <th>Peraih</th>
-                                <th>Tahun</th>
-                                <th>Keterangan</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbodyPrestasi">
-                            <tr>
-                                <td colspan="8">
-                                    <div class="empty-state">
-                                        <i class="fas fa-trophy"></i>
-                                        <p>Memuat data prestasi...</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-footer">
-                    <span id="infoPrestasi">Menampilkan 0 data</span>
-                </div>
-            </div>
 
         </div><!-- end .table-card -->
 
@@ -805,16 +969,6 @@
                 <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
-                <!-- Toggle Berita / Prestasi -->
-                <div class="modal-tab-group">
-                    <button class="modal-tab-opt active" id="optBerita" onclick="switchModalTab('berita')">
-                        <i class="fas fa-newspaper"></i> Berita Sekolah
-                    </button>
-                    <button class="modal-tab-opt prestasi-opt" id="optPrestasi" onclick="switchModalTab('prestasi')">
-                        <i class="fas fa-trophy"></i> Prestasi Siswa
-                    </button>
-                </div>
-
                 <!-- Form Berita -->
                 <div class="modal-form active" id="formBerita">
                     <div class="form-group">
@@ -866,67 +1020,6 @@
                             </div>
                         </div>
                         <input type="hidden" id="b_gambar">
-                    </div>
-                </div>
-
-                <!-- Form Prestasi -->
-                <div class="modal-form" id="formPrestasi">
-                    <div class="form-group">
-                        <label>ID Prestasi</label>
-                        <input type="text" id="p_id" readonly
-                            style="background:#f1f5f9; color:#64748b; cursor:not-allowed; font-weight:600; letter-spacing:0.5px;"
-                            placeholder="Otomatis terisi...">
-                    </div>
-                    <div class="form-group">
-                        <label>Nama Prestasi / Kompetisi <span class="req">*</span></label>
-                        <input type="text" id="p_nama" placeholder="Contoh: Olimpiade Matematika Nasional">
-                    </div>
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label>Kategori <span class="req">*</span></label>
-                            <select id="p_kategori">
-                                <option value="">-- Pilih Kategori --</option>
-                                <option value="Juara 1">Juara 1</option>
-                                <option value="Juara 2">Juara 2</option>
-                                <option value="Juara 3">Juara 3</option>
-                                <option value="Medali Emas">Medali Emas</option>
-                                <option value="Medali Perak">Medali Perak</option>
-                                <option value="Medali Perunggu">Medali Perunggu</option>
-                                <option value="Best School">Best School</option>
-                                <option value="Harapan">Harapan</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Tahun <span class="req">*</span></label>
-                            <input type="number" id="p_tahun" placeholder="2026" min="2000" max="2099">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Nama Peraih / Tim <span class="req">*</span></label>
-                        <input type="text" id="p_peraih" placeholder="Nama siswa atau tim">
-                    </div>
-                    <div class="form-group">
-                        <label>Keterangan</label>
-                        <textarea id="p_keterangan" placeholder="Deskripsi singkat prestasi..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Foto Prestasi</label>
-                        <div class="upload-area" id="p_upload_area" onclick="document.getElementById('p_foto').click()">
-                            <input type="file" id="p_foto" accept="image/*" style="display:none" onchange="handleUpload(this,'p')">
-                            <div class="upload-placeholder" id="p_upload_placeholder">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                                <span>Klik untuk upload foto</span>
-                                <small>Format: JPG, PNG, WEBP &bull; Maks. 1 MB</small>
-                            </div>
-                            <div class="upload-preview" id="p_upload_preview" style="display:none">
-                                <img id="p_preview_img" src="" alt="Preview">
-                                <button type="button" class="upload-remove" onclick="removeUpload(event,'p')" title="Hapus foto">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                                <span class="upload-filename" id="p_filename"></span>
-                            </div>
-                        </div>
-                        <input type="hidden" id="p_gambar">
                     </div>
                 </div>
             </div>
@@ -1049,7 +1142,7 @@
         }
 
         // Drag & drop support
-        ['b_upload_area', 'p_upload_area'].forEach(id => {
+        ['b_upload_area'].forEach(id => {
             const area = document.getElementById(id);
             const prefix = id.split('_')[0];
             if (!area) return;
@@ -1098,6 +1191,33 @@
         }
 
         // ============================================================
+        // Sidebar Toggle
+        // ============================================================
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar    = document.getElementById('sidebar');
+        const overlay    = document.getElementById('overlay');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        });
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+
+        // Dropdown submenu
+        document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+            toggle.addEventListener('click', e => {
+                e.preventDefault();
+                const submenu = toggle.nextElementSibling;
+                submenu.classList.toggle('open');
+                const icon = toggle.querySelector('.dropdown-icon');
+                icon.style.transform = submenu.classList.contains('open') ? 'rotate(90deg)' : 'rotate(0deg)';
+            });
+        });
+
+        // ============================================================
         // Tab Switch (main)
         // ============================================================
         function switchTab(tab) {
@@ -1111,7 +1231,6 @@
         // Data Store (local arrays — swap with Supabase calls as needed)
         // ============================================================
         let dataBerita   = [];
-        let dataPrestasi = [];
 
         // ---- Render Berita ----
         function renderBerita(data) {
@@ -1150,43 +1269,6 @@
                 </tr>`).join('');
         }
 
-        // ---- Render Prestasi ----
-        function renderPrestasi(data) {
-            const tbody = document.getElementById('tbodyPrestasi');
-            document.getElementById('countPrestasi').textContent = data.length;
-            document.getElementById('infoPrestasi').textContent = `Menampilkan ${data.length} data`;
-
-            if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">
-                    <i class="fas fa-trophy"></i>
-                    <p>Belum ada data prestasi. Klik <strong>Tambah</strong> untuk menambahkan.</p>
-                </div></td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = data.map((item, i) => `
-                <tr>
-                    <td>${i + 1}</td>
-                    <td>
-                        <div class="thumb">
-                            ${item.gambar
-                                ? `<img src="${item.gambar}" alt="foto" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-image\\'></i>'">`
-                                : '<i class="fas fa-image"></i>'}
-                        </div>
-                    </td>
-                    <td style="max-width:200px; font-weight:600; color:#1e293b;">${item.nama}</td>
-                    <td><span class="badge ${badgePrestasi(item.kategori)}">${item.kategori}</span></td>
-                    <td style="color:#374151;">${item.peraih}</td>
-                    <td><strong>${item.tahun}</strong></td>
-                    <td style="max-width:200px; color:#64748b; font-size:0.82rem;">${truncate(item.keterangan, 70)}</td>
-                    <td>
-                        <div class="action-btns">
-                            <button class="btn-edit" title="Edit" onclick="editPrestasi(${item.id})"><i class="fas fa-pencil-alt"></i></button>
-                            <button class="btn-delete" title="Hapus" onclick="deletePrestasi(${item.id})"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </td>
-                </tr>`).join('');
-        }
 
         // ---- Filter ----
         function filterBerita() {
@@ -1198,15 +1280,6 @@
             renderBerita(filtered);
         }
 
-        function filterPrestasi() {
-            const q = document.getElementById('searchPrestasi').value.toLowerCase();
-            const filtered = dataPrestasi.filter(d =>
-                d.nama.toLowerCase().includes(q) ||
-                d.peraih.toLowerCase().includes(q) ||
-                d.kategori.toLowerCase().includes(q)
-            );
-            renderPrestasi(filtered);
-        }
 
         // ---- Helpers ----
         function badgeBerita(k) {
@@ -1218,15 +1291,6 @@
             return map[k] || 'badge-berita';
         }
 
-        function badgePrestasi(k) {
-            const map = {
-                'Juara 1': 'badge-juara1', 'Juara 2': 'badge-juara2',
-                'Juara 3': 'badge-juara3', 'Medali Emas': 'badge-emas',
-                'Medali Perak': 'badge-perak', 'Medali Perunggu': 'badge-juara3',
-                'Best School': 'badge-pengumuman', 'Harapan': 'badge-kegiatan'
-            };
-            return map[k] || 'badge-prestasi';
-        }
 
         function truncate(str, n) {
             if (!str) return '-';
@@ -1258,29 +1322,13 @@
             renderBerita(dataBerita);
         }
 
-        async function loadPrestasi() {
-            if (!supabaseClient) { renderPrestasi([]); return; }
-            try {
-                const { data, error } = await supabaseClient
-                    .from('prestasi')
-                    .select('*')
-                    .order('tahun', { ascending: false });
-                if (error) throw error;
-                dataPrestasi = data || [];
-            } catch (e) {
-                console.error('Gagal load prestasi:', e);
-                dataPrestasi = [];
-            }
-            renderPrestasi(dataPrestasi);
-        }
 
         // ============================================================
         // Modal
         // ============================================================
-        let currentModalTab = 'berita';
         let editId = null;
 
-        function openModal(type = 'berita') {
+        function openModal() {
             editId = null;
             document.getElementById('modalTitle').innerHTML =
                 '<i class="fas fa-plus-circle" style="color:#667eea; margin-right:8px;"></i> Tambah Data';
@@ -1291,11 +1339,8 @@
             const pad = n => String(n).padStart(2, '0');
             const stamp = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
             const nextBeritaId  = 'BRT-' + stamp;
-            const nextPrestasiId = 'PST-' + stamp;
             document.getElementById('b_id').value = nextBeritaId;
-            document.getElementById('p_id').value = nextPrestasiId;
 
-            switchModalTab(type);
             document.getElementById('modalOverlay').classList.add('active');
         }
 
@@ -1304,37 +1349,18 @@
             editId = null;
         }
 
-        function switchModalTab(tab) {
-            currentModalTab = tab;
-            document.getElementById('optBerita').classList.toggle('active', tab === 'berita');
-            document.getElementById('optPrestasi').classList.toggle('active', tab === 'prestasi');
-            document.getElementById('formBerita').classList.toggle('active', tab === 'berita');
-            document.getElementById('formPrestasi').classList.toggle('active', tab === 'prestasi');
 
-            const saveBtn = document.getElementById('btnSave');
-            if (tab === 'prestasi') {
-                saveBtn.classList.add('prestasi-save');
-            } else {
-                saveBtn.classList.remove('prestasi-save');
-            }
-        }
 
         function clearForms() {
             ['b_id','b_judul','b_kategori','b_tanggal','b_isi'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = '';
             });
-            ['p_id','p_nama','p_kategori','p_tahun','p_peraih','p_keterangan'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.value = '';
-            });
             resetUpload('b');
-            resetUpload('p');
         }
 
         async function saveData() {
-            if (currentModalTab === 'berita') await saveBerita();
-            else await savePrestasi();
+            await saveBerita();
         }
 
         async function saveBerita() {
@@ -1389,47 +1415,6 @@
             switchTab('berita');
         }
 
-        async function savePrestasi() {
-            const nama       = document.getElementById('p_nama').value.trim();
-            const kategori   = document.getElementById('p_kategori').value;
-            const tahun      = document.getElementById('p_tahun').value;
-            const peraih     = document.getElementById('p_peraih').value.trim();
-            const keterangan = document.getElementById('p_keterangan').value.trim();
-            const gambar     = document.getElementById('p_gambar').value.trim();
-
-            if (!nama || !kategori || !tahun || !peraih) {
-                alert('Harap lengkapi semua field yang wajib diisi (*).');
-                return;
-            }
-
-            const payload = { nama, kategori, tahun: parseInt(tahun), peraih, keterangan: keterangan || null, gambar: gambar || null };
-
-            if (supabaseClient) {
-                try {
-                    let err;
-                    if (editId) {
-                        ({ error: err } = await supabaseClient.from('prestasi').update(payload).eq('id', editId));
-                    } else {
-                        ({ error: err } = await supabaseClient.from('prestasi').insert([payload]));
-                    }
-                    if (err) throw err;
-                } catch (e) {
-                    alert('Gagal menyimpan: ' + e.message);
-                    return;
-                }
-            } else {
-                if (editId) {
-                    const idx = dataPrestasi.findIndex(d => d.id === editId);
-                    if (idx > -1) dataPrestasi[idx] = { ...dataPrestasi[idx], ...payload };
-                } else {
-                    dataPrestasi.unshift({ id: Date.now(), ...payload });
-                }
-            }
-
-            closeModal();
-            await loadPrestasi();
-            switchTab('prestasi');
-        }
 
         // ============================================================
         // Edit
@@ -1440,7 +1425,6 @@
             editId = id;
             document.getElementById('modalTitle').innerHTML =
                 '<i class="fas fa-edit" style="color:#667eea; margin-right:8px;"></i> Edit Berita';
-            switchModalTab('berita');
             document.getElementById('b_id').value       = item.id       || '';
             document.getElementById('b_judul').value    = item.judul    || '';
             document.getElementById('b_kategori').value = item.kategori || '';
@@ -1450,22 +1434,6 @@
             document.getElementById('modalOverlay').classList.add('active');
         }
 
-        function editPrestasi(id) {
-            const item = dataPrestasi.find(d => d.id === id);
-            if (!item) return;
-            editId = id;
-            document.getElementById('modalTitle').innerHTML =
-                '<i class="fas fa-edit" style="color:#f5576c; margin-right:8px;"></i> Edit Prestasi';
-            switchModalTab('prestasi');
-            document.getElementById('p_id').value         = item.id         || '';
-            document.getElementById('p_nama').value       = item.nama       || '';
-            document.getElementById('p_kategori').value   = item.kategori   || '';
-            document.getElementById('p_tahun').value      = item.tahun      || '';
-            document.getElementById('p_peraih').value     = item.peraih     || '';
-            document.getElementById('p_keterangan').value = item.keterangan || '';
-            setUploadPreview('p', item.gambar || '');
-            document.getElementById('modalOverlay').classList.add('active');
-        }
 
         // ============================================================
         // Delete
@@ -1481,16 +1449,6 @@
             await loadBerita();
         }
 
-        async function deletePrestasi(id) {
-            if (!confirm('Yakin ingin menghapus data prestasi ini?')) return;
-            if (supabaseClient) {
-                const { error } = await supabaseClient.from('prestasi').delete().eq('id', id);
-                if (error) { alert('Gagal menghapus: ' + error.message); return; }
-            } else {
-                dataPrestasi = dataPrestasi.filter(d => d.id !== id);
-            }
-            await loadPrestasi();
-        }
 
         // Close modal on overlay click
         document.getElementById('modalOverlay').addEventListener('click', function(e) {
@@ -1504,7 +1462,6 @@
             updateNavbarDate();
             loadSchoolIdentity();
             loadBerita();
-            loadPrestasi();
         });
     </script>
 </body>
