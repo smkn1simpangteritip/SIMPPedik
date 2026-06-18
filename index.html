@@ -715,169 +715,6 @@
             }
         }
 
-        /* --- Galeri Prestasi Container --- */
-        .gallery-container {
-            width: calc(100% - 20px);
-            max-width: none;
-            margin: 2rem auto;
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 25px 10px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .gallery-title {
-            grid-column: 1 / -1;
-            text-align: center;
-            color: white;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        /* --- Gallery Headline (mirip headline-news) --- */
-        .gallery-headline {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-            transition: transform 0.3s ease;
-        }
-
-        .gallery-headline:hover {
-            transform: translateY(-5px);
-        }
-
-        .gallery-headline-image {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-
-        .gallery-headline-content {
-            padding: 20px;
-        }
-
-        .gallery-headline-tag {
-            background: linear-gradient(to right, #f093fb, #f5576c);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: inline-block;
-            margin-bottom: 10px;
-        }
-
-        .gallery-headline-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 10px;
-            line-height: 1.4;
-        }
-
-        .gallery-headline-excerpt {
-            font-size: 0.9rem;
-            color: #666;
-            line-height: 1.6;
-        }
-
-        /* --- Gallery Small List (mirip small-news-list) --- */
-        .gallery-small-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .gallery-small-item {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-        }
-
-        .gallery-small-item:hover {
-            transform: translateX(-5px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-        }
-
-        .gallery-small-tag {
-            background: #fce7f3;
-            color: #f093fb;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            display: inline-block;
-            margin-bottom: 8px;
-        }
-
-        .gallery-small-title {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-            line-height: 1.4;
-        }
-
-        .gallery-small-year {
-            font-size: 0.75rem;
-            color: #888;
-        }
-
-        /* Responsive gallery-container */
-        @media (max-width: 768px) {
-            .gallery-container {
-                grid-template-columns: 1fr;
-                margin: 1rem auto;
-            }
-            .gallery-headline-image {
-                height: 180px;
-            }
-            .gallery-headline-title {
-                font-size: 1.1rem;
-            }
-            .gallery-small-list {
-                flex-direction: row;
-                overflow-x: auto;
-                scroll-snap-type: x mandatory;
-                -webkit-overflow-scrolling: touch;
-                gap: 15px;
-                padding: 5px;
-            }
-            .gallery-small-item {
-                flex: 0 0 280px;
-                scroll-snap-align: start;
-            }
-            .gallery-small-item:hover {
-                transform: translateX(0);
-            }
-        }
-
-        /* Lama - gallery-overlay tetap dipertahankan agar tidak error JS */
-        .gallery-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 9999;
-        }
-
-        .gallery-overlay.active {
-            display: block;
-        }
 
         /* --- Lihat Semua Button --- */
         .btn-lihat-semua {
@@ -1033,28 +870,12 @@
         }
 
         /* --- Main Content Wrapper --- */
-        .main-content-wrapper {
-            width: 100%;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            max-width: none;
-        }
-
-        @media (max-width: 1024px) {
-            .main-content-wrapper {
-                grid-template-columns: 1fr;
-            }
-        }
-
         @media (max-width: 768px) {
-            .news-container,
-            .gallery-container {
+            .news-container {
                 margin: 1rem auto;
                 padding: 20px 15px;
             }
-            .news-title,
-            .gallery-title {
+            .news-title {
                 font-size: 1.4rem;
             }
         }
@@ -1065,9 +886,7 @@
     <img src="icon-512.png" alt="Logo" style="display: block; margin: 0 auto 1rem auto; width: 100px; height: 100px; object-fit: contain; border-radius: 15px;">
     <p style="text-align: center; color: white; font-size: 0.85rem; font-weight: 600; margin-bottom: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">SISTEM INFORMASI MANAJEMEN PERKEMBANGAN PESERTA DIDIK</p>
 
-    <!-- Main Content Wrapper -->
-    <div class="main-content-wrapper">
-        <!-- News Container -->
+    <!-- News Container -->
         <div class="news-container">
             <h2 class="news-title">Berita Sekolah</h2>
             
@@ -1085,109 +904,6 @@
             <button class="btn-lihat-semua" id="newsLihatSemuaBtn">Lihat Semua</button>
         </div>
 
-        <!-- Gallery Container -->
-        <div class="gallery-container">
-            <h2 class="gallery-title">Galeri Prestasi</h2>
-
-            <!-- Gallery Headline -->
-            <div class="gallery-headline">
-                <img src="b1.jpeg" class="gallery-headline-image" alt="Kompetisi Robotik Nasional">
-                <div class="gallery-headline-content">
-                    <span class="gallery-headline-tag">Juara 1</span>
-                    <h3 class="gallery-headline-title">Kompetisi Robotik Nasional</h3>
-                    <p class="gallery-headline-excerpt">Tim robotik SMKN 1 Simpang Teritip berhasil meraih juara pertama dalam Kompetisi Robotik Nasional 2026 dengan inovasi robot pemilah sampah otomatis yang berbasis AI...</p>
-                </div>
-            </div>
-
-            <!-- Gallery Small List -->
-            <div class="gallery-small-list">
-                <div class="gallery-small-item">
-                    <span class="gallery-small-tag">Medali Emas</span>
-                    <h4 class="gallery-small-title">Olimpiade Matematika</h4>
-                    <span class="gallery-small-year">2025</span>
-                </div>
-                <div class="gallery-small-item">
-                    <span class="gallery-small-tag">Juara 1</span>
-                    <h4 class="gallery-small-title">Kompetisi Debat Bahasa</h4>
-                    <span class="gallery-small-year">2024</span>
-                </div>
-                <div class="gallery-small-item">
-                    <span class="gallery-small-tag">Juara 2</span>
-                    <h4 class="gallery-small-title">Lomba Karya Ilmiah</h4>
-                    <span class="gallery-small-year">2025</span>
-                </div>
-                <div class="gallery-small-item">
-                    <span class="gallery-small-tag">Best School</span>
-                    <h4 class="gallery-small-title">Sekolah Adiwiyata Nasional</h4>
-                    <span class="gallery-small-year">2024</span>
-                </div>
-            </div>
-
-            <button class="btn-lihat-semua" id="galleryLihatSemuaBtn">Lihat Semua</button>
-        </div>
-    </div>
-
-    <!-- Gallery Overlay -->
-    <div class="gallery-overlay" id="galleryOverlay"></div>
-
-    <!-- Carousel Modal: Galeri Prestasi (5 item, termasuk yang tidak tampil di grid) -->
-    <div class="carousel-modal" id="galleryCarouselModal">
-        <div class="carousel-content">
-            <button class="carousel-close" id="galleryCarouselClose">&times;</button>
-            <button class="carousel-nav carousel-prev" id="galleryCarouselPrev">&#10094;</button>
-            <button class="carousel-nav carousel-next" id="galleryCarouselNext">&#10095;</button>
-            
-            <div class="carousel-slide active" data-index="0">
-                <img src="b1.jpeg" class="carousel-image" alt="Kompetisi Robotik Nasional">
-                <div class="carousel-info">
-                    <span class="carousel-tag">Juara 1</span>
-                    <h3 class="carousel-title">Kompetisi Robotik Nasional</h3>
-                    <p class="carousel-year">2026</p>
-                    <p class="carousel-description">Tim robotik SMKN 1 Simpang Teritip berhasil meraih juara pertama dalam Kompetisi Robotik Nasional 2026 dengan inovasi robot pemilah sampah otomatis yang berbasis AI.</p>
-                </div>
-            </div>
-            
-            <div class="carousel-slide" data-index="1">
-                <img src="b2.jpeg" class="carousel-image" alt="Olimpiade Matematika">
-                <div class="carousel-info">
-                    <span class="carousel-tag">Medali Emas</span>
-                    <h3 class="carousel-title">Olimpiade Matematika</h3>
-                    <p class="carousel-year">2025</p>
-                    <p class="carousel-description">Siswa kami berhasil memenangkan medali emas dalam Olimpiade Matematika Tingkat Nasional 2025 setelah melalui seleksi ketat dari ribuan peserta.</p>
-                </div>
-            </div>
-            
-            <div class="carousel-slide" data-index="2">
-                <img src="b3.jpeg" class="carousel-image" alt="Kompetisi Debat Bahasa">
-                <div class="carousel-info">
-                    <span class="carousel-tag">Juara 1</span>
-                    <h3 class="carousel-title">Kompetisi Debat Bahasa</h3>
-                    <p class="carousel-year">2024</p>
-                    <p class="carousel-description">Tim debat bahasa Indonesia berhasil membawa pulang piala emas dalam Kompetisi Debat Bahasa Tingkat Provinsi.</p>
-                </div>
-            </div>
-            
-            <div class="carousel-slide" data-index="3">
-                <img src="b4.jpeg" class="carousel-image" alt="Lomba Karya Ilmiah">
-                <div class="carousel-info">
-                    <span class="carousel-tag">Juara 2</span>
-                    <h3 class="carousel-title">Lomba Karya Ilmiah</h3>
-                    <p class="carousel-year">2025</p>
-                    <p class="carousel-description">Penelitian tentang pengolahan limbah plastik menjadi bahan bakar alternatif mendapatkan juara kedua dalam Lomba Karya Ilmiah Remaja.</p>
-                </div>
-            </div>
-            
-            <div class="carousel-slide" data-index="4">
-                <img src="b1.jpeg" class="carousel-image" alt="Sekolah Adiwiyata">
-                <div class="carousel-info">
-                    <span class="carousel-tag">Best School</span>
-                    <h3 class="carousel-title">Sekolah Adiwiyata</h3>
-                    <p class="carousel-year">2024</p>
-                    <p class="carousel-description">SMKN 1 Simpang Teritip dinobatkan sebagai Sekolah Adiwiyata Tingkat Nasional berkat komitmen dalam pelestarian lingkungan.</p>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Modal Detail Berita -->
     <div class="news-detail-modal" id="newsDetailModal">
@@ -2009,48 +1725,6 @@
                 if (e.target === loginModal) closeLoginModal();
             });
 
-            // --- Logic Galeri Prestasi (Collage) ---
-            const galleryItems = document.querySelectorAll('.gallery-item');
-            const galleryOverlay = document.getElementById('galleryOverlay');
-            let expandedItem = null;
-            let originalParent = null;
-
-            galleryItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    if (expandedItem && expandedItem !== item) {
-                        // Return previous item to original position
-                        if (originalParent) {
-                            originalParent.appendChild(expandedItem);
-                        }
-                        expandedItem.classList.remove('expanded');
-                    }
-                    
-                    // Store original parent
-                    originalParent = item.parentElement;
-                    
-                    // Move item to body to escape stacking contexts
-                    document.body.appendChild(item);
-                    
-                    item.classList.add('expanded');
-                    galleryOverlay.classList.add('active');
-                    expandedItem = item;
-                });
-            });
-
-            galleryOverlay.addEventListener('click', () => {
-                if (expandedItem) {
-                    expandedItem.classList.remove('expanded');
-                    
-                    // Return item to original position
-                    if (originalParent) {
-                        originalParent.appendChild(expandedItem);
-                    }
-                    
-                    expandedItem = null;
-                    originalParent = null;
-                }
-                galleryOverlay.classList.remove('active');
-            });
 
             // --- Logic Carousel Modal (reusable untuk Galeri Prestasi & Berita Sekolah) ---
             function setupCarousel({ btnId, modalId, closeId, prevId, nextId }) {
@@ -2107,13 +1781,6 @@
                 });
             }
 
-            setupCarousel({
-                btnId: 'galleryLihatSemuaBtn',
-                modalId: 'galleryCarouselModal',
-                closeId: 'galleryCarouselClose',
-                prevId: 'galleryCarouselPrev',
-                nextId: 'galleryCarouselNext'
-            });
 
             // Berita Sekolah carousel dihandle secara dinamis oleh setupNewsCarouselDynamic()
 
