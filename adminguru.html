@@ -510,13 +510,13 @@
                 <button class="guru-piket-modal-close" id="closePklModal">&times;</button>
             </div>
             <div class="guru-piket-modal-body">
-                <a href="koordinatorpkl.html" class="menu-card">
+                <a href="#" class="menu-card" id="koordinatorPklLink">
                     <div class="icon-box ic-orange">
                         <i class="fas fa-user-cog"></i>
                     </div>
                     <span>Koordinator PKL</span>
                 </a>
-                <a href="pembimbingpkl.html" class="menu-card">
+                <a href="#" class="menu-card" id="guruPembimbingPklLink">
                     <div class="icon-box ic-teal">
                         <i class="fas fa-chalkboard-teacher"></i>
                     </div>
@@ -579,6 +579,30 @@
         </div>
     </div>
 
+    <!-- Modal Peringatan Koordinator PKL -->
+    <div id="koordinatorPklWarningModal" class="modal">
+        <div class="modal-content" style="text-align: center; max-width: 400px;">
+            <div style="margin-bottom: 20px;">
+                <i class="fas fa-user-shield" style="font-size: 4rem; color: #f46b45;"></i>
+            </div>
+            <h3 style="color: #333; margin-bottom: 10px;">Akses Ditolak</h3>
+            <p style="color: #666; margin-bottom: 25px;">Maaf, anda tidak memiliki tugas tambahan sebagai Koordinator PKL</p>
+            <button onclick="document.getElementById('koordinatorPklWarningModal').classList.remove('active')" style="background: #f46b45; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: 600; width: 100%;">Tutup</button>
+        </div>
+    </div>
+
+    <!-- Modal Peringatan Guru Pembimbing PKL -->
+    <div id="guruPembimbingPklWarningModal" class="modal">
+        <div class="modal-content" style="text-align: center; max-width: 400px;">
+            <div style="margin-bottom: 20px;">
+                <i class="fas fa-user-shield" style="font-size: 4rem; color: #f46b45;"></i>
+            </div>
+            <h3 style="color: #333; margin-bottom: 10px;">Akses Ditolak</h3>
+            <p style="color: #666; margin-bottom: 25px;">Maaf, anda tidak memiliki tugas tambahan sebagai Pembimbing PKL Siswa</p>
+            <button onclick="document.getElementById('guruPembimbingPklWarningModal').classList.remove('active')" style="background: #f46b45; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: 600; width: 100%;">Tutup</button>
+        </div>
+    </div>
+
     <!-- Modal Countdown Ruang Uji -->
     <div id="ruangUjiModal" class="modal">
         <div class="modal-content" style="text-align: center; max-width: 500px;">
@@ -609,10 +633,16 @@
         // --- Supabase Integration for Navbar ---
         const supabaseUrl = 'https://mjvobqfcoutazqcovtlp.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdm9icWZjb3V0YXpxY292dGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzEwMzYsImV4cCI6MjA4NjE0NzAzNn0.jz6JaC9mMTMhLVhXSh1OCnFWDPZ0Cy2tUnHEmWxAR8o';
+
+        // --- Supabase Project Mapping PKL (untuk validasi Koordinator PKL) ---
+        const mappingSupabaseUrl  = 'https://ctbskvysuqecnaopqlam.supabase.co';
+        const mappingSupabaseKey  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0YnNrdnlzdXFlY25hb3BxbGFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTAwODksImV4cCI6MjA4NjUyNjA4OX0.npr4SV6s8XFxXek0R0jNvdhlnIZrdTqrNvWGYVtMAcY';
+        let mappingClient;
         
         let supabaseClient;
         if (typeof supabase !== 'undefined') {
             supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+            mappingClient  = supabase.createClient(mappingSupabaseUrl, mappingSupabaseKey);
 
             async function loadSchoolIdentity() {
                 try {
@@ -914,6 +944,77 @@
                     }
                 } catch (err) {
                     console.error("Error validating walikelas:", err);
+                }
+            });
+        }
+
+        // --- Koordinator PKL Validation ---
+        const koordinatorPklLink = document.getElementById('koordinatorPklLink');
+        const koordinatorPklWarningModal = document.getElementById('koordinatorPklWarningModal');
+
+        if (koordinatorPklLink) {
+            koordinatorPklLink.addEventListener('click', async (e) => {
+                e.preventDefault();
+
+                const session = JSON.parse(sessionStorage.getItem('guru_session'));
+                if (!session || !session.nama) {
+                    alert("Sesi tidak valid. Silakan login ulang.");
+                    return;
+                }
+
+                try {
+                    const { data, error } = await mappingClient
+                        .from('koordinatorpkl')
+                        .select('nama')
+                        .eq('nama', session.nama)
+                        .maybeSingle();
+
+                    if (error) throw error;
+
+                    if (data) {
+                        window.location.href = 'koordinatorpklguru.html';
+                    } else {
+                        const pklModalEl = document.getElementById('pklModal');
+                        if (pklModalEl) pklModalEl.classList.remove('active');
+                        koordinatorPklWarningModal.classList.add('active');
+                    }
+                } catch (err) {
+                    console.error("Error validating koordinator PKL:", err);
+                }
+            });
+        }
+
+        // --- Guru Pembimbing PKL Validation ---
+        const guruPembimbingPklLink = document.getElementById('guruPembimbingPklLink');
+        const guruPembimbingPklWarningModal = document.getElementById('guruPembimbingPklWarningModal');
+
+        if (guruPembimbingPklLink) {
+            guruPembimbingPklLink.addEventListener('click', async (e) => {
+                e.preventDefault();
+
+                const session = JSON.parse(sessionStorage.getItem('guru_session'));
+                if (!session || !session.nama) {
+                    alert("Sesi tidak valid. Silakan login ulang.");
+                    return;
+                }
+
+                try {
+                    const { data, error } = await mappingClient
+                        .from('pembimbingsekolah')
+                        .select('nama')
+                        .eq('nama', session.nama);
+
+                    if (error) throw error;
+
+                    if (data && data.length > 0) {
+                        window.location.href = 'dashboardpklsekolah.html';
+                    } else {
+                        const pklModalEl = document.getElementById('pklModal');
+                        if (pklModalEl) pklModalEl.classList.remove('active');
+                        guruPembimbingPklWarningModal.classList.add('active');
+                    }
+                } catch (err) {
+                    console.error("Error validating guru pembimbing PKL:", err);
                 }
             });
         }
