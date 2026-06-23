@@ -1405,8 +1405,9 @@
                     isPassword: false
                 },
                 'PKL': {
-                    label1: 'Username', placeholder1: 'Masukkan Username', type1: 'text',
-                    isSelect1: false,
+                    label1: 'Pilih Nama',
+                    isSelect1: true,
+                    options1: [], // Akan diisi dari tabel pembimbingindustri
                     label2: 'Password', placeholder2: 'Masukkan Password', type2: 'password',
                     isPassword: true
                 },
@@ -1465,6 +1466,30 @@
                 }
             }
             loadSiswaData();
+
+            // --- Fetch Data Pembimbing Industri untuk Dropdown PKL ---
+            async function loadPembimbingIndustriData() {
+                try {
+                    const { data, error } = await absensiClient
+                        .from('pembimbingindustri')
+                        .select('nama')
+                        .order('nama');
+                    
+                    if (error) throw error;
+                    
+                    if (data && data.length > 0) {
+                        roleConfig['PKL'].options1 = data.map(item => item.nama);
+                        
+                        // Jika sedang di tab PKL, refresh dropdown
+                        if (roleInput.value === 'PKL') {
+                            updateFormUI(roleConfig['PKL']);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error loading pembimbing industri options:', err);
+                }
+            }
+            loadPembimbingIndustriData();
 
             // 0. Handle Role Tabs
             roleTabs.forEach(tab => {
@@ -1659,18 +1684,30 @@
                     }
                 } else if (role === 'PKL') {
                     try {
-                        // Query Supabase untuk cek Username dan Password
-                        const { data, error } = await simpedikClient
-                            .from('identitassekolah')
-                            .select('username, password')
-                            .eq('username', val1)
+                        // Query Supabase untuk cek Nama dan Password dari pembimbingindustri
+                        const { data, error } = await absensiClient
+                            .from('pembimbingindustri')
+                            .select('*')
+                            .eq('nama', val1)
                             .eq('password', val2)
                             .single();
 
-                        if (error || !data) throw new Error('Username atau Password salah.');
+                        if (error || !data) throw new Error('Nama atau Password tidak sesuai.');
 
-                        showMessage('Login Berhasil! Mengalihkan...', 'success');
-                        setTimeout(() => { window.location.href = 'adminpkl.html'; }, 1000);
+                        // Simpan sesi PKL ke sessionStorage
+                        sessionStorage.setItem('pkl_session', JSON.stringify(data));
+
+                        // Tampilkan Modal Selamat Datang
+                        const welcomeModal = document.getElementById('welcomeModal');
+                        const welcomeMessage = document.getElementById('welcomeMessage');
+                        const btnWelcomeOk = document.getElementById('btnWelcomeOk');
+
+                        welcomeMessage.textContent = `Selamat datang ${data.nama} di aplikasi SIMPedik`;
+                        welcomeModal.classList.add('active');
+
+                        // Redirect saat klik OK
+                        btnWelcomeOk.onclick = () => window.location.href = 'adminpembimbingindustri.html';
+
                     } catch (err) {
                         showMessage(err.message || 'Login gagal.', 'error');
                         submitBtn.textContent = originalBtnText;
