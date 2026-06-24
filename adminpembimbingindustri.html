@@ -1649,6 +1649,10 @@
                             <input type="text" class="form-control" id="inputNamaSiswaAbsen" disabled>
                         </div>
                         <div class="form-group-modal">
+                            <label for="inputNisnAbsen">NISN</label>
+                            <input type="text" class="form-control" id="inputNisnAbsen" disabled>
+                        </div>
+                        <div class="form-group-modal">
                             <label for="inputStatusAbsen">Status Kehadiran</label>
                             <select class="form-control" id="inputStatusAbsen" required>
                                 <option value="">-- Pilih Status --</option>
@@ -2627,6 +2631,7 @@
             const form        = document.getElementById('formKehadiran');
             const inputId     = document.getElementById('inputIdAbsen');
             const inputNama   = document.getElementById('inputNamaSiswaAbsen');
+            const inputNisn   = document.getElementById('inputNisnAbsen');
             const inputTgl    = document.getElementById('inputTanggalAbsen');
             const inputStatus = document.getElementById('inputStatusAbsen');
             const btnSimpan   = form.querySelector('.btn-simpan');
@@ -2656,6 +2661,7 @@
 
             async function openModal() {
                 inputNama.value   = siswaAktif ? (siswaAktif.nama_siswa || '-') : '-';
+                inputNisn.value   = siswaAktif ? (siswaAktif.nisn || '-') : '-';
                 inputTgl.value    = new Date().toISOString().split('T')[0];
                 inputStatus.value = '';
                 inputId.value     = 'Memuat...';
@@ -2696,6 +2702,7 @@
                 e.preventDefault();
                 const id_absen   = inputId.value.trim();
                 const nama_siswa = inputNama.value;
+                const nisn       = inputNisn.value;
                 const tanggal    = inputTgl.value;
                 const status     = inputStatus.value;
                 if (!id_absen || !status || !tanggal || id_absen === 'Memuat...') return;
@@ -2721,12 +2728,12 @@
 
                     const { error } = await supabaseClient
                         .from('absensipkl')
-                        .insert([{ id: id_absen, tanggal: tanggal, nama_siswa: nama_siswa, status: status }]);
+                        .insert([{ id: id_absen, tanggal: tanggal, nama_siswa: nama_siswa, nisn: nisn, status: status }]);
 
                     if (error) throw error;
 
                     const tanggalFormatted = new Date(tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
-                    absensiData.push({ id: Date.now(), id_absen, nama_siswa, tanggal: tanggalFormatted, tanggal_raw: tanggal, status });
+                    absensiData.push({ id: Date.now(), id_absen, nama_siswa, nisn, tanggal: tanggalFormatted, tanggal_raw: tanggal, status });
                     renderAbsensiTable();
                     closeModal();
                     showToast('Data kehadiran berhasil disimpan.', 'success');
