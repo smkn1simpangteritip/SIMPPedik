@@ -165,6 +165,41 @@
             transform: rotate(180deg);
         }
 
+        /* Tab Styles (di dalam accordion PKL) */
+        .tab-nav {
+            display: flex;
+            gap: 4px;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 10px 18px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.88rem;
+            color: #6b7280;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover {
+            color: #06b6d4;
+            background-color: #f0fdfe;
+        }
+        .tab-btn.active {
+            color: #06b6d4;
+            border-bottom-color: #06b6d4;
+        }
+        .tab-pane {
+            display: none;
+        }
+        .tab-pane.active {
+            display: block;
+        }
+
         /* Table Styles */
         .table-responsive { overflow-x: auto; margin-top: 10px; }
         .custom-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
@@ -367,6 +402,93 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Item 6: Praktik Kerja Lapangan (PKL) -->
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span><i class="fas fa-briefcase" style="color: #06b6d4; margin-right: 10px; width: 20px; text-align: center;"></i> Praktik Kerja Lapangan (PKL)</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-body">
+
+                            <!-- Tab Navigation -->
+                            <div class="tab-nav">
+                                <button class="tab-btn active" onclick="switchPklTab(this, 'pklAbsensiTab')">
+                                    <i class="fas fa-calendar-check"></i> Absensi Kehadiran
+                                </button>
+                                <button class="tab-btn" onclick="switchPklTab(this, 'pklKasusTab')">
+                                    <i class="fas fa-exclamation-triangle"></i> Kasus PKL
+                                </button>
+                                <button class="tab-btn" onclick="switchPklTab(this, 'pklNilaiTab')">
+                                    <i class="fas fa-chart-line"></i> Nilai PKL
+                                </button>
+                            </div>
+
+                            <!-- Tab: Absensi Kehadiran -->
+                            <div class="tab-pane active" id="pklAbsensiTab">
+                                <div class="table-responsive">
+                                    <table class="custom-table" id="pklAbsensiTable">
+                                        <thead>
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Kode Absen</th>
+                                                <th>Nama Siswa</th>
+                                                <th>NISN</th>
+                                                <th>Tanggal</th>
+                                                <th>Status Kehadiran</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td colspan="6" style="text-align:center;">Memuat data...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Tab: Kasus PKL -->
+                            <div class="tab-pane" id="pklKasusTab">
+                                <div class="table-responsive">
+                                    <table class="custom-table" id="pklKasusTable">
+                                        <thead>
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Tanggal</th>
+                                                <th>Jenis Kasus</th>
+                                                <th>Tempat PKL</th>
+                                                <th>Pembimbing</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Tab: Nilai PKL -->
+                            <div class="tab-pane" id="pklNilaiTab">
+                                <div class="table-responsive">
+                                    <table class="custom-table" id="pklNilaiTable">
+                                        <thead>
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Aspek Penilaian</th>
+                                                <th>Nilai</th>
+                                                <th>Predikat</th>
+                                                <th>Pembimbing</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -449,6 +571,7 @@
                 loadNilaiSiswa(session.nama_siswa);
                 loadKasusSiswa(session.nama_siswa);
                 loadPembinaanWali(session.nama_siswa);
+                loadPklSiswa(session.nama_siswa, session.nisn);
             } else {
                 // Jika tidak ada sesi, redirect ke login
                 window.location.href = 'index.html';
@@ -700,6 +823,168 @@
                 });
             } catch (err) {
                 console.error('Error loading pembinaan:', err);
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Gagal memuat data: ${err.message}</td></tr>`;
+            }
+        }
+
+        // --- Tab Switch Logic (PKL) ---
+        function switchPklTab(btn, paneId) {
+            const tabContainer = btn.closest('.accordion-body');
+
+            tabContainer.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            tabContainer.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+
+            btn.classList.add('active');
+            tabContainer.querySelector('#' + paneId).classList.add('active');
+
+            // Sesuaikan ulang tinggi accordion karena konten tab berubah
+            const accItem = btn.closest('.accordion-item');
+            const accContent = accItem.querySelector('.accordion-content');
+            if (accItem.classList.contains('active')) {
+                accContent.style.maxHeight = accContent.scrollHeight + "px";
+            }
+        }
+
+        // --- Load Data PKL Siswa (3 Tab) ---
+        function loadPklSiswa(namaSiswa, nisn) {
+            loadPklAbsensi(nisn);
+            loadPklKasus(namaSiswa);
+            loadPklNilai(namaSiswa);
+        }
+
+        // Tab 1: Absensi Kehadiran PKL
+        async function loadPklAbsensi(nisn) {
+            const tbody = document.querySelector('#pklAbsensiTable tbody');
+            if (!tbody) return;
+
+            if (!nisn) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 15px; color: #888;">NISN tidak ditemukan.</td></tr>';
+                return;
+            }
+
+            try {
+                const { data, error } = await absensiClient
+                    .from('absensipkl')
+                    .select('*')
+                    .eq('nisn', nisn)
+                    .order('id', { ascending: true });
+
+                if (error) throw error;
+
+                tbody.innerHTML = '';
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 15px; color: #888;">Belum ada riwayat kehadiran PKL.</td></tr>';
+                    return;
+                }
+
+                data.forEach((item, index) => {
+                    const date = item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID', {
+                        day: '2-digit', month: 'long', year: 'numeric'
+                    }) : '-';
+
+                    let statusColor = '#6b7280';
+                    if (item.status === 'Hadir') statusColor = '#10b981';
+                    else if (item.status === 'Sakit') statusColor = '#3b82f6';
+                    else if (item.status === 'Izin') statusColor = '#f59e0b';
+                    else if (item.status === 'Tanpa Keterangan') statusColor = '#ef4444';
+
+                    const row = `<tr>
+                        <td>${index + 1}</td>
+                        <td>${item.id || '-'}</td>
+                        <td>${item.nama_siswa || '-'}</td>
+                        <td>${item.nisn || '-'}</td>
+                        <td>${date}</td>
+                        <td><span class="status-badge" style="background-color: ${statusColor}; color: white;">${item.status || '-'}</span></td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            } catch (err) {
+                console.error('Error loading absensi PKL:', err);
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Gagal memuat data: ${err.message}</td></tr>`;
+            }
+        }
+
+        // Tab 2: Kasus PKL
+        async function loadPklKasus(namaSiswa) {
+            const tbody = document.querySelector('#pklKasusTable tbody');
+            if (!tbody) return;
+
+            try {
+                const { data, error } = await absensiClient
+                    .from('pklkasus')
+                    .select('*')
+                    .eq('nama_siswa', namaSiswa)
+                    .order('tanggal', { ascending: false });
+
+                if (error) throw error;
+
+                tbody.innerHTML = '';
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 15px; color: #888;">Tidak ada catatan kasus PKL.</td></tr>';
+                    return;
+                }
+
+                data.forEach((item, index) => {
+                    const date = new Date(item.tanggal).toLocaleDateString('id-ID', {
+                        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+                    });
+
+                    const row = `<tr>
+                        <td>${index + 1}</td>
+                        <td>${date}</td>
+                        <td>${item.jenis_kasus || '-'}</td>
+                        <td>${item.tempat_pkl || '-'}</td>
+                        <td>${item.pembimbing || '-'}</td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            } catch (err) {
+                console.error('Error loading kasus PKL:', err);
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Gagal memuat data: ${err.message}</td></tr>`;
+            }
+        }
+
+        // Tab 3: Nilai PKL
+        async function loadPklNilai(namaSiswa) {
+            const tbody = document.querySelector('#pklNilaiTable tbody');
+            if (!tbody) return;
+
+            try {
+                const { data, error } = await absensiClient
+                    .from('pklnilai')
+                    .select('*')
+                    .eq('nama_siswa', namaSiswa)
+                    .order('aspek', { ascending: true });
+
+                if (error) throw error;
+
+                tbody.innerHTML = '';
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 15px; color: #888;">Belum ada data nilai PKL.</td></tr>';
+                    return;
+                }
+
+                data.forEach((item, index) => {
+                    let predikatColor = '#6b7280';
+                    if (item.predikat === 'Sangat Baik') predikatColor = '#10b981';
+                    else if (item.predikat === 'Baik') predikatColor = '#3b82f6';
+                    else if (item.predikat === 'Cukup') predikatColor = '#f59e0b';
+                    else if (item.predikat === 'Kurang') predikatColor = '#ef4444';
+
+                    const row = `<tr>
+                        <td>${index + 1}</td>
+                        <td>${item.aspek || '-'}</td>
+                        <td>${item.nilai ?? '-'}</td>
+                        <td><span class="status-badge" style="background-color: ${predikatColor}; color: white;">${item.predikat || '-'}</span></td>
+                        <td>${item.pembimbing || '-'}</td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            } catch (err) {
+                console.error('Error loading nilai PKL:', err);
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Gagal memuat data: ${err.message}</td></tr>`;
             }
         }
