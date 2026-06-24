@@ -114,8 +114,8 @@
         }
 
         .role-tab.active {
-            background-color: #ffffff;
-            color: #667eea;
+            background-color: #FF5722;
+            color: #ffffff;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
@@ -244,6 +244,90 @@
             .login-right { padding: 2rem; }
         }
 
+        /* Modal Login khusus mobile: cegah konten terpotong & perkecil elemen */
+        @media (max-width: 768px) {
+            #loginModal {
+                align-items: center;
+                padding: 12px;
+                overflow-y: auto;
+            }
+            #loginModal .modal-content {
+                max-height: calc(100vh - 24px);
+                margin: auto;
+                border-radius: 12px;
+                align-items: flex-start;
+            }
+            #loginModal .login-container {
+                margin: 0;
+                max-width: 100%;
+            }
+            #loginModal .login-left {
+                padding: 1.2rem 1.5rem;
+            }
+            #loginModal .school-logo {
+                width: 60px;
+                margin-bottom: 0.8rem;
+            }
+            #loginModal .login-left h1 {
+                font-size: 1.1rem;
+                margin-bottom: 0.4rem;
+            }
+            #loginModal .login-left p {
+                font-size: 0.85rem;
+                line-height: 1.4;
+            }
+            #loginModal .login-right {
+                padding: 1.2rem 1.5rem 1.5rem;
+            }
+            #loginModal .login-header {
+                margin-bottom: 1rem;
+            }
+            #loginModal .login-header h2 {
+                font-size: 1.3rem;
+                margin-bottom: 0.25rem;
+            }
+            #loginModal .login-header p {
+                font-size: 0.8rem;
+            }
+            #loginModal .form-group {
+                margin-bottom: 0.9rem;
+            }
+            #loginModal .form-group label {
+                font-size: 0.8rem;
+                margin-bottom: 0.3rem;
+            }
+            #loginModal .form-group input,
+            #loginModal .form-group select {
+                padding: 0.6rem 0.7rem;
+                font-size: 0.9rem;
+            }
+            #loginModal .role-tab {
+                padding: 7px;
+                font-size: 0.8rem;
+            }
+            #loginModal .btn-login,
+            #loginModal .btn-cancel {
+                padding: 0.7rem;
+                font-size: 0.9rem;
+            }
+            #loginModal .footer-text {
+                margin-top: 0.9rem;
+            }
+            #loginModal .footer-text p {
+                font-size: 0.7rem !important;
+            }
+        }
+
+        @media (max-width: 380px) {
+            #loginModal .login-left,
+            #loginModal .login-right {
+                padding: 1rem 1.1rem;
+            }
+            #loginModal .school-logo {
+                width: 50px;
+            }
+        }
+
         /* --- Modal Styles (Registration) --- */
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
         .modal.active { display: flex; }
@@ -253,7 +337,9 @@
         #loginModal .modal-content {
             padding: 0;
             max-width: 900px;
-            overflow: hidden;
+            max-height: 90vh;
+            overflow-y: auto;
+            overflow-x: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
