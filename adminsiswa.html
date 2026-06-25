@@ -118,6 +118,10 @@
             .navbar-brand span {
                 font-size: 1rem;
             }
+
+            .main-content {
+                padding: 2rem 5px;
+            }
         }
 
         /* Accordion Styles */
@@ -171,8 +175,11 @@
             gap: 4px;
             border-bottom: 2px solid #2d3548;
             margin-bottom: 15px;
-            flex-wrap: wrap;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
+        .tab-nav::-webkit-scrollbar { display: none; }
         .tab-btn {
             padding: 10px 18px;
             border: none;
