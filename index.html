@@ -1054,6 +1054,7 @@
                                 <button type="button" class="role-tab active" data-role="Siswa">Siswa</button>
                                 <button type="button" class="role-tab" data-role="Guru">Guru</button>
                                 <button type="button" class="role-tab" data-role="PKL">PKL</button>
+                                <button type="button" class="role-tab" data-role="AdminTU">Admin TU</button>
                                 <button type="button" class="role-tab" data-role="Administrator">Admin</button>
                             </div>
                             <input type="hidden" id="role" value="Siswa">
@@ -1497,6 +1498,13 @@
                     label2: 'Password', placeholder2: 'Masukkan Password', type2: 'password',
                     isPassword: true
                 },
+                'AdminTU': {
+                    label1: 'Pilih Nama',
+                    isSelect1: true,
+                    options1: [], // Akan diisi dari tabel datapegawai
+                    label2: 'Password', placeholder2: 'Masukkan Password', type2: 'password',
+                    isPassword: true
+                },
                 'Administrator': {
                     label1: 'Username', placeholder1: 'Masukkan Username', type1: 'text',
                     isSelect1: false,
@@ -1576,6 +1584,29 @@
                 }
             }
             loadPembimbingIndustriData();
+
+            // --- Fetch Data Pegawai TU untuk Dropdown Admin TU ---
+            async function loadPegawaiTUData() {
+                try {
+                    const { data, error } = await absensiClient
+                        .from('datapegawai')
+                        .select('nama_pegawai')
+                        .order('nama_pegawai');
+                    
+                    if (error) throw error;
+                    
+                    if (data && data.length > 0) {
+                        roleConfig['AdminTU'].options1 = data.map(p => p.nama_pegawai);
+                        
+                        if (roleInput.value === 'AdminTU') {
+                            updateFormUI(roleConfig['AdminTU']);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error loading pegawai TU options:', err);
+                }
+            }
+            loadPegawaiTUData();
 
             // 0. Handle Role Tabs
             roleTabs.forEach(tab => {
@@ -1793,6 +1824,40 @@
 
                         // Redirect saat klik OK
                         btnWelcomeOk.onclick = () => window.location.href = 'adminpembimbingindustri.html';
+
+                    } catch (err) {
+                        showMessage(err.message || 'Login gagal.', 'error');
+                        submitBtn.textContent = originalBtnText;
+                        submitBtn.disabled = false;
+                    }
+                } else if (role === 'AdminTU') {
+                    try {
+                        const { data, error } = await absensiClient
+                            .from('datapegawai')
+                            .select('*')
+                            .eq('nama_pegawai', val1)
+                            .eq('password', val2)
+                            .single();
+
+                        if (error || !data) throw new Error('Nama atau Password tidak sesuai.');
+
+                        // Simpan sesi Admin TU ke sessionStorage
+                        sessionStorage.setItem('admintu_session', JSON.stringify({
+                            id: data.id,
+                            nama: data.nama_pegawai,
+                            nip: data.nip,
+                            photo: data.photo
+                        }));
+
+                        // Tampilkan Modal Selamat Datang
+                        const welcomeModal = document.getElementById('welcomeModal');
+                        const welcomeMessage = document.getElementById('welcomeMessage');
+                        const btnWelcomeOk = document.getElementById('btnWelcomeOk');
+
+                        welcomeMessage.textContent = `Selamat datang ${data.nama_pegawai} di aplikasi SIMPedik`;
+                        welcomeModal.classList.add('active');
+
+                        btnWelcomeOk.onclick = () => window.location.href = 'admintu.html';
 
                     } catch (err) {
                         showMessage(err.message || 'Login gagal.', 'error');
