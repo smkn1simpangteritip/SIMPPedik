@@ -150,12 +150,12 @@
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.3s ease-out;
-            background-color: #f8fafc;
+            background-color: #1e2330;
         }
         .accordion-body {
             padding: 20px;
-            border-top: 1px solid #e2e8f0;
-            color: #555;
+            border-top: 1px solid #2d3548;
+            color: #cbd5e1;
         }
         .accordion-icon {
             transition: transform 0.3s ease;
@@ -169,7 +169,7 @@
         .tab-nav {
             display: flex;
             gap: 4px;
-            border-bottom: 2px solid #e2e8f0;
+            border-bottom: 2px solid #2d3548;
             margin-bottom: 15px;
             flex-wrap: wrap;
         }
@@ -180,18 +180,24 @@
             cursor: pointer;
             font-weight: 600;
             font-size: 0.88rem;
-            color: #6b7280;
+            color: #94a3b8;
             border-bottom: 3px solid transparent;
             margin-bottom: -2px;
             transition: all 0.2s;
         }
         .tab-btn:hover {
-            color: #06b6d4;
-            background-color: #f0fdfe;
+            color: #e2e8f0;
+            background-color: #2d3548;
         }
         .tab-btn.active {
             color: #06b6d4;
             border-bottom-color: #06b6d4;
+            background-color: #0f2030;
+        }
+        .tab-btn.pkl-tab.active {
+            color: #fff;
+            background-color: var(--navbar-bg);
+            border-bottom-color: #b91c1c;
         }
         .tab-pane {
             display: none;
@@ -203,9 +209,10 @@
         /* Table Styles */
         .table-responsive { overflow-x: auto; margin-top: 10px; }
         .custom-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .custom-table th, .custom-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
-        .custom-table th { background-color: #f8f9fa; color: #555; font-weight: 600; }
-        .custom-table tr:hover { background-color: #f9f9f9; }
+        .custom-table th, .custom-table td { padding: 12px 15px; text-align: left; border: 1px solid #2d3548; }
+        .custom-table th { background-color: #E6F2DD; color: #1a1a1a; font-weight: 600; }
+        .custom-table td { color: #cbd5e1; }
+        .custom-table tr:hover td { background-color: #253047; }
         .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; }
     </style>
 </head>
@@ -414,13 +421,13 @@
 
                             <!-- Tab Navigation -->
                             <div class="tab-nav">
-                                <button class="tab-btn active" onclick="switchPklTab(this, 'pklAbsensiTab')">
+                                <button class="tab-btn pkl-tab active" onclick="switchPklTab(this, 'pklAbsensiTab')">
                                     <i class="fas fa-calendar-check"></i> Absensi Kehadiran
                                 </button>
-                                <button class="tab-btn" onclick="switchPklTab(this, 'pklKasusTab')">
+                                <button class="tab-btn pkl-tab" onclick="switchPklTab(this, 'pklKasusTab')">
                                     <i class="fas fa-exclamation-triangle"></i> Kasus PKL
                                 </button>
-                                <button class="tab-btn" onclick="switchPklTab(this, 'pklNilaiTab')">
+                                <button class="tab-btn pkl-tab" onclick="switchPklTab(this, 'pklNilaiTab')">
                                     <i class="fas fa-chart-line"></i> Nilai PKL
                                 </button>
                             </div>
@@ -453,14 +460,15 @@
                                         <thead>
                                             <tr>
                                                 <th>No</th>
+                                                <th>Kode Kasus</th>
                                                 <th>Tanggal</th>
-                                                <th>Jenis Kasus</th>
-                                                <th>Tempat PKL</th>
-                                                <th>Pembimbing</th>
+                                                <th>Nama Siswa</th>
+                                                <th>Deskripsi Kasus</th>
+                                                <th>Tindak Lanjut</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
+                                            <tr><td colspan="6" style="text-align:center;">Memuat data...</td></tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -473,14 +481,17 @@
                                         <thead>
                                             <tr>
                                                 <th>No</th>
-                                                <th>Aspek Penilaian</th>
+                                                <th>Kode Nilai</th>
+                                                <th>Nama Siswa</th>
+                                                <th>Kelas</th>
+                                                <th>Kode SKKNI</th>
+                                                <th>Deskripsi SKKNI</th>
                                                 <th>Nilai</th>
-                                                <th>Predikat</th>
-                                                <th>Pembimbing</th>
+                                                <th>Deskripsi Nilai</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
+                                            <tr><td colspan="8" style="text-align:center;">Memuat data...</td></tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -591,15 +602,23 @@
         function toggleAccordion(header) {
             const item = header.parentElement;
             const content = item.querySelector('.accordion-content');
-            
-            // Toggle active class
-            item.classList.toggle('active');
-            
-            // Toggle max-height for animation
-            if (item.classList.contains('active')) {
-                content.style.maxHeight = content.scrollHeight + "px";
-            } else {
+            const isActive = item.classList.contains('active');
+
+            // Tutup semua accordion lain
+            document.querySelectorAll('.accordion-item').forEach(otherItem => {
+                if (otherItem !== item) {
+                    otherItem.classList.remove('active');
+                    otherItem.querySelector('.accordion-content').style.maxHeight = null;
+                }
+            });
+
+            // Toggle accordion yang diklik
+            if (isActive) {
+                item.classList.remove('active');
                 content.style.maxHeight = null;
+            } else {
+                item.classList.add('active');
+                content.style.maxHeight = content.scrollHeight + "px";
             }
         }
 
@@ -912,7 +931,7 @@
 
             try {
                 const { data, error } = await absensiClient
-                    .from('pklkasus')
+                    .from('kasuspkl')
                     .select('*')
                     .eq('nama_siswa', namaSiswa)
                     .order('tanggal', { ascending: false });
@@ -922,27 +941,28 @@
                 tbody.innerHTML = '';
 
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 15px; color: #888;">Tidak ada catatan kasus PKL.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 15px; color: #888;">Tidak ada catatan kasus PKL.</td></tr>';
                     return;
                 }
 
                 data.forEach((item, index) => {
-                    const date = new Date(item.tanggal).toLocaleDateString('id-ID', {
-                        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-                    });
+                    const date = item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID', {
+                        day: '2-digit', month: 'long', year: 'numeric'
+                    }) : '-';
 
                     const row = `<tr>
                         <td>${index + 1}</td>
+                        <td>${item.id || '-'}</td>
                         <td>${date}</td>
-                        <td>${item.jenis_kasus || '-'}</td>
-                        <td>${item.tempat_pkl || '-'}</td>
-                        <td>${item.pembimbing || '-'}</td>
+                        <td>${item.nama_siswa || '-'}</td>
+                        <td>${item.deskripsi || '-'}</td>
+                        <td>${item.tindak_lanjut || '-'}</td>
                     </tr>`;
                     tbody.innerHTML += row;
                 });
             } catch (err) {
                 console.error('Error loading kasus PKL:', err);
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Gagal memuat data: ${err.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Gagal memuat data: ${err.message}</td></tr>`;
             }
         }
 
@@ -953,39 +973,36 @@
 
             try {
                 const { data, error } = await absensiClient
-                    .from('pklnilai')
+                    .from('nilaipkl')
                     .select('*')
                     .eq('nama_siswa', namaSiswa)
-                    .order('aspek', { ascending: true });
+                    .order('kode_nilai', { ascending: true });
 
                 if (error) throw error;
 
                 tbody.innerHTML = '';
 
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 15px; color: #888;">Belum ada data nilai PKL.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 15px; color: #888;">Belum ada data nilai PKL.</td></tr>';
                     return;
                 }
 
                 data.forEach((item, index) => {
-                    let predikatColor = '#6b7280';
-                    if (item.predikat === 'Sangat Baik') predikatColor = '#10b981';
-                    else if (item.predikat === 'Baik') predikatColor = '#3b82f6';
-                    else if (item.predikat === 'Cukup') predikatColor = '#f59e0b';
-                    else if (item.predikat === 'Kurang') predikatColor = '#ef4444';
-
                     const row = `<tr>
                         <td>${index + 1}</td>
-                        <td>${item.aspek || '-'}</td>
+                        <td>${item.kode_nilai || '-'}</td>
+                        <td>${item.nama_siswa || '-'}</td>
+                        <td>${item.kelas || '-'}</td>
+                        <td>${item.skkni || '-'}</td>
+                        <td>${item.deskripsi_skkni || '-'}</td>
                         <td>${item.nilai ?? '-'}</td>
-                        <td><span class="status-badge" style="background-color: ${predikatColor}; color: white;">${item.predikat || '-'}</span></td>
-                        <td>${item.pembimbing || '-'}</td>
+                        <td>${item.deskripsi_nilai || '-'}</td>
                     </tr>`;
                     tbody.innerHTML += row;
                 });
             } catch (err) {
                 console.error('Error loading nilai PKL:', err);
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Gagal memuat data: ${err.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red;">Gagal memuat data: ${err.message}</td></tr>`;
             }
         }
     </script>
