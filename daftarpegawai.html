@@ -467,7 +467,201 @@
             .navbar-brand span { font-size: 1rem; }
             .main-content { padding: 2rem 5px; }
             .form-row { grid-template-columns: 1fr; }
+
+            /* Modal di mobile: floating dengan padding 10px semua sisi */
+            .modal-overlay {
+                align-items: center;
+                justify-content: center;
+                padding: 10px;
+            }
+            .modal-box {
+                width: 100%;
+                max-width: 100%;
+                max-height: calc(100vh - 20px);
+                border-radius: 12px;
+                animation: slideDown 0.3s ease;
+                margin: 0;
+            }
+            .modal-body {
+                padding: 14px;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                flex: 1;
+                min-height: 0;
+            }
+            .modal-header { padding: 12px 14px; }
+            .modal-footer { padding: 10px 14px; }
+            .form-group { margin-bottom: 10px; }
         }
+
+        /* ID Auto Generate */
+        .id-auto-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .id-auto-input {
+            width: 100%;
+            padding: 9px 12px;
+            padding-right: 70px;
+            border: 1.5px solid #ddd;
+            border-radius: 7px;
+            font-size: 0.9rem;
+            color: #333;
+            background: #f8f8ff;
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: default;
+        }
+        .id-auto-badge {
+            position: absolute;
+            right: 8px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 20px;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        /* Custom Datepicker */
+        .datepicker-wrapper { position: relative; }
+        .datepicker-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 12px;
+            border: 1.5px solid #ddd;
+            border-radius: 7px;
+            font-size: 0.9rem;
+            color: #666;
+            cursor: pointer;
+            background: white;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            user-select: none;
+        }
+        .datepicker-display:hover, .datepicker-display.open {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.15);
+        }
+        .datepicker-display.has-value { color: #333; font-weight: 600; }
+        .datepicker-popup {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.22);
+            width: 280px;
+            overflow: hidden;
+            animation: fadeInDown 0.18s ease;
+        }
+        .datepicker-popup.open { display: block; }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .cal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 12px 10px;
+            color: white;
+        }
+        .cal-nav {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem;
+            transition: background 0.2s;
+        }
+        .cal-nav:hover { background: rgba(255,255,255,0.35); }
+        .cal-month-year {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .cal-month-year select {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-radius: 6px;
+            padding: 3px 6px;
+            cursor: pointer;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        .cal-month-year select option { color: #333; background: white; }
+        .cal-days-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background: #f5f3ff;
+            padding: 6px 8px 4px;
+        }
+        .cal-days-header span {
+            text-align: center;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            padding: 6px 8px 8px;
+        }
+        .cal-day {
+            text-align: center;
+            padding: 6px 2px;
+            font-size: 0.82rem;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #333;
+            transition: background 0.15s, color 0.15s;
+            border: none;
+            background: transparent;
+        }
+        .cal-day:hover { background: #ede9fe; color: var(--primary-color); }
+        .cal-day.today { font-weight: 700; color: var(--primary-color); border: 1.5px solid var(--primary-color); }
+        .cal-day.selected { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white !important; font-weight: 700; }
+        .cal-day.other-month { color: #ccc; }
+        .cal-day.sunday { color: #ef4444; }
+        .cal-day.selected.sunday { color: white !important; }
+        .cal-footer {
+            display: flex;
+            gap: 6px;
+            padding: 8px 10px;
+            border-top: 1px solid #f0f0f0;
+            background: #fafafa;
+        }
+        .cal-today-btn, .cal-clear-btn {
+            flex: 1;
+            padding: 6px;
+            border-radius: 6px;
+            font-size: 0.76rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: opacity 0.2s;
+        }
+        .cal-today-btn { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; }
+        .cal-clear-btn { background: #f1f1f1; color: #777; }
+        .cal-today-btn:hover, .cal-clear-btn:hover { opacity: 0.82; }
     </style>
 </head>
 <body>
@@ -541,7 +735,10 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label><i class="fas fa-hashtag" style="margin-right:4px;color:var(--primary-color)"></i>ID Pegawai</label>
-                        <input type="text" id="inputIdPegawai" placeholder="Contoh: TU-001">
+                        <div class="id-auto-wrapper">
+                            <input type="text" id="inputIdPegawai" readonly class="id-auto-input">
+                            <span class="id-auto-badge"><i class="fas fa-magic"></i> Auto</span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-id-card" style="margin-right:4px;color:var(--primary-color)"></i>NIP <span style="color:#aaa;font-weight:400;font-size:0.75rem;">(opsional)</span></label>
@@ -561,7 +758,14 @@
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-calendar" style="margin-right:4px;color:var(--primary-color)"></i>Tanggal Lahir</label>
-                        <input type="date" id="inputTanggalLahir">
+                        <div class="datepicker-wrapper" id="datepickerWrapper">
+                            <div class="datepicker-display" id="datepickerDisplay" onclick="toggleCalendar()">
+                                <i class="fas fa-calendar-alt" style="color:var(--primary-color)"></i>
+                                <span id="datepickerText">Pilih tanggal lahir</span>
+                                <i class="fas fa-chevron-down" id="calChevron" style="margin-left:auto;color:#aaa;font-size:0.75rem;transition:transform 0.2s;"></i>
+                            </div>
+                            <input type="hidden" id="inputTanggalLahir">
+                        </div>
                     </div>
                 </div>
 
@@ -619,8 +823,8 @@
 
     <script>
         // --- Supabase ---
-        const supabaseUrl  = 'https://mjvobqfcoutazqcovtlp.supabase.co';
-        const supabaseKey  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdm9icWZjb3V0YXpxY292dGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzEwMzYsImV4cCI6MjA4NjE0NzAzNn0.jz6JaC9mMTMhLVhXSh1OCnFWDPZ0Cy2tUnHEmWxAR8o';
+        const supabaseUrl  = 'https://ctbskvysuqecnaopqlam.supabase.co';
+        const supabaseKey  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0YnNrdnlzdXFlY25hb3BxbGFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTAwODksImV4cCI6MjA4NjUyNjA4OX0.npr4SV6s8XFxXek0R0jNvdhlnIZrdTqrNvWGYVtMAcY';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
         let pegawaiData = [];
@@ -650,9 +854,9 @@
             tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:30px;color:#aaa;"><i class="fas fa-spinner fa-spin"></i> Memuat data...</td></tr>`;
             try {
                 const { data, error } = await supabaseClient
-                    .from('pegawai')
+                    .from('datapegawai')
                     .select('*')
-                    .order('id_pegawai', { ascending: true });
+                    .order('id', { ascending: true });
                 if (error) throw error;
                 pegawaiData = data || [];
                 renderTable();
@@ -676,12 +880,12 @@
                 return `<tr>
                     <td>${i + 1}</td>
                     <td class="photo-cell">${fotoEl}</td>
-                    <td>${p.id_pegawai || '-'}</td>
-                    <td style="font-weight:600;">${p.nama || '-'}</td>
+                    <td>${p.id || '-'}</td>
+                    <td style="font-weight:600;">${p.nama_pegawai || '-'}</td>
                     <td>${p.nip || '-'}</td>
                     <td>${ttl}</td>
                     <td>${p.alamat || '-'}</td>
-                    <td>${p.telepon || '-'}</td>
+                    <td>${p.tlp || '-'}</td>
                     <td style="white-space:nowrap;">
                         <button class="btn-action btn-edit" onclick="openModal('edit', '${p.id}')"><i class="fas fa-pen"></i> Edit</button>
                         <button class="btn-action btn-delete" style="margin-left:4px;" onclick="deletePegawai('${p.id}')"><i class="fas fa-trash"></i> Hapus</button>
@@ -698,6 +902,7 @@
             document.getElementById('inputNama').value = '';
             document.getElementById('inputTempatLahir').value = '';
             document.getElementById('inputTanggalLahir').value = '';
+            calSelectedDate = null;
             document.getElementById('inputAlamat').value = '';
             document.getElementById('inputTelepon').value = '';
             document.getElementById('inputPassword').value = '';
@@ -712,13 +917,14 @@
                 if (!p) return;
                 editRowId = id;
                 document.getElementById('modalTitle').innerHTML = '<i class="fas fa-pen"></i> Edit Pegawai';
-                document.getElementById('inputIdPegawai').value = p.id_pegawai || '';
+                document.getElementById('inputIdPegawai').value = p.id || '';
                 document.getElementById('inputNip').value = p.nip || '';
-                document.getElementById('inputNama').value = p.nama || '';
+                document.getElementById('inputNama').value = p.nama_pegawai || '';
                 document.getElementById('inputTempatLahir').value = p.tempat_lahir || '';
                 document.getElementById('inputTanggalLahir').value = p.tanggal_lahir || '';
+                calSelectedDate = p.tanggal_lahir || null;
                 document.getElementById('inputAlamat').value = p.alamat || '';
-                document.getElementById('inputTelepon').value = p.telepon || '';
+                document.getElementById('inputTelepon').value = p.tlp || '';
                 document.getElementById('inputPhotoUrl').value = p.photo || '';
                 if (p.photo) {
                     document.getElementById('photoPreview').src = p.photo;
@@ -727,7 +933,13 @@
                 }
             } else {
                 document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-plus"></i> Tambah Pegawai';
+                // Auto-generate ID Pegawai format IP-XXXX
+                const rand = String(Math.floor(1000 + Math.random() * 9000));
+                document.getElementById('inputIdPegawai').value = 'IP-' + rand;
             }
+            // Reset calendar display
+            calSelectedDate = document.getElementById('inputTanggalLahir').value || null;
+            updateDatepickerDisplay();
             document.getElementById('modalOverlay').classList.add('active');
         }
 
@@ -762,14 +974,23 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
 
             try {
-                const payload = { id_pegawai, nama, nip, tempat_lahir, tanggal_lahir, alamat, telepon, photo };
+                const payload = {
+                    id: id_pegawai,
+                    nama_pegawai: nama,
+                    nip,
+                    tempat_lahir,
+                    tanggal_lahir,
+                    alamat,
+                    tlp: telepon,
+                    photo
+                };
                 if (password) payload.password = password;
 
                 let error;
                 if (editRowId) {
-                    ({ error } = await supabaseClient.from('pegawai').update(payload).eq('id', editRowId));
+                    ({ error } = await supabaseClient.from('datapegawai').update(payload).eq('id', editRowId));
                 } else {
-                    ({ error } = await supabaseClient.from('pegawai').insert([payload]));
+                    ({ error } = await supabaseClient.from('datapegawai').insert([payload]));
                 }
                 if (error) throw error;
 
@@ -789,7 +1010,7 @@
         async function deletePegawai(id) {
             if (!confirm('Hapus data pegawai ini?')) return;
             try {
-                const { error } = await supabaseClient.from('pegawai').delete().eq('id', id);
+                const { error } = await supabaseClient.from('datapegawai').delete().eq('id', id);
                 if (error) throw error;
                 showToast('Data pegawai berhasil dihapus.', 'success');
                 loadPegawai();
@@ -877,11 +1098,192 @@
             toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
         }
 
+
+        // --- Custom Calendar ---
+        let calSelectedDate = null;
+        let calCurrentMonth = new Date().getMonth();
+        let calCurrentYear = new Date().getFullYear();
+        let calOpen = false;
+
+        const MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+        function initCalendarSelects() {
+            const mSel = document.getElementById('calMonthSel');
+            const ySel = document.getElementById('calYearSel');
+            if (!mSel || !ySel) return;
+            mSel.innerHTML = MONTHS_ID.map((m, i) => `<option value="${i}">${m}</option>`).join('');
+            const curY = new Date().getFullYear();
+            ySel.innerHTML = '';
+            for (let y = curY - 80; y <= curY; y++) {
+                ySel.innerHTML += `<option value="${y}">${y}</option>`;
+            }
+        }
+
+        function toggleCalendar() {
+            calOpen = !calOpen;
+            const popup   = document.getElementById('datepickerPopup');
+            const chevron = document.getElementById('calChevron');
+            const display = document.getElementById('datepickerDisplay');
+            if (calOpen) {
+                const ref = calSelectedDate ? new Date(calSelectedDate + 'T00:00:00') : new Date();
+                calCurrentMonth = ref.getMonth();
+                calCurrentYear  = ref.getFullYear();
+                document.getElementById('calMonthSel').value = calCurrentMonth;
+                document.getElementById('calYearSel').value  = calCurrentYear;
+                renderCalendar();
+                popup.classList.add('open');
+                display.classList.add('open');
+                chevron.style.transform = 'rotate(180deg)';
+                // Posisikan popup di tengah horizontal modal, tepat di bawah display field
+                const modalBox = document.querySelector('.modal-box');
+                const modalRect = modalBox ? modalBox.getBoundingClientRect() : null;
+                const dispRect  = display.getBoundingClientRect();
+                const popupW    = 280;
+                // Center horizontally within modal
+                let left = modalRect
+                    ? modalRect.left + (modalRect.width - popupW) / 2
+                    : dispRect.left;
+                // Tepat di bawah field display
+                let top = dispRect.bottom + 6;
+                // Jangan keluar layar bawah
+                const popupH = 320;
+                if (top + popupH > window.innerHeight - 10) {
+                    top = dispRect.top - popupH - 6;
+                }
+                popup.style.left = left + 'px';
+                popup.style.top  = top  + 'px';
+            } else {
+                popup.classList.remove('open');
+                display.classList.remove('open');
+                chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function closeCalendar() {
+            calOpen = false;
+            const popup = document.getElementById('datepickerPopup');
+            const chevron = document.getElementById('calChevron');
+            const display = document.getElementById('datepickerDisplay');
+            if (popup) { popup.classList.remove('open'); display.classList.remove('open'); chevron.style.transform = 'rotate(0deg)'; }
+        }
+
+        function renderCalendar() {
+            calCurrentMonth = parseInt(document.getElementById('calMonthSel').value);
+            calCurrentYear  = parseInt(document.getElementById('calYearSel').value);
+            const firstDay = new Date(calCurrentYear, calCurrentMonth, 1).getDay();
+            const daysInMonth = new Date(calCurrentYear, calCurrentMonth + 1, 0).getDate();
+            const daysInPrev  = new Date(calCurrentYear, calCurrentMonth, 0).getDate();
+            const today = new Date(); today.setHours(0,0,0,0);
+            const grid = document.getElementById('calGrid');
+            let html = '';
+            // prev month filler
+            for (let i = firstDay - 1; i >= 0; i--) {
+                html += `<button type="button" class="cal-day other-month" disabled>${daysInPrev - i}</button>`;
+            }
+            for (let d = 1; d <= daysInMonth; d++) {
+                const thisDate = new Date(calCurrentYear, calCurrentMonth, d);
+                const yyyy = calCurrentYear;
+                const mm = String(calCurrentMonth + 1).padStart(2, '0');
+                const dd = String(d).padStart(2, '0');
+                const dateStr = `${yyyy}-${mm}-${dd}`;
+                const isToday = thisDate.getTime() === today.getTime();
+                const isSelected = calSelectedDate === dateStr;
+                const isSunday = thisDate.getDay() === 0;
+                let cls = 'cal-day';
+                if (isToday)    cls += ' today';
+                if (isSelected) cls += ' selected';
+                if (isSunday)   cls += ' sunday';
+                html += `<button type="button" class="${cls}" onclick="selectDate('${dateStr}')">${d}</button>`;
+            }
+            // next month filler
+            const total = firstDay + daysInMonth;
+            const remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
+            for (let d = 1; d <= remaining; d++) {
+                html += `<button type="button" class="cal-day other-month" disabled>${d}</button>`;
+            }
+            grid.innerHTML = html;
+        }
+
+        function selectDate(dateStr) {
+            calSelectedDate = dateStr;
+            document.getElementById('inputTanggalLahir').value = dateStr;
+            updateDatepickerDisplay();
+            closeCalendar();
+        }
+
+        function updateDatepickerDisplay() {
+            const display = document.getElementById('datepickerDisplay');
+            const textEl  = document.getElementById('datepickerText');
+            if (!display || !textEl) return;
+            if (calSelectedDate) {
+                const [y, m, d] = calSelectedDate.split('-');
+                textEl.textContent = `${parseInt(d)} ${MONTHS_ID[parseInt(m)-1]} ${y}`;
+                display.classList.add('has-value');
+            } else {
+                textEl.textContent = 'Pilih tanggal lahir';
+                display.classList.remove('has-value');
+            }
+        }
+
+        function calNav(dir) {
+            calCurrentMonth += dir;
+            if (calCurrentMonth > 11) { calCurrentMonth = 0; calCurrentYear++; }
+            if (calCurrentMonth < 0)  { calCurrentMonth = 11; calCurrentYear--; }
+            document.getElementById('calMonthSel').value = calCurrentMonth;
+            document.getElementById('calYearSel').value  = calCurrentYear;
+            renderCalendar();
+        }
+
+        function calGoToday() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm   = String(today.getMonth() + 1).padStart(2, '0');
+            const dd   = String(today.getDate()).padStart(2, '0');
+            selectDate(`${yyyy}-${mm}-${dd}`);
+        }
+
+        function calClear() {
+            calSelectedDate = null;
+            document.getElementById('inputTanggalLahir').value = '';
+            updateDatepickerDisplay();
+            closeCalendar();
+        }
+
+        // Close calendar when clicking outside
+        document.addEventListener('click', function(e) {
+            const wrapper = document.getElementById('datepickerWrapper');
+            const popup   = document.getElementById('datepickerPopup');
+            const insideWrapper = wrapper && wrapper.contains(e.target);
+            const insidePopup   = popup   && popup.contains(e.target);
+            if (!insideWrapper && !insidePopup) closeCalendar();
+        });
+
         // --- Init ---
         document.addEventListener('DOMContentLoaded', () => {
+            initCalendarSelects();
             loadSchoolIdentity();
             loadPegawai();
         });
     </script>
+
+    <!-- Calendar Popup (rendered at body level agar tidak terpotong modal) -->
+    <div class="datepicker-popup" id="datepickerPopup">
+        <div class="cal-header">
+            <button type="button" class="cal-nav" onclick="calNav(-1)"><i class="fas fa-chevron-left"></i></button>
+            <div class="cal-month-year">
+                <select id="calMonthSel" onchange="renderCalendar()"></select>
+                <select id="calYearSel" onchange="renderCalendar()"></select>
+            </div>
+            <button type="button" class="cal-nav" onclick="calNav(1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="cal-days-header">
+            <span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="cal-footer">
+            <button type="button" class="cal-today-btn" onclick="calGoToday()"><i class="fas fa-crosshairs"></i> Hari Ini</button>
+            <button type="button" class="cal-clear-btn" onclick="calClear()"><i class="fas fa-times"></i> Hapus</button>
+        </div>
+    </div>
 </body>
 </html>
