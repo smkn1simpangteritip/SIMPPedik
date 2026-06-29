@@ -1115,7 +1115,6 @@
                     doc.text(`Halaman ${data.pageNumber} / ${pCount}`, pageW - 14, pgY, { align: 'right' });
                 },
             });
-
             const safeDate = dateText.replace(/[\/\\:*?"<>|]/g, '-');
             doc.save(`Daftar_MBG_${safeDate}.pdf`);
         }
