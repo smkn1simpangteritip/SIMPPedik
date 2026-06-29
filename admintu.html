@@ -517,65 +517,6 @@
             .stats-grid { grid-template-columns: 1fr 1fr; }
         }
 
-        /* --- Modal Sumbangan Komite --- */
-        .modal-sumbangan .modal-header {
-            background: linear-gradient(135deg, #059669, #10b981);
-        }
-        .sumbangan-menu-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-            padding: 6px 0;
-        }
-        .sumbangan-menu-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 22px 14px;
-            border-radius: 14px;
-            border: 2px solid #e2e8f0;
-            text-decoration: none;
-            cursor: pointer;
-            transition: border-color 0.2s, background 0.2s, transform 0.15s;
-            background: #f8fafc;
-            min-height: 120px;
-        }
-        .sumbangan-menu-item:hover {
-            border-color: #10b981;
-            background: #f0fdf4;
-            transform: translateY(-2px);
-        }
-        .sumbangan-menu-item.hover-red:hover {
-            border-color: #ef4444;
-            background: #fff1f2;
-        }
-        .sumbangan-menu-item.hover-purple:hover {
-            border-color: #8b5cf6;
-            background: #faf5ff;
-        }
-        .sumbangan-menu-icon {
-            width: 48px; height: 48px;
-            border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.3rem;
-        }
-        .sumbangan-menu-item span {
-            font-size: 0.78rem;
-            font-weight: 700;
-            color: #334155;
-            text-align: center;
-            line-height: 1.3;
-        }
-        .sumbangan-menu-item p {
-            font-size: 0.71rem;
-            color: #94a3b8;
-            text-align: center;
-            margin: 0;
-            line-height: 1.4;
-        }
-
         /* --- Modal --- */
         .modal-overlay {
             display: none;
@@ -781,15 +722,36 @@
                     <span>Arsip Sekolah</span>
                 </a>
 
-                <a href="#" class="menu-card" onclick="openModalSumbangan(); return false;">
-                    <div class="icon-box ic-green">
-                        <i class="fas fa-donate"></i>
+                <a href="mappingsumbangan.html" class="menu-card">
+                    <div class="icon-box ic-blue">
+                        <i class="fas fa-users"></i>
                     </div>
-                    <span>Sumbangan Komite</span>
+                    <span>Mapping Sumbangan Siswa</span>
+                </a>
+
+                <a href="sumbangankomite.html" class="menu-card">
+                    <div class="icon-box ic-emerald">
+                        <i class="fas fa-cash-register"></i>
+                    </div>
+                    <span>Transaksi Pembayaran</span>
+                </a>
+
+                <a href="pengeluaransumbangan.html" class="menu-card">
+                    <div class="icon-box ic-rose">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <span>Pengeluaran Sumbangan Komite</span>
+                </a>
+
+                <a href="neracasumbangan.html" class="menu-card">
+                    <div class="icon-box ic-purple">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <span>Laporan Neraca Sumbangan Komite</span>
                 </a>
 
                 <a href="index.html" class="menu-card" onclick="return logOut()">
-                    <div class="icon-box ic-slate">
+                    <div class="icon-box ic-rose">
                         <i class="fas fa-sign-out-alt"></i>
                     </div>
                     <span>Log Out</span>
@@ -906,47 +868,7 @@
         </div>
     </div>
 
-    <!-- Modal Sumbangan Komite -->
-    <div class="modal-overlay modal-sumbangan" id="modalSumbangan">
-        <div class="modal-box" style="max-width:520px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-donate"></i> Sumbangan Komite</h3>
-                <button class="modal-close" onclick="closeModalSumbangan()"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="modal-body" style="padding:24px 22px; display:flex; align-items:center; justify-content:center;">
-                <div class="sumbangan-menu-grid" style="width:100%;">
-                    <a href="mappingsumbangan.html" class="sumbangan-menu-item">
-                        <div class="sumbangan-menu-icon" style="background:#dbeafe;color:#2563eb;">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <span>Mapping Sumbangan Siswa</span>
-                        <p>Data tagihan per siswa</p>
-                    </a>
-                    <a href="sumbangankomite.html" class="sumbangan-menu-item">
-                        <div class="sumbangan-menu-icon" style="background:#dcfce7;color:#15803d;">
-                            <i class="fas fa-cash-register"></i>
-                        </div>
-                        <span>Transaksi Pembayaran</span>
-                        <p>Rekap pembayaran komite</p>
-                    </a>
-                    <a href="pengeluaransumbangan.html" class="sumbangan-menu-item hover-red">
-                        <div class="sumbangan-menu-icon" style="background:#fee2e2;color:#dc2626;">
-                            <i class="fas fa-money-bill-wave"></i>
-                        </div>
-                        <span>Pengeluaran Sumbangan Komite</span>
-                        <p>Catat pengeluaran dana</p>
-                    </a>
-                    <a href="neracasumbangan.html" class="sumbangan-menu-item hover-purple">
-                        <div class="sumbangan-menu-icon" style="background:#ede9fe;color:#7c3aed;">
-                            <i class="fas fa-balance-scale"></i>
-                        </div>
-                        <span>Laporan Neraca Sumbangan Komite</span>
-                        <p>Ringkasan pemasukan & pengeluaran</p>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <!-- Toast -->
     <div class="toast" id="toast"></div>
@@ -1351,18 +1273,7 @@
                 if (e.target === this) closeEditProfil();
             });
 
-            // Tutup modal sumbangan saat klik backdrop
-            document.getElementById('modalSumbangan').addEventListener('click', function(e) {
-                if (e.target === this) closeModalSumbangan();
-            });
         });
-
-        function openModalSumbangan() {
-            document.getElementById('modalSumbangan').classList.add('active');
-        }
-        function closeModalSumbangan() {
-            document.getElementById('modalSumbangan').classList.remove('active');
-        }
     </script>
 
 </body>
