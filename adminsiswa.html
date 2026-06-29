@@ -221,6 +221,66 @@
         .custom-table td { color: #cbd5e1; }
         .custom-table tr:hover td { background-color: #253047; }
         .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; }
+
+        /* Badge Status Pembayaran Sumbangan Komite */
+        .badge-lunas-sk {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: rgba(16,185,129,0.15); color: #34d399;
+            padding: 3px 10px; border-radius: 10px;
+            font-size: 0.78rem; font-weight: 600;
+            white-space: nowrap;
+        }
+        .badge-belum-sk {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: rgba(245,158,11,0.15); color: #fbbf24;
+            padding: 3px 10px; border-radius: 10px;
+            font-size: 0.78rem; font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* Info & Summary Riwayat Sumbangan Komite */
+        .sumbangan-info {
+            font-size: 0.82rem;
+            color: #cbd5e1;
+            margin-bottom: 14px;
+            padding: 8px 12px;
+            background: #0f2030;
+            border-radius: 6px;
+            border-left: 3px solid #06b6d4;
+        }
+        .sumbangan-info strong { color: #e2e8f0; }
+        .sumbangan-summary {
+            display: flex;
+            justify-content: flex-end;
+            gap: 18px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            flex-wrap: wrap;
+        }
+        .sumbangan-summary strong { color: #06b6d4; }
+        .sumbangan-summary strong.sisa-sumbangan { color: #ef4444; }
+
+        /* Scroll horizontal tabel Sumbangan Komite di mode smartphone */
+        .sumbangan-table-wrap {
+            -webkit-overflow-scrolling: touch;
+        }
+        @media (max-width: 768px) {
+            .sumbangan-table {
+                min-width: 480px;
+                font-size: 0.78rem;
+            }
+            .sumbangan-table th,
+            .sumbangan-table td {
+                white-space: nowrap;
+                padding: 8px 10px;
+            }
+            .badge-lunas-sk,
+            .badge-belum-sk {
+                font-size: 0.72rem;
+                padding: 2px 8px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -507,6 +567,27 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Item 7: Sumbangan Pendidikan Komite Sekolah -->
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span><i class="fas fa-hand-holding-dollar" style="color: #06b6d4; margin-right: 10px; width: 20px; text-align: center;"></i> Sumbangan Pendidikan Komite Sekolah</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-body">
+                            <div id="sumbanganLoadingInfo" class="sumbangan-info">
+                                <i class="fas fa-spinner fa-spin"></i> Memuat data tahun pelajaran...
+                            </div>
+
+                            <!-- Tab Navigasi Tahun Pelajaran (diisi otomatis sesuai jumlah tahun) -->
+                            <div class="tab-nav" id="sumbanganTabNav" style="display:none;"></div>
+
+                            <!-- Isi Tab per Tahun Pelajaran (diisi otomatis) -->
+                            <div id="sumbanganTabContent"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -590,6 +671,7 @@
                 loadKasusSiswa(session.nama_siswa);
                 loadPembinaanWali(session.nama_siswa);
                 loadPklSiswa(session.nama_siswa, session.nisn);
+                loadSumbanganKomite(session.nama_siswa, session.nisn);
             } else {
                 // Jika tidak ada sesi, redirect ke login
                 window.location.href = 'index.html';
@@ -1012,6 +1094,177 @@
                 tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red;">Gagal memuat data: ${err.message}</td></tr>`;
             }
         }
+        // ============================================================
+        // --- Sumbangan Pendidikan Komite Sekolah (Riwayat 12 Bulan) ---
+        // ============================================================
+        const BULAN_AJARAN_LIST = ['Juli','Agustus','September','Oktober','November','Desember',
+                                    'Januari','Februari','Maret','April','Mei','Juni'];
+
+        // Format ke Rupiah, dibulatkan ke atas, tanpa angka desimal/koma
+        function formatRupiah(angka) {
+            const bulat = Math.ceil(parseFloat(angka) || 0);
+            return 'Rp ' + bulat.toLocaleString('id-ID', { maximumFractionDigits: 0 });
+        }
+
+        async function loadSumbanganKomite(namaSiswa, nisn) {
+            const infoEl = document.getElementById('sumbanganLoadingInfo');
+            const navEl = document.getElementById('sumbanganTabNav');
+            const contentEl = document.getElementById('sumbanganTabContent');
+
+            if (!infoEl || !navEl || !contentEl) return;
+
+            if (!nisn) {
+                infoEl.innerHTML = '<i class="fas fa-exclamation-circle" style="color:#fbbf24;"></i> NISN tidak ditemukan.';
+                return;
+            }
+
+            try {
+                // Ambil daftar tahun pelajaran milik siswa ini dari tabel tagihan
+                const { data: tagihanData, error: tagihanError } = await absensiClient
+                    .from('tagihansumbangan')
+                    .select('tahun_pelajaran, nominal_per_bulan')
+                    .eq('nisn', nisn);
+
+                if (tagihanError) throw tagihanError;
+
+                // Unikkan & urutkan tahun pelajaran (terlama -> terbaru)
+                const tahunMap = {};
+                (tagihanData || []).forEach(d => {
+                    if (d.tahun_pelajaran) tahunMap[d.tahun_pelajaran] = d.nominal_per_bulan || 0;
+                });
+                const tahunList = Object.keys(tahunMap).sort();
+
+                if (tahunList.length === 0) {
+                    infoEl.innerHTML = '<i class="fas fa-info-circle" style="color:#06b6d4;"></i> Belum ada data tagihan Sumbangan Komite untuk siswa ini.';
+                    navEl.style.display = 'none';
+                    contentEl.innerHTML = '';
+                    return;
+                }
+
+                // Ambil seluruh riwayat pembayaran (semua tahun) sekaligus untuk siswa ini
+                const { data: bayarData, error: bayarError } = await absensiClient
+                    .from('sumbangankomite')
+                    .select('*')
+                    .eq('nisn', nisn)
+                    .order('tanggal_bayar', { ascending: true });
+
+                if (bayarError) throw bayarError;
+
+                // Kelompokkan data pembayaran per tahun_pelajaran
+                const bayarPerTahun = {};
+                (bayarData || []).forEach(d => {
+                    const t = d.tahun_pelajaran || '';
+                    if (!bayarPerTahun[t]) bayarPerTahun[t] = {};
+                    bayarPerTahun[t][d.bulan_bayar] = d;
+                });
+
+                infoEl.style.display = 'none';
+                renderSumbanganTabs(tahunList, tahunMap, bayarPerTahun);
+
+            } catch (err) {
+                console.error('Error loading sumbangan komite:', err);
+                infoEl.style.display = 'block';
+                infoEl.innerHTML = `<i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> Gagal memuat data: ${err.message}`;
+                navEl.style.display = 'none';
+                contentEl.innerHTML = '';
+            }
+        }
+
+        function renderSumbanganTabs(tahunList, nominalPerTahun, bayarPerTahun) {
+            const navEl = document.getElementById('sumbanganTabNav');
+            const contentEl = document.getElementById('sumbanganTabContent');
+
+            // Bangun navigasi tab. Jika hanya 1 tahun, tab tetap ditampilkan (sebagai label tahun ajaran)
+            navEl.style.display = 'flex';
+            navEl.innerHTML = tahunList.map((tahun, i) => `
+                <button class="tab-btn sk-tab ${i === 0 ? 'active' : ''}" onclick="switchSumbanganTab(this, 'skTahunTab-${i}')">
+                    <i class="fas fa-calendar-alt"></i> ${tahun}
+                </button>
+            `).join('');
+
+            // Bangun isi tab per tahun
+            contentEl.innerHTML = tahunList.map((tahun, i) => {
+                const nominal = parseFloat(nominalPerTahun[tahun]) || 0;
+                const dataBulan = bayarPerTahun[tahun] || {};
+
+                let totalLunas = 0;
+                let totalDibayar = 0;
+
+                const rowsHtml = BULAN_AJARAN_LIST.map((bulan, idx) => {
+                    const existing = dataBulan[bulan] || null;
+                    if (existing) {
+                        totalLunas++;
+                        totalDibayar += parseFloat(existing.nominal) || 0;
+                    }
+                    const tanggal = existing && existing.tanggal_bayar
+                        ? new Date(existing.tanggal_bayar).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })
+                        : '-';
+                    const jumlah = existing ? formatRupiah(existing.nominal) : '-';
+                    const idPembayaran = existing ? (existing.id || '-') : '-';
+                    const statusBadge = existing
+                        ? '<span class="badge-lunas-sk"><i class="fas fa-check-circle"></i> Lunas</span>'
+                        : '<span class="badge-belum-sk"><i class="fas fa-clock"></i> Belum Bayar</span>';
+
+                    return `<tr>
+                        <td style="font-weight:600;">${bulan}</td>
+                        <td>${idPembayaran}</td>
+                        <td>${tanggal}</td>
+                        <td>${jumlah}</td>
+                        <td>${statusBadge}</td>
+                    </tr>`;
+                }).join('');
+
+                const totalTagihan = nominal * 12;
+                const sisaBayar = totalTagihan - totalDibayar;
+
+                return `
+                <div class="tab-pane ${i === 0 ? 'active' : ''}" id="skTahunTab-${i}">
+                    <div class="sumbangan-info">
+                        <i class="fas fa-info-circle" style="color:#06b6d4;"></i>
+                        Tahun Pelajaran <strong>${tahun}</strong> &nbsp;|&nbsp; Nominal/Bulan: <strong>${formatRupiah(nominal)}</strong>
+                        &nbsp;|&nbsp; <strong>${totalLunas} dari 12</strong> bulan sudah dibayar.
+                    </div>
+                    <div class="table-responsive sumbangan-table-wrap">
+                        <table class="custom-table sumbangan-table">
+                            <thead>
+                                <tr>
+                                    <th>Bulan</th>
+                                    <th>ID Pembayaran</th>
+                                    <th>Tanggal Bayar</th>
+                                    <th>Jumlah Bayar</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rowsHtml}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="sumbangan-summary">
+                        <span>Total Dibayar: <strong>${formatRupiah(totalDibayar)}</strong></span>
+                        <span>Sisa Sumbangan Komite: <strong class="sisa-sumbangan">${formatRupiah(Math.max(sisaBayar, 0))}</strong></span>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // --- Tab Switch Logic (Sumbangan Komite) ---
+        function switchSumbanganTab(btn, paneId) {
+            const tabContainer = btn.closest('.accordion-body');
+
+            tabContainer.querySelectorAll('.sk-tab').forEach(b => b.classList.remove('active'));
+            tabContainer.querySelectorAll('#sumbanganTabContent .tab-pane').forEach(p => p.classList.remove('active'));
+
+            btn.classList.add('active');
+            tabContainer.querySelector('#' + paneId).classList.add('active');
+
+            // Sesuaikan ulang tinggi accordion karena konten tab berubah
+            const accItem = btn.closest('.accordion-item');
+            const accContent = accItem.querySelector('.accordion-content');
+            if (accItem.classList.contains('active')) {
+                accContent.style.maxHeight = accContent.scrollHeight + "px";
+            }
+        }
     </script>
 </body>
-</html>
+</html>                           b 
