@@ -744,7 +744,30 @@
         @media (max-width: 768px) {
             .main-content { padding: 1rem 0.5rem; }
             .form-row { grid-template-columns: 1fr; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-box {
+                min-width: unset;
+                width: 100%;
+            }
+            .filter-select {
+                width: 100%;
+            }
+            .btn-export-pdf {
+                width: 100%;
+                justify-content: center;
+            }
+            .card-title-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            .card-title-actions button {
+                width: 100%;
+                justify-content: center;
+            }
         }
 
         /* Print styles */
@@ -950,7 +973,7 @@
                     <i class="fas fa-list-ul"></i>
                     <span>Daftar Pengeluaran Sumbangan</span>
                 </div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <div class="card-title-actions" style="display:flex;gap:8px;flex-wrap:wrap;">
                     <button class="btn-export-pdf" onclick="exportPdf()">
                         <i class="fas fa-file-pdf"></i> Export PDF
                     </button>
