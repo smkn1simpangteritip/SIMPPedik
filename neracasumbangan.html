@@ -476,12 +476,35 @@
 
         @media (max-width: 768px) {
             .main-content { padding: 1rem 0.5rem; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .stats-grid { grid-template-columns: 1fr; }
             .saldo-banner { flex-direction: column; align-items: stretch; }
             .saldo-item { width: 100%; }
             .saldo-item + .saldo-item { border-left: none; padding-left: 0; border-top: 1px solid rgba(255,255,255,0.22); padding-top: 12px; }
             .saldo-item.is-final { text-align: left; }
             .saldo-item.is-final .saldo-item-head { justify-content: flex-start; }
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-box {
+                min-width: unset;
+                width: 100%;
+            }
+            .filter-select {
+                width: 100%;
+            }
+            .btn-export-pdf {
+                width: 100%;
+                justify-content: center;
+            }
+            .card-title-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            .card-title-actions button {
+                width: 100%;
+                justify-content: center;
+            }
         }
 
         /* Print styles */
@@ -894,7 +917,7 @@
                     <i class="fas fa-list-ul"></i>
                     <span>Riwayat Arus Kas (Buku Besar)</span>
                 </div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <div class="card-title-actions" style="display:flex;gap:8px;flex-wrap:wrap;">
                     <button class="btn-export-pdf" onclick="exportPdf()">
                         <i class="fas fa-file-pdf"></i> Export PDF
                     </button>
