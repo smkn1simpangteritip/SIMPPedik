@@ -216,6 +216,8 @@
         .btn-primary { background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); }
         .btn-secondary { background-color: #4b5563; }
         .btn-danger { background-color: #ef4444; }
+        .btn-warning { background-color: #f59e0b; }
+        .btn-warning:hover { opacity: 0.9; }
 
         /* Searchable Dropdown */
         .searchable-dropdown { position: relative; }
@@ -457,6 +459,7 @@
                     actionDiv.innerHTML = `
                         <button class="btn btn-primary" onclick="openMappingModal('${kelasName}')"><i class="fas fa-plus"></i> Tambah Mapping</button>
                         <button class="btn btn-danger" onclick="exportMappingPdf('${kelasName}')"><i class="fas fa-file-pdf"></i> Export Pdf</button>
+                        <button class="btn btn-warning" onclick="pindahkanKeAlumni('${kelasName}')"><i class="fas fa-user-graduate"></i> Pindahkan Ke Alumni</button>
                     `;
                     pane.appendChild(actionDiv);
 
@@ -799,6 +802,63 @@
             } catch (err) {
                 console.error('Export error:', err);
                 alert('Gagal export PDF: ' + err.message);
+            }
+        }
+
+        // --- Pindahkan Ke Alumni Function ---
+        window.pindahkanKeAlumni = async function(kelasName) {
+            if (!confirm(`Apakah Anda yakin ingin memindahkan SEMUA siswa kelas ${kelasName} ke data Alumni?\n\nData akan dihapus dari Mapping Siswa setelah berhasil dipindahkan.`)) {
+                return;
+            }
+
+            try {
+                // Ambil semua data siswa pada kelas terkait
+                const { data, error } = await supabaseClient
+                    .from('mappingsiswa')
+                    .select('*')
+                    .eq('kelas', kelasName);
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    alert('Tidak ada data untuk dipindahkan.');
+                    return;
+                }
+
+                // Siapkan data untuk tabel alumni
+                const alumniData = data.map(item => ({
+                    kode_maping: item.kode_maping,
+                    nama_siswa: item.nama_siswa,
+                    nisn: item.nisn,
+                    alamat: item.alamat,
+                    tempat_lahir: item.tempat_lahir,
+                    tanggal_lahir: item.tanggal_lahir,
+                    nama_ayah: item.nama_ayah,
+                    nama_ibu: item.nama_ibu
+                }));
+
+                // Insert ke tabel alumni
+                const { error: insertError } = await supabaseClient
+                    .from('alumni')
+                    .insert(alumniData);
+
+                if (insertError) throw insertError;
+
+                // Hapus dari tabel mappingsiswa berdasarkan kode_maping
+                const kodeMapingList = data.map(item => item.kode_maping);
+                const { error: deleteError } = await supabaseClient
+                    .from('mappingsiswa')
+                    .delete()
+                    .in('kode_maping', kodeMapingList);
+
+                if (deleteError) throw deleteError;
+
+                alert(`Berhasil memindahkan ${data.length} siswa kelas ${kelasName} ke Alumni!`);
+                loadKelasTabs();
+
+            } catch (err) {
+                console.error('Error pindah ke alumni:', err);
+                alert('Gagal memindahkan ke alumni: ' + err.message);
             }
         }
     </script>
