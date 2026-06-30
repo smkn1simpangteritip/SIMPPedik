@@ -349,6 +349,27 @@
         </div>
     </main>
 
+    <!-- Modal Tahun Lulus (Pindahkan Ke Alumni) -->
+    <div id="alumniTahunModal" class="modal">
+        <div class="modal-content" style="max-width: 420px;">
+            <div class="modal-header">
+                <h3>Pindahkan Ke Alumni</h3>
+                <span class="close-modal" id="closeAlumniTahunModal" title="Tutup" aria-label="Close">&times;</span>
+            </div>
+            <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 15px;">
+                Masukkan Tahun Lulus untuk seluruh siswa kelas <strong id="alumniTahunKelasLabel"></strong> yang akan dipindahkan ke data Alumni.
+            </p>
+            <div class="form-group">
+                <label>Tahun Lulus</label>
+                <input type="text" id="tahunLulusInput" placeholder="Contoh: 2024/2025">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelAlumniTahunBtn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmAlumniTahunBtn">Konfirmasi</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // --- Supabase Integration for Absensi (Mapping Siswa) ---
         const supabaseUrl = 'https://ctbskvysuqecnaopqlam.supabase.co';
@@ -805,11 +826,51 @@
             }
         }
 
-        // --- Pindahkan Ke Alumni Function ---
-        window.pindahkanKeAlumni = async function(kelasName) {
-            if (!confirm(`Apakah Anda yakin ingin memindahkan SEMUA siswa kelas ${kelasName} ke data Alumni?\n\nData akan dihapus dari Mapping Siswa setelah berhasil dipindahkan.`)) {
+        // --- Modal Tahun Lulus (Pindahkan Ke Alumni) ---
+        const alumniTahunModal = document.getElementById('alumniTahunModal');
+        const alumniTahunKelasLabel = document.getElementById('alumniTahunKelasLabel');
+        const tahunLulusInput = document.getElementById('tahunLulusInput');
+        const confirmAlumniTahunBtn = document.getElementById('confirmAlumniTahunBtn');
+        const cancelAlumniTahunBtn = document.getElementById('cancelAlumniTahunBtn');
+        const closeAlumniTahunModal = document.getElementById('closeAlumniTahunModal');
+        let kelasYangAkanDipindah = null;
+
+        window.pindahkanKeAlumni = function(kelasName) {
+            kelasYangAkanDipindah = kelasName;
+            alumniTahunKelasLabel.textContent = kelasName;
+            tahunLulusInput.value = '';
+            alumniTahunModal.classList.add('active');
+        }
+
+        function closeAlumniTahunModalFn() {
+            alumniTahunModal.classList.remove('active');
+            kelasYangAkanDipindah = null;
+        }
+
+        cancelAlumniTahunBtn.addEventListener('click', closeAlumniTahunModalFn);
+        closeAlumniTahunModal.addEventListener('click', closeAlumniTahunModalFn);
+        alumniTahunModal.addEventListener('click', (e) => {
+            if (e.target === alumniTahunModal) closeAlumniTahunModalFn();
+        });
+
+        confirmAlumniTahunBtn.addEventListener('click', async function() {
+            const tahunLulus = tahunLulusInput.value.trim();
+            const kelasName = kelasYangAkanDipindah;
+
+            if (!tahunLulus) {
+                alert('Tahun Lulus wajib diisi terlebih dahulu!');
+                tahunLulusInput.focus();
                 return;
             }
+
+            if (!kelasName) {
+                alert('Kelas tidak valid.');
+                return;
+            }
+
+            const originalText = confirmAlumniTahunBtn.textContent;
+            confirmAlumniTahunBtn.textContent = 'Memproses...';
+            confirmAlumniTahunBtn.disabled = true;
 
             try {
                 // Ambil semua data siswa pada kelas terkait
@@ -822,10 +883,11 @@
 
                 if (!data || data.length === 0) {
                     alert('Tidak ada data untuk dipindahkan.');
+                    closeAlumniTahunModalFn();
                     return;
                 }
 
-                // Siapkan data untuk tabel alumni
+                // Siapkan data untuk tabel alumni, termasuk tahun_lulus
                 const alumniData = data.map(item => ({
                     kode_maping: item.kode_maping,
                     nama_siswa: item.nama_siswa,
@@ -834,7 +896,8 @@
                     tempat_lahir: item.tempat_lahir,
                     tanggal_lahir: item.tanggal_lahir,
                     nama_ayah: item.nama_ayah,
-                    nama_ibu: item.nama_ibu
+                    nama_ibu: item.nama_ibu,
+                    tahun_lulus: tahunLulus
                 }));
 
                 // Insert ke tabel alumni
@@ -853,14 +916,18 @@
 
                 if (deleteError) throw deleteError;
 
-                alert(`Berhasil memindahkan ${data.length} siswa kelas ${kelasName} ke Alumni!`);
+                alert(`Berhasil memindahkan ${data.length} siswa kelas ${kelasName} ke Alumni (Tahun Lulus: ${tahunLulus})!`);
+                closeAlumniTahunModalFn();
                 loadKelasTabs();
 
             } catch (err) {
                 console.error('Error pindah ke alumni:', err);
                 alert('Gagal memindahkan ke alumni: ' + err.message);
+            } finally {
+                confirmAlumniTahunBtn.textContent = originalText;
+                confirmAlumniTahunBtn.disabled = false;
             }
-        }
+        });
     </script>
 </body>
 </html>
