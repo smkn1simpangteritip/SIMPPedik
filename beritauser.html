@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Berita Sekolah</title>
 
+    <!-- 📌 Open Graph default (akan diupdate otomatis via JS saat berita dimuat) -->
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Berita Sekolah">
+    <meta id="ogTitle" property="og:title" content="Berita Sekolah">
+    <meta id="ogDescription" property="og:description" content="Baca berita terbaru dari sekolah kami.">
+    <meta id="ogImage" property="og:image" content="icon-192.png">
+    <meta id="ogUrl" property="og:url" content="">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta id="twTitle" name="twitter:title" content="Berita Sekolah">
+    <meta id="twDescription" name="twitter:description" content="Baca berita terbaru dari sekolah kami.">
+    <meta id="twImage" name="twitter:image" content="icon-192.png">
+
     <!-- 🔥 PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#667eea">
@@ -428,7 +440,30 @@
             document.getElementById('loadingBox').style.display  = 'none';
             document.getElementById('articleBox').style.display  = 'block';
 
+            updateMetaTags(item);
+
             window.scrollTo(0, 0);
+        }
+
+        // Update meta tag Open Graph & Twitter Card agar preview share
+        // (judul, deskripsi, gambar) sesuai dengan berita yang sedang dibuka.
+        // Catatan: ini membantu saat halaman dibuka di browser/in-app browser,
+        // namun bot Facebook/WhatsApp/X TIDAK menjalankan JavaScript, jadi untuk
+        // preview yang 100% akurat saat dibagikan tetap perlu render meta tag
+        // di sisi server (lihat catatan Edge Function).
+        function updateMetaTags(item) {
+            const pageUrl     = window.location.href;
+            const description = truncateBerita(item.isiberita, 160);
+            const imageUrl    = item.photo || (window.location.origin + '/icon-192.png');
+
+            document.getElementById('ogTitle').setAttribute('content', item.judul || 'Berita Sekolah');
+            document.getElementById('ogDescription').setAttribute('content', description);
+            document.getElementById('ogImage').setAttribute('content', imageUrl);
+            document.getElementById('ogUrl').setAttribute('content', pageUrl);
+
+            document.getElementById('twTitle').setAttribute('content', item.judul || 'Berita Sekolah');
+            document.getElementById('twDescription').setAttribute('content', description);
+            document.getElementById('twImage').setAttribute('content', imageUrl);
         }
 
         async function loadRelated(currentId) {
