@@ -1295,9 +1295,9 @@
                     <h3 class="headline-title">${beritaUtama.judul}</h3>
                     <p class="headline-excerpt">${truncateBerita(beritaUtama.isiberita, 150)}</p>
                 </div>`;
-            // Klik headline → buka modal detail
+            // Klik headline → buka halaman beritauser.html
             headlineEl.style.cursor = 'pointer';
-            headlineEl.addEventListener('click', () => openNewsDetail(beritaUtama));
+            headlineEl.addEventListener('click', () => goToBeritaUser(beritaUtama));
 
             // --- Render Small News ---
             const smallEl = document.getElementById('smallNewsList');
@@ -1314,12 +1314,20 @@
 
             // Pasang event click tiap small-news-item
             smallEl.querySelectorAll('.small-news-item').forEach((el, i) => {
-                el.addEventListener('click', () => openNewsDetail(beritaLain[i]));
+                el.addEventListener('click', () => goToBeritaUser(beritaLain[i]));
             });
         }
 
         // ============================================================
-        // Buka Modal Detail Berita
+        // Buka Halaman Detail Berita (beritauser.html)
+        // ============================================================
+        function goToBeritaUser(item) {
+            window.location.href = 'beritauser.html?id=' + encodeURIComponent(item.id);
+        }
+
+        // ============================================================
+        // Buka Modal Detail Berita (tidak lagi dipakai untuk klik berita,
+        // fungsi ini dibiarkan agar tidak merusak bagian lain yang mungkin masih memanggilnya)
         // ============================================================
         function openNewsDetail(item) {
             const img         = document.getElementById('newsDetailImg');
