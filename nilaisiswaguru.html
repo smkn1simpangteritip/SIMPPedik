@@ -265,6 +265,34 @@
         .input-text { width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
 
         .input-readonly { background-color: #f9fafb; border: 1px solid #eee; color: #555; cursor: default; }
+
+        /* Header & Toolbar Input Nilai (ditambahkan agar konsisten & tidak overflow) */
+        .input-nilai-header { margin-bottom: 15px; max-width: 100%; }
+
+        .input-nilai-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            max-width: 100%;
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex: 1 1 250px;
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        .actions-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            max-width: 100%;
+        }
        
         /* Hide spinners for number inputs */
 
@@ -375,6 +403,61 @@
 
                 font-size: 1rem;
 
+            }
+
+            .main-content {
+                padding-left: 5px;
+                padding-right: 5px;
+            }
+
+            .input-nilai-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-wrapper {
+                width: 100%;
+                flex: 1 1 auto;
+            }
+
+            .actions-wrapper {
+                width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .actions-wrapper .btn,
+            .actions-wrapper .export-dropdown {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .export-menu {
+                width: 100%;
+                left: 0;
+                right: auto;
+            }
+
+            .preview-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .biodata-row {
+                flex-direction: column;
+                align-items: center !important;
+            }
+
+            .biodata-photo {
+                width: 100% !important;
+            }
+
+            .biodata-info {
+                width: 100% !important;
+                min-width: 0 !important;
+            }
+
+            .biodata-info table {
+                table-layout: auto;
             }
 
         }
@@ -937,15 +1020,15 @@
 
             </div>
 
-            <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start;">
+            <div class="biodata-row" style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start;">
 
-                <div style="flex: 0 0 auto; width: 120px; text-align: center;">
+                <div class="biodata-photo" style="flex: 0 0 auto; width: 120px; text-align: center;">
 
                     <img id="bioPhoto" src="" alt="Foto Guru" style="width: 120px; height: 120px; object-fit: cover; border-radius: 10px; border: 3px solid #eee; background: #f0f0f0;">
 
                 </div>
 
-                <div style="flex: 1; min-width: 250px;">
+                <div class="biodata-info" style="flex: 1; min-width: 250px;">
 
                     <table style="width: 100%; border-collapse: collapse;">
 
@@ -1019,7 +1102,7 @@
 
                             <td style="padding: 12px 0; color: #666; font-weight: 600;">KKTP/KKM</td>
 
-                            <td style="padding: 8px 0; color: #333; display: flex; align-items: center;">
+                            <td style="padding: 8px 0; color: #333; display: flex; align-items: center; flex-wrap: wrap; row-gap: 6px; max-width: 100%;">
                                 <span style="margin-right: 5px;">:</span>
                                 <input type="number" id="inputKKTP" class="custom-input" placeholder="0" style="width: 80px;">
                                 <span style="margin-left: 15px; margin-right: 5px; font-weight: 600; color: #666;">Jumlah Ulangan Harian :</span>
