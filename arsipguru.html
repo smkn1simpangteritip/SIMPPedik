@@ -198,6 +198,36 @@
 
         @media (max-width: 768px) {
             .navbar-brand span { font-size: 1rem; }
+
+            .main-content {
+                padding-left: 5px;
+                padding-right: 5px;
+            }
+
+            .arsip-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .arsip-search,
+            .arsip-actions {
+                width: 100%;
+            }
+
+            .arsip-search input {
+                width: 100%;
+            }
+
+            .arsip-actions {
+                display: flex;
+                gap: 10px;
+            }
+
+            .arsip-actions button {
+                flex: 1;
+                width: auto;
+            }
         }
 
         /* Tombol Kembali Ke Dashboard */
@@ -246,11 +276,11 @@
         
         <!-- Container 1: Search, Add, Export -->
         <div class="dashboard-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <div>
+            <div class="arsip-toolbar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div class="arsip-search">
                     <input type="text" placeholder="Cari Arsip" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                 </div>
-                <div>
+                <div class="arsip-actions">
                     <button id="addArsipBtn" style="background-color: #4CAF50; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">Tambah Arsip</button>
                     <button id="exportPdfBtn" style="background-color: #008CBA; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">Export PDF</button>
                 </div>
@@ -582,4 +612,3 @@
     </script>
 </body>
 </html>
-
