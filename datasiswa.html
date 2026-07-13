@@ -229,6 +229,7 @@
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button class="btn btn-success" id="importBtn"><i class="fas fa-file-import"></i> Import CSV</button>
+                    <button class="btn btn-primary" id="kirimLinkBtn"><i class="fas fa-share"></i> Kirim Link</button>
                     <button class="btn btn-danger" id="exportPdfBtn"><i class="fas fa-file-pdf"></i> Export Pdf</button>
                 </div>
                 <input type="file" id="importFile" accept=".csv" style="display: none;" title="Pilih file CSV untuk diimport">
@@ -542,6 +543,11 @@
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
             }
+        });
+
+        // --- Kirim Link (Buka Halaman Input Data Diri) ---
+        document.getElementById('kirimLinkBtn').addEventListener('click', () => {
+            window.open('datadiri.html', '_blank');
         });
 
         // --- Export PDF Logic ---
