@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Data Diri Siswa - SMKN 1 Simpang Teritip</title>
+    <!-- Font Awesome untuk Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase JS SDK -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --bg-light: #f4f6f9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* --- Kartu Form --- */
+        .form-card {
+            background: white;
+            width: 100%;
+            max-width: 550px;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+            overflow: hidden;
+            animation: popIn 0.3s ease;
+            max-height: 92vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes popIn {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 25px;
+            border-bottom: 1px solid #eee;
+            flex-shrink: 0;
+        }
+
+        .form-header h3 {
+            color: #333;
+            font-size: 1.25rem;
+        }
+
+        .form-header p {
+            color: #888;
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        .close-page {
+            font-size: 1.7rem;
+            line-height: 1;
+            cursor: pointer;
+            color: #888;
+            transition: color 0.2s;
+            background: none;
+            border: none;
+        }
+        .close-page:hover { color: #ef4444; }
+
+        .form-body {
+            padding: 25px;
+            overflow-y: auto;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #666; font-size: 0.9rem; font-weight: 500; }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;
+            font-size: 0.95rem; transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+
+        input[type="date"] { position: relative; padding-right: 10px; color: #444; }
+        input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; transition: 0.3s; }
+        input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; transform: scale(1.1); }
+
+        .form-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 18px 25px;
+            border-top: 1px solid #eee;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            color: white;
+        }
+        .btn-primary { background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-secondary { background-color: #e2e8f0; color: #475569; }
+        .btn-secondary:hover { background-color: #cbd5e1; }
+
+        .info-msg {
+            font-size: 0.85rem;
+            color: #10b981;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .error-msg {
+            font-size: 0.85rem;
+            color: #ef4444;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .form-card { max-height: 96vh; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-card">
+        <div class="form-header">
+            <div>
+                <h3>Input Data Diri Siswa</h3>
+                <p>Silakan lengkapi data diri Anda dengan benar.</p>
+            </div>
+            <button type="button" class="close-page" id="closePageBtn" title="Tutup Halaman">&times;</button>
+        </div>
+
+        <form id="dataDiriForm">
+            <div class="form-body">
+                <div class="info-msg" id="successMsg">Data berhasil disimpan!</div>
+                <div class="error-msg" id="errorMsg"></div>
+
+                <div class="form-group">
+                    <label for="nisn">NISN</label>
+                    <input type="number" id="nisn" name="nisn" placeholder="Nomor Induk Siswa Nasional" required>
+                </div>
+                <div class="form-group">
+                    <label for="namaSiswa">Nama Siswa</label>
+                    <input type="text" id="namaSiswa" name="namaSiswa" placeholder="Nama Lengkap Siswa" required>
+                </div>
+                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div>
+                        <label for="tempatLahir">Tempat Lahir</label>
+                        <input type="text" id="tempatLahir" name="tempatLahir" placeholder="Kota Kelahiran">
+                    </div>
+                    <div>
+                        <label for="tanggalLahir">Tanggal Lahir</label>
+                        <input type="date" id="tanggalLahir" name="tanggalLahir">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="namaAyah">Nama Ayah</label>
+                    <input type="text" id="namaAyah" name="namaAyah" placeholder="Nama Ayah Kandung">
+                </div>
+                <div class="form-group">
+                    <label for="namaIbu">Nama Ibu</label>
+                    <input type="text" id="namaIbu" name="namaIbu" placeholder="Nama Ibu Kandung">
+                </div>
+                <div class="form-group">
+                    <label for="alamat">Alamat</label>
+                    <textarea id="alamat" name="alamat" placeholder="Alamat Lengkap" required></textarea>
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="submitBtn"><i class="fas fa-save"></i> Simpan</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // --- Supabase Integration (sama dengan datasiswa.html) ---
+        const supabaseUrl = 'https://mjvobqfcoutazqcovtlp.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdm9icWZjb3V0YXpxY292dGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzEwMzYsImV4cCI6MjA4NjE0NzAzNn0.jz6JaC9mMTMhLVhXSh1OCnFWDPZ0Cy2tUnHEmWxAR8o';
+
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        const dataDiriForm = document.getElementById('dataDiriForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const successMsg = document.getElementById('successMsg');
+        const errorMsg = document.getElementById('errorMsg');
+
+        // --- Tutup Halaman (tombol X) ---
+        function closePage() {
+            window.close();
+            // Fallback jika browser tidak mengizinkan window.close() (misalnya tab tidak dibuka via script)
+            setTimeout(() => {
+                if (!window.closed) {
+                    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#fff;font-family:inherit;font-size:1.1rem;text-align:center;padding:20px;">Halaman ini dapat ditutup secara manual.</div>';
+                }
+            }, 300);
+        }
+
+        document.getElementById('closePageBtn').addEventListener('click', closePage);
+
+        // --- Tombol Cancel ---
+        document.getElementById('cancelBtn').addEventListener('click', () => {
+            if (confirm('Batalkan pengisian data? Data yang sudah diisi tidak akan disimpan.')) {
+                dataDiriForm.reset();
+                successMsg.style.display = 'none';
+                errorMsg.style.display = 'none';
+                closePage();
+            }
+        });
+
+        // --- Submit / Simpan Data ---
+        dataDiriForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            successMsg.style.display = 'none';
+            errorMsg.style.display = 'none';
+
+            // Konfirmasi sebelum menyimpan
+            const konfirmasi = confirm('Apakah Anda yakin data yang diisi sudah benar dan ingin menyimpannya?');
+            if (!konfirmasi) return;
+
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = 'Menyimpan...';
+            submitBtn.disabled = true;
+
+            try {
+                const nisnVal = document.getElementById('nisn').value;
+                const namaVal = document.getElementById('namaSiswa').value;
+                const tempatLahirVal = document.getElementById('tempatLahir').value;
+                const tanggalLahirVal = document.getElementById('tanggalLahir').value || null;
+                const namaAyahVal = document.getElementById('namaAyah').value;
+                const namaIbuVal = document.getElementById('namaIbu').value;
+                const alamatVal = document.getElementById('alamat').value;
+
+                const siswaData = {
+                    nisn: nisnVal,
+                    nama_siswa: namaVal,
+                    tempat_lahir: tempatLahirVal,
+                    tanggal_lahir: tanggalLahirVal,
+                    nama_ayah: namaAyahVal,
+                    nama_ibu: namaIbuVal,
+                    alamat: alamatVal
+                };
+
+                const result = await supabaseClient
+                    .from('datasiswa')
+                    .insert([siswaData]);
+
+                if (result.error) throw result.error;
+
+                successMsg.style.display = 'block';
+                dataDiriForm.reset();
+
+                alert('Data Diri berhasil disimpan!');
+                closePage();
+
+            } catch (err) {
+                console.error(err);
+                errorMsg.textContent = 'Terjadi kesalahan: ' + err.message;
+                errorMsg.style.display = 'block';
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
