@@ -348,12 +348,17 @@
         const supabaseKey  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0YnNrdnlzdXFlY25hb3BxbGFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTAwODksImV4cCI6MjA4NjUyNjA4OX0.npr4SV6s8XFxXek0R0jNvdhlnIZrdTqrNvWGYVtMAcY';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+        // --- Supabase khusus Identitas Sekolah (logo & nama di navbar) ---
+        const identitasUrl  = 'https://mjvobqfcoutazqcovtlp.supabase.co';
+        const identitasKey  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdm9icWZjb3V0YXpxY292dGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzEwMzYsImV4cCI6MjA4NjE0NzAzNn0.jz6JaC9mMTMhLVhXSh1OCnFWDPZ0Cy2tUnHEmWxAR8o';
+        const identitasClient = supabase.createClient(identitasUrl, identitasKey);
+
         let arsipData = [];
 
         // --- Load Navbar Identity (sama dengan daftarpegawai.html) ---
         async function loadSchoolIdentity() {
             try {
-                const { data } = await supabaseClient
+                const { data } = await identitasClient
                     .from('identitassekolah')
                     .select('nama_sekolah, logo')
                     .limit(1).single();
