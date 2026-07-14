@@ -878,6 +878,10 @@
             <div class="saldo-item">
                 <div class="saldo-item-head"><span class="saldo-label">Total Pemasukan</span></div>
                 <div class="saldo-value" id="bdMasuk">Rp 0</div>
+                <div class="saldo-breakdown">
+                    <span><span class="saldo-dot saldo-dot-green"></span> Tahun Berjalan: <strong id="bdMasukBerjalan">Rp 0</strong></span>
+                    <span><span class="saldo-dot saldo-dot-purple"></span> Tahun Sebelumnya: <strong id="bdMasukSebelumnya">Rp 0</strong></span>
+                </div>
             </div>
             <div class="saldo-item">
                 <div class="saldo-item-head"><span class="saldo-label">Total Pengeluaran</span></div>
@@ -1122,20 +1126,35 @@
             try {
                 await loadSaldoAwal();
 
-                const [masukRes, keluarRes] = await Promise.all([
+                const [masukRes, masukTSRes, keluarRes] = await Promise.all([
                     db.from('sumbangankomite').select('*'),
+                    db.from('ipptahunsebelumnya').select('*'),
                     db.from('pengeluaransumbangan').select('*')
                 ]);
 
                 if (masukRes.error) throw masukRes.error;
+                if (masukTSRes.error) throw masukTSRes.error;
                 if (keluarRes.error) throw keluarRes.error;
 
                 const masuk = (masukRes.data || []).map(d => ({
                     tanggal: d.tanggal_bayar,
                     jenis: 'masuk',
+                    sumber: 'berjalan',
                     keterangan: d.nama_siswa ? `Pembayaran sumbangan - ${d.nama_siswa}${d.kelas ? ' ('+d.kelas+')' : ''}${d.bulan_bayar ? ' - ' + d.bulan_bayar : ''}` : (d.keterangan || 'Pemasukan sumbangan'),
                     nominal: parseFloat(d.nominal) || 0
                 }));
+
+                const masukTS = (masukTSRes.data || []).map(d => {
+                    const nominalBulan = parseFloat(d.nominal_bulan) || 0;
+                    const jumlahBulan  = parseFloat(d.jumlah_bulan) || 0;
+                    return {
+                        tanggal: d.tanggal_bayar,
+                        jenis: 'masuk',
+                        sumber: 'sebelumnya',
+                        keterangan: `Pembayaran sumbangan (Tahun Sebelumnya) - ${d.nama_siswa || '-'}${d.bulan_bayar ? ' - ' + d.bulan_bayar : ''}`,
+                        nominal: nominalBulan * jumlahBulan
+                    };
+                });
 
                 const keluar = (keluarRes.data || []).map(d => ({
                     tanggal: d.tanggal_pengeluaran,
@@ -1144,7 +1163,7 @@
                     nominal: parseFloat(d.total_pengeluaran) || 0
                 }));
 
-                let combined = [...masuk, ...keluar].filter(d => d.tanggal);
+                let combined = [...masuk, ...masukTS, ...keluar].filter(d => d.tanggal);
 
                 // Urutkan ASC by tanggal untuk hitung saldo berjalan, lalu beri saldo
                 combined.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
@@ -1193,6 +1212,8 @@
         // =============================================
         function updateStats(combinedAsc) {
             const totalMasuk = combinedAsc.filter(d => d.jenis === 'masuk').reduce((s, d) => s + d.nominal, 0);
+            const totalMasukBerjalan = combinedAsc.filter(d => d.jenis === 'masuk' && d.sumber === 'berjalan').reduce((s, d) => s + d.nominal, 0);
+            const totalMasukSebelumnya = combinedAsc.filter(d => d.jenis === 'masuk' && d.sumber === 'sebelumnya').reduce((s, d) => s + d.nominal, 0);
             const totalKeluar = combinedAsc.filter(d => d.jenis === 'keluar').reduce((s, d) => s + d.nominal, 0);
             const saldoAkhir = saldoAwal + totalMasuk - totalKeluar;
             const trxMasuk = combinedAsc.filter(d => d.jenis === 'masuk').length;
@@ -1214,6 +1235,8 @@
             document.getElementById('saldoAkhir').textContent = 'Rp ' + saldoAkhir.toLocaleString('id-ID');
             document.getElementById('saldoAkhir').classList.toggle('negative', saldoAkhir < 0);
             document.getElementById('bdMasuk').textContent = 'Rp ' + totalMasuk.toLocaleString('id-ID');
+            document.getElementById('bdMasukBerjalan').textContent = 'Rp ' + totalMasukBerjalan.toLocaleString('id-ID');
+            document.getElementById('bdMasukSebelumnya').textContent = 'Rp ' + totalMasukSebelumnya.toLocaleString('id-ID');
             document.getElementById('bdKeluar').textContent = 'Rp ' + totalKeluar.toLocaleString('id-ID');
 
             document.getElementById('statTrxMasuk').textContent = trxMasuk;
