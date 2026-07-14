@@ -1359,7 +1359,7 @@
                             <button class="btn-icon btn-edit" onclick="openModal('${d.id}')" title="Edit">
                                 <i class="fas fa-pen"></i>
                             </button>
-                            <button class="btn-icon btn-delete" onclick="openConfirm('${d.id}', '${escHtml(d.nama_barang||'')}')" title="Hapus">
+                            <button class="btn-icon btn-delete" onclick="openConfirm('${d.id}')" title="Hapus">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -1602,7 +1602,9 @@
         // =============================================
         // Hapus Data
         // =============================================
-        function openConfirm(id, nama) {
+        function openConfirm(id) {
+            const item = allData.find(d => String(d.id) === String(id));
+            const nama = item ? (item.nama_barang || '') : '';
             deleteTargetId = id;
             document.getElementById('confirmText').textContent =
                 `Hapus pengeluaran "${nama}"? Data tidak dapat dikembalikan.`;
