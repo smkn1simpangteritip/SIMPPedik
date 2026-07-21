@@ -169,8 +169,8 @@
         
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 8px; color: #666; font-size: 0.9rem; font-weight: 500; }
-        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; transition: border-color 0.3s; }
-        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; transition: border-color 0.3s; background-color: #fff; }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
         .form-group textarea { resize: vertical; min-height: 80px; }
         
         /* Styling khusus untuk input date agar lebih menarik */
@@ -194,7 +194,7 @@
             position: absolute; left: 12px; top: 50%; 
             transform: translateY(-50%); color: #999; 
         }
-        @media (max-width: 768px) { .search-box { width: 100%; margin-top: 10px; } }
+        @media (max-width: 768px) { .search-box { width: 100%; margin-top: 10px; } #filterJk { width: 100%; margin-top: 10px; } }
     </style>
 </head>
 <body>
@@ -226,6 +226,11 @@
                         <i class="fas fa-search"></i>
                         <input type="text" id="searchInput" placeholder="Cari NISN atau Nama...">
                     </div>
+                    <select id="filterJk" title="Filter berdasarkan Jenis Kelamin" style="padding: 10px 15px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; background-color: #fff;">
+                        <option value="">Semua Jenis Kelamin</option>
+                        <option value="Laki-Laki">Laki-Laki</option>
+                        <option value="Perempuan">Perempuan</option>
+                    </select>
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button class="btn btn-success" id="importBtn"><i class="fas fa-file-import"></i> Import CSV</button>
@@ -244,6 +249,7 @@
                             <th>Nama Siswa</th>
                             <th>Tempat Lahir</th>
                             <th>Tanggal Lahir</th>
+                            <th>Jenis Kelamin</th>
                             <th>Nama Ayah</th>
                             <th>Nama Ibu</th>
                             <th>Alamat</th>
@@ -252,7 +258,7 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td colspan="9" style="text-align: center; color: #888; padding: 20px;">Belum ada data siswa.</td>
+                            <td colspan="10" style="text-align: center; color: #888; padding: 20px;">Belum ada data siswa.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -293,6 +299,14 @@
                         <label for="tanggalLahir">Tanggal Lahir</label>
                         <input type="date" id="tanggalLahir" name="tanggalLahir">
                     </div>
+                </div>
+                <div class="form-group">
+                    <label for="jenisKelamin">Jenis Kelamin</label>
+                    <select id="jenisKelamin" name="jenisKelamin">
+                        <option value="">Pilih Jenis Kelamin</option>
+                        <option value="Laki-Laki">Laki-Laki</option>
+                        <option value="Perempuan">Perempuan</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="namaAyah">Nama Ayah</label>
@@ -385,7 +399,7 @@
         // --- Load Data Siswa ---
         async function loadSiswaData() {
             const tableBody = document.querySelector('.custom-table tbody');
-            tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Memuat data...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="10" style="text-align:center;">Memuat data...</td></tr>';
 
             try {
                 const { data, error } = await supabaseClient
@@ -400,7 +414,7 @@
 
             } catch (err) {
                 console.error('Error loading siswa data:', err);
-                tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; color: #ef4444;">Gagal memuat data: ${err.message}</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center; color: #ef4444;">Gagal memuat data: ${err.message}</td></tr>`;
             }
         }
 
@@ -410,7 +424,7 @@
             tableBody.innerHTML = '';
 
             if (!data || data.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #888; padding: 20px;">Data tidak ditemukan.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: #888; padding: 20px;">Data tidak ditemukan.</td></tr>';
                 return;
             }
 
@@ -422,6 +436,7 @@
                     <td>${siswa.nama_siswa}</td>
                     <td>${siswa.tempat_lahir || '-'}</td>
                     <td>${siswa.tanggal_lahir || '-'}</td>
+                    <td>${siswa.jk || '-'}</td>
                     <td>${siswa.nama_ayah || '-'}</td>
                     <td>${siswa.nama_ibu || '-'}</td>
                     <td>${siswa.alamat}</td>
@@ -434,15 +449,23 @@
             });
         }
 
-        // Event Listener Pencarian
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            const filteredData = allSiswaData.filter(siswa => 
-                (siswa.nisn && siswa.nisn.toString().toLowerCase().includes(searchTerm)) ||
-                (siswa.nama_siswa && siswa.nama_siswa.toLowerCase().includes(searchTerm))
-            );
+        // Event Listener Pencarian & Filter Jenis Kelamin
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const jkTerm = document.getElementById('filterJk').value;
+
+            const filteredData = allSiswaData.filter(siswa => {
+                const matchSearch = (siswa.nisn && siswa.nisn.toString().toLowerCase().includes(searchTerm)) ||
+                    (siswa.nama_siswa && siswa.nama_siswa.toLowerCase().includes(searchTerm));
+                const matchJk = !jkTerm || siswa.jk === jkTerm;
+                return matchSearch && matchJk;
+            });
+
             renderSiswaTable(filteredData);
-        });
+        }
+
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('filterJk').addEventListener('change', applyFilters);
 
         // --- Fungsi Edit Siswa ---
         window.editSiswa = function(nisn) {
@@ -454,6 +477,7 @@
                 document.getElementById('namaSiswa').value = siswa.nama_siswa;
                 document.getElementById('tempatLahir').value = siswa.tempat_lahir || '';
                 document.getElementById('tanggalLahir').value = siswa.tanggal_lahir || '';
+                document.getElementById('jenisKelamin').value = siswa.jk || '';
                 document.getElementById('namaAyah').value = siswa.nama_ayah || '';
                 document.getElementById('namaIbu').value = siswa.nama_ibu || '';
                 document.getElementById('alamat').value = siswa.alamat;
@@ -502,6 +526,7 @@
                 const namaVal = document.getElementById('namaSiswa').value;
                 const tempatLahirVal = document.getElementById('tempatLahir').value;
                 const tanggalLahirVal = document.getElementById('tanggalLahir').value || null;
+                const jenisKelaminVal = document.getElementById('jenisKelamin').value;
                 const namaAyahVal = document.getElementById('namaAyah').value;
                 const namaIbuVal = document.getElementById('namaIbu').value;
                 const alamatVal = document.getElementById('alamat').value;
@@ -511,6 +536,7 @@
                     nama_siswa: namaVal,
                     tempat_lahir: tempatLahirVal,
                     tanggal_lahir: tanggalLahirVal,
+                    jk: jenisKelaminVal,
                     nama_ayah: namaAyahVal,
                     nama_ibu: namaIbuVal,
                     alamat: alamatVal
@@ -605,9 +631,10 @@
                         cells[2].innerText, // Nama Siswa
                         cells[3].innerText, // Tempat Lahir
                         cells[4].innerText, // Tanggal Lahir
-                        cells[5].innerText, // Nama Ayah
-                        cells[6].innerText, // Nama Ibu
-                        cells[7].innerText  // Alamat
+                        cells[5].innerText, // Jenis Kelamin
+                        cells[6].innerText, // Nama Ayah
+                        cells[7].innerText, // Nama Ibu
+                        cells[8].innerText  // Alamat
                     ];
                     tableRows.push(rowData);
                 }
@@ -615,7 +642,7 @@
 
             // Generate Tabel PDF
             doc.autoTable({
-                head: [['No', 'NISN', 'Nama Siswa', 'Tempat Lahir', 'Tgl Lahir', 'Ayah', 'Ibu', 'Alamat']],
+                head: [['No', 'NISN', 'Nama Siswa', 'Tempat Lahir', 'Tgl Lahir', 'JK', 'Ayah', 'Ibu', 'Alamat']],
                 body: tableRows,
                 startY: yPos,
                 theme: 'grid',
@@ -665,7 +692,7 @@
                         loadSiswaData(); // Refresh tabel
                     } catch (err) {
                         console.error('Import error:', err);
-                        alert('Gagal import data: ' + err.message + '\n\nPastikan header CSV sesuai: nisn, nama_siswa, tempat_lahir, tanggal_lahir, nama_ayah, nama_ibu, alamat');
+                        alert('Gagal import data: ' + err.message + '\n\nPastikan header CSV sesuai: nisn, nama_siswa, tempat_lahir, tanggal_lahir, jk, nama_ayah, nama_ibu, alamat');
                     }
                     
                     // Reset input file agar bisa pilih file yang sama lagi jika perlu
