@@ -179,6 +179,9 @@
             background-color: #111827;
             color: #9ca3af;
         }
+        #alumniTbody tr:hover {
+            background-color: #2d3a4d;
+        }
 
         .stat-box {
             display: inline-flex;
@@ -225,6 +228,10 @@
 
             <div class="tab-actions">
                 <button class="btn btn-primary" onclick="openAlumniModal()"><i class="fas fa-plus"></i> Tambah Alumni</button>
+                <div class="search-box" title="Cari Nama Siswa" style="position:relative; min-width:250px;">
+                    <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#9ca3af;"></i>
+                    <input type="text" id="searchAlumniInput" placeholder="Cari Nama Siswa..." style="width:100%; padding:10px 15px 10px 35px; background:#374151; border:1px solid #4b5563; border-radius:6px; font-size:0.9rem; color:#fff;">
+                </div>
                 <button class="btn btn-success" onclick="document.getElementById('importFileInput').click()"><i class="fas fa-file-excel"></i> Import Excel</button>
                 <button class="btn btn-secondary" onclick="downloadTemplateExcel()"><i class="fas fa-download"></i> Download Template</button>
                 <button class="btn btn-danger" onclick="exportAlumniPdf()"><i class="fas fa-file-pdf"></i> Export Pdf</button>
@@ -244,12 +251,16 @@
                             <th>Tanggal Lahir</th>
                             <th>Nama Ayah</th>
                             <th>Nama Ibu</th>
+                            <th>Nomor Akta</th>
+                            <th>Nomor KK</th>
+                            <th>Tahun Masuk</th>
+                            <th>Photo</th>
                             <th>Tahun Lulus</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="alumniTbody">
-                        <tr><td colspan="11" style="text-align:center; padding:20px; color:#6b7280;">Memuat data...</td></tr>
+                        <tr><td colspan="15" style="text-align:center; padding:20px; color:#6b7280;">Memuat data...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -269,6 +280,8 @@
                     <span class="close-modal" title="Tutup" aria-label="Close">&times;</span>
                 </div>
                 <form id="alumniForm">
+                    <input type="hidden" id="isEditModeAlumni" value="false">
+                    <input type="hidden" id="editAlumniId" value="">
                     <div class="form-group">
                         <label>Kode Mapping</label>
                         <input type="text" id="kodeMapping" name="kodeMapping" placeholder="Masukkan Kode Mapping" required>
@@ -283,7 +296,7 @@
                     </div>
                     <div class="form-group">
                         <label>NISN</label>
-                        <input type="text" id="nisn" name="nisn" placeholder="Otomatis terisi / dapat diubah">
+                        <input type="text" id="nisn" name="nisn" placeholder="Otomatis terisi / dapat diubah" inputmode="numeric" pattern="[0-9]*" maxlength="20">
                     </div>
                     <div class="form-group">
                         <label>Alamat</label>
@@ -306,6 +319,27 @@
                         <input type="text" id="namaIbu" name="namaIbu">
                     </div>
                     <div class="form-group">
+                        <label>Nomor Akta</label>
+                        <input type="text" id="noAkta" name="noAkta">
+                    </div>
+                    <div class="form-group">
+                        <label>Nomor Kartu Keluarga</label>
+                        <input type="text" id="noKk" name="noKk">
+                    </div>
+                    <div class="form-group">
+                        <label>Tahun Masuk</label>
+                        <input type="text" id="tahunMasuk" name="tahunMasuk" placeholder="Contoh: 2021/2022">
+                    </div>
+                    <div class="form-group">
+                        <label>Photo</label>
+                        <input type="file" id="fotoAlumni" name="fotoAlumni" accept="image/*">
+                        <input type="hidden" id="fotoAlumniUrl" name="fotoAlumniUrl">
+                        <div id="fotoAlumniPreviewWrap" style="margin-top:10px; display:none; align-items:center; gap:12px;">
+                            <img id="fotoAlumniPreview" src="" alt="Preview Foto" style="width:60px; height:60px; object-fit:cover; border-radius:6px; border:1px solid #4b5563;">
+                        </div>
+                        <small style="color:#9ca3af; font-size:0.8rem; display:block; margin-top:6px;">Foto akan otomatis dikompres maks. 20KB sebelum disimpan. Terisi otomatis jika memilih siswa dari daftar dan tidak mengunggah foto baru.</small>
+                    </div>
+                    <div class="form-group">
                         <label>Tahun Lulus</label>
                         <input type="text" id="tahunLulus" name="tahunLulus" placeholder="Contoh: 2024/2025" required>
                     </div>
@@ -314,6 +348,17 @@
                         <button type="submit" class="btn btn-primary">Simpan</button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- Modal Zoom Foto -->
+        <div id="photoZoomModal" class="modal">
+            <div class="modal-content" style="max-width: 400px; text-align:center;">
+                <div class="modal-header">
+                    <h3 id="photoZoomTitle">Foto Alumni</h3>
+                    <span class="close-modal" id="closePhotoZoomModal" title="Tutup" aria-label="Close">&times;</span>
+                </div>
+                <img id="photoZoomImg" src="" alt="Foto Alumni" style="width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px;">
             </div>
         </div>
     </main>
@@ -332,6 +377,8 @@
         let schoolData = {};
         let siswaCache = []; // Cache data siswa (dari mappingsiswa) untuk autocomplete
         let alumniCache = []; // Cache data alumni untuk render & export
+        let currentFilteredAlumni = []; // Hasil filter pencarian terkini (dipakai render tabel & Export Pdf kolektif)
+        let compressedFotoBlob = null; // Blob foto alumni hasil kompresi, siap diupload
 
         if (typeof supabase !== 'undefined') {
             supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
@@ -384,7 +431,7 @@
         // --- Load Data Alumni dari Supabase ---
         async function loadAlumniData() {
             const tbody = document.getElementById('alumniTbody');
-            tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; padding:20px; color:#6b7280;">Memuat data...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="15" style="text-align:center; padding:20px; color:#6b7280;">Memuat data...</td></tr>';
             try {
                 const { data, error } = await supabaseClient
                     .from('alumni')
@@ -396,36 +443,81 @@
                 alumniCache = data || [];
                 document.getElementById('totalAlumni').textContent = alumniCache.length;
 
-                if (alumniCache.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; padding:20px; color:#6b7280;">Belum ada data alumni.</td></tr>';
-                    return;
-                }
-
-                tbody.innerHTML = alumniCache.map((item, index) => `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${item.kode_maping || '-'}</td>
-                        <td>${item.nisn || '-'}</td>
-                        <td>${item.nama_siswa || '-'}</td>
-                        <td>${item.alamat || '-'}</td>
-                        <td>${item.tempat_lahir || '-'}</td>
-                        <td>${item.tanggal_lahir || '-'}</td>
-                        <td>${item.nama_ayah || '-'}</td>
-                        <td>${item.nama_ibu || '-'}</td>
-                        <td>${item.tahun_lulus || '-'}</td>
-                        <td>
-                            <button class="btn btn-danger" style="padding: 5px 10px;" onclick="deleteAlumni('${item.id}')" title="Hapus">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
+                // Terapkan pencarian yang sedang aktif (jika ada) ke data yang baru dimuat
+                applyAlumniSearch();
 
             } catch (err) {
                 console.error('Error loading alumni:', err);
-                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding:20px; color:#ef4444;">Gagal memuat data: ${err.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="15" style="text-align:center; padding:20px; color:#ef4444;">Gagal memuat data: ${err.message}</td></tr>`;
             }
         }
+
+        // --- Render Tabel Alumni dari sebuah array data ---
+        function renderAlumniTable(data) {
+            const tbody = document.getElementById('alumniTbody');
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="15" style="text-align:center; padding:20px; color:#6b7280;">Tidak ada data alumni yang cocok.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map((item, index) => `
+                <tr onclick="editAlumni('${(item.kode_maping || '').replace(/'/g, "\\'")}')" style="cursor:pointer;" title="Klik untuk edit data alumni ini">
+                    <td>${index + 1}</td>
+                    <td>${item.kode_maping || '-'}</td>
+                    <td>${item.nisn || '-'}</td>
+                    <td>${item.nama_siswa || '-'}</td>
+                    <td>${item.alamat || '-'}</td>
+                    <td>${item.tempat_lahir || '-'}</td>
+                    <td>${item.tanggal_lahir || '-'}</td>
+                    <td>${item.nama_ayah || '-'}</td>
+                    <td>${item.nama_ibu || '-'}</td>
+                    <td>${item.no_akta || '-'}</td>
+                    <td>${item.no_kk || '-'}</td>
+                    <td>${item.tahun_masuk || '-'}</td>
+                    <td>
+                        ${item.photo
+                            ? `<img src="${item.photo}" alt="Foto ${(item.nama_siswa || '').replace(/"/g, '&quot;')}" onclick="event.stopPropagation(); openAlumniPhotoZoom('${item.photo.replace(/'/g, "\\'")}', '${(item.nama_siswa || '').replace(/'/g, "\\'")}')" style="width:40px; height:40px; border-radius:6px; object-fit:cover; border:1px solid #4b5563; cursor:pointer;">`
+                            : '-'}
+                    </td>
+                    <td>${item.tahun_lulus || '-'}</td>
+                    <td onclick="event.stopPropagation();">
+                        <button onclick="exportAlumniSinglePdf('${(item.kode_maping || '').replace(/'/g, "\\'")}')" style="background:none; border:none; color:#f59e0b; cursor:pointer;" title="Export Buku Induk (PDF)"><i class="fas fa-file-pdf"></i></button>
+                        <button class="btn btn-danger" style="padding: 5px 10px; margin-left:10px;" onclick="deleteAlumni('${(item.kode_maping || '').replace(/'/g, "\\'")}')" title="Hapus">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // --- Pencarian Nama Siswa ---
+        function applyAlumniSearch() {
+            const searchTerm = (document.getElementById('searchAlumniInput').value || '').toLowerCase().trim();
+
+            currentFilteredAlumni = !searchTerm
+                ? alumniCache
+                : alumniCache.filter(item => (item.nama_siswa || '').toLowerCase().includes(searchTerm));
+
+            renderAlumniTable(currentFilteredAlumni);
+        }
+        document.getElementById('searchAlumniInput').addEventListener('input', applyAlumniSearch);
+
+        // --- Zoom Foto Alumni ---
+        const photoZoomModal = document.getElementById('photoZoomModal');
+        window.openAlumniPhotoZoom = function(photoUrl, namaSiswa) {
+            document.getElementById('photoZoomImg').src = photoUrl;
+            document.getElementById('photoZoomTitle').textContent = namaSiswa ? `Foto ${namaSiswa}` : 'Foto Alumni';
+            photoZoomModal.classList.add('active');
+        }
+        function closePhotoZoomModal() {
+            photoZoomModal.classList.remove('active');
+            document.getElementById('photoZoomImg').src = '';
+        }
+        document.getElementById('closePhotoZoomModal').addEventListener('click', closePhotoZoomModal);
+        window.addEventListener('click', (e) => {
+            if (e.target === photoZoomModal) closePhotoZoomModal();
+        });
 
         // --- Modal Handling ---
         const modal = document.getElementById('alumniModal');
@@ -436,14 +528,80 @@
         const namaSiswaHidden = document.getElementById('namaSiswa');
         const siswaDropdown = document.getElementById('siswaDropdown');
 
+        // Pastikan hanya angka yang bisa diketik di field NISN (nol di depan tetap dipertahankan)
+        document.getElementById('nisn').addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '');
+        });
+
         window.openAlumniModal = function() {
             alumniForm.reset();
+            document.getElementById('isEditModeAlumni').value = 'false';
+            document.getElementById('editAlumniId').value = '';
+            document.getElementById('kodeMapping').readOnly = false;
+            document.getElementById('fotoAlumniUrl').value = '';
+            compressedFotoBlob = null;
+            document.getElementById('fotoAlumniPreviewWrap').style.display = 'none';
+            document.getElementById('fotoAlumniPreview').src = '';
+            modal.querySelector('.modal-header h3').textContent = 'Tambah Data Alumni';
+            modal.querySelector('button[type="submit"]').textContent = 'Simpan';
+            modal.classList.add('active');
+        }
+
+        // --- Fungsi Edit Alumni (kode_maping adalah primary key tabel alumni) ---
+        window.editAlumni = function(kodeMaping) {
+            const item = alumniCache.find(a => String(a.kode_maping) === String(kodeMaping));
+            if (!item) {
+                alert('Data alumni tidak ditemukan.');
+                return;
+            }
+
+            alumniForm.reset();
+            compressedFotoBlob = null;
+
+            document.getElementById('isEditModeAlumni').value = 'true';
+            document.getElementById('editAlumniId').value = item.kode_maping;
+
+            document.getElementById('kodeMapping').value = item.kode_maping || '';
+            document.getElementById('kodeMapping').readOnly = true; // Primary key, tidak boleh diubah saat edit
+            namaSiswaSearch.value = item.nama_siswa || '';
+            namaSiswaHidden.value = item.nama_siswa || '';
+            document.getElementById('nisn').value = item.nisn || '';
+            document.getElementById('alamat').value = item.alamat || '';
+            document.getElementById('tempatLahir').value = item.tempat_lahir || '';
+            document.getElementById('tanggalLahir').value = item.tanggal_lahir || '';
+            document.getElementById('namaAyah').value = item.nama_ayah || '';
+            document.getElementById('namaIbu').value = item.nama_ibu || '';
+            document.getElementById('noAkta').value = item.no_akta || '';
+            document.getElementById('noKk').value = item.no_kk || '';
+            document.getElementById('tahunMasuk').value = item.tahun_masuk || '';
+            document.getElementById('tahunLulus').value = item.tahun_lulus || '';
+
+            document.getElementById('fotoAlumniUrl').value = item.photo || '';
+            const previewWrap = document.getElementById('fotoAlumniPreviewWrap');
+            const previewImg = document.getElementById('fotoAlumniPreview');
+            if (item.photo) {
+                previewImg.src = item.photo;
+                previewWrap.style.display = 'flex';
+            } else {
+                previewImg.src = '';
+                previewWrap.style.display = 'none';
+            }
+
+            modal.querySelector('.modal-header h3').textContent = 'Edit Data Alumni';
+            modal.querySelector('button[type="submit"]').textContent = 'Update';
             modal.classList.add('active');
         }
 
         function closeModal() {
             modal.classList.remove('active');
             alumniForm.reset();
+            document.getElementById('isEditModeAlumni').value = 'false';
+            document.getElementById('editAlumniId').value = '';
+            document.getElementById('kodeMapping').readOnly = false;
+            document.getElementById('fotoAlumniUrl').value = '';
+            compressedFotoBlob = null;
+            document.getElementById('fotoAlumniPreviewWrap').style.display = 'none';
+            document.getElementById('fotoAlumniPreview').src = '';
             siswaDropdown.classList.remove('show');
         }
 
@@ -492,6 +650,23 @@
             document.getElementById('tanggalLahir').value = siswa.tanggal_lahir || '';
             document.getElementById('namaAyah').value = siswa.nama_ayah || '';
             document.getElementById('namaIbu').value = siswa.nama_ibu || '';
+            document.getElementById('noAkta').value = siswa.no_akta || '';
+            document.getElementById('noKk').value = siswa.no_kk || '';
+            document.getElementById('tahunMasuk').value = siswa.tahun_masuk || '';
+
+            // Isi foto dari data siswa (kecuali user sudah mengunggah foto baru secara manual)
+            if (!compressedFotoBlob) {
+                document.getElementById('fotoAlumniUrl').value = siswa.photo || '';
+                const preview = document.getElementById('fotoAlumniPreview');
+                const previewWrap = document.getElementById('fotoAlumniPreviewWrap');
+                if (siswa.photo) {
+                    preview.src = siswa.photo;
+                    previewWrap.style.display = 'flex';
+                } else {
+                    preview.src = '';
+                    previewWrap.style.display = 'none';
+                }
+            }
 
             if (siswa.kode_maping) {
                 document.getElementById('kodeMapping').value = siswa.kode_maping;
@@ -503,6 +678,89 @@
         document.addEventListener('click', function(e) {
             if (!namaSiswaSearch.contains(e.target) && !siswaDropdown.contains(e.target)) {
                 siswaDropdown.classList.remove('show');
+            }
+        });
+
+        // --- Kompresi Foto ke Ukuran Target (maks default 20KB) ---
+        function compressImageToTargetSize(file, maxKB = 20) {
+            return new Promise((resolve, reject) => {
+                const objectUrl = URL.createObjectURL(file);
+                const img = new Image();
+
+                img.onload = () => {
+                    URL.revokeObjectURL(objectUrl);
+
+                    // Batasi dimensi awal supaya proses kompresi lebih cepat & efektif
+                    const maxDim = 300;
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > maxDim || height > maxDim) {
+                        const scale = maxDim / Math.max(width, height);
+                        width = Math.round(width * scale);
+                        height = Math.round(height * scale);
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    function tryCompress(w, h, quality) {
+                        canvas.width = w;
+                        canvas.height = h;
+                        ctx.clearRect(0, 0, w, h);
+                        ctx.drawImage(img, 0, 0, w, h);
+
+                        canvas.toBlob((blob) => {
+                            if (!blob) {
+                                reject(new Error('Gagal memproses gambar.'));
+                                return;
+                            }
+                            const sizeOk = blob.size <= maxKB * 1024;
+                            const reachedMin = w <= 40 && quality <= 0.1;
+
+                            if (sizeOk || reachedMin) {
+                                resolve(blob);
+                            } else if (quality > 0.1) {
+                                // Turunkan kualitas dulu sebelum memperkecil dimensi
+                                tryCompress(w, h, Math.round((quality - 0.1) * 10) / 10);
+                            } else {
+                                // Kualitas sudah minimum, perkecil dimensi lalu ulangi dari kualitas awal
+                                const newW = Math.max(40, Math.round(w * 0.8));
+                                const newH = Math.max(40, Math.round(h * 0.8));
+                                tryCompress(newW, newH, 0.7);
+                            }
+                        }, 'image/jpeg', quality);
+                    }
+
+                    tryCompress(width, height, 0.7);
+                };
+
+                img.onerror = () => {
+                    URL.revokeObjectURL(objectUrl);
+                    reject(new Error('Gagal memuat gambar.'));
+                };
+
+                img.src = objectUrl;
+            });
+        }
+
+        // Preview foto saat file dipilih (sekaligus kompres ke maks 20KB)
+        document.getElementById('fotoAlumni').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const previewWrap = document.getElementById('fotoAlumniPreviewWrap');
+            const previewImg = document.getElementById('fotoAlumniPreview');
+
+            try {
+                previewWrap.style.display = 'flex';
+                previewImg.src = '';
+                compressedFotoBlob = await compressImageToTargetSize(file, 20);
+                previewImg.src = URL.createObjectURL(compressedFotoBlob);
+            } catch (err) {
+                console.error('Gagal mengompres foto:', err);
+                alert('Gagal memproses foto: ' + err.message);
+                compressedFotoBlob = null;
+                previewWrap.style.display = 'none';
             }
         });
 
@@ -524,17 +782,60 @@
                 tanggal_lahir: document.getElementById('tanggalLahir').value || null,
                 nama_ayah: document.getElementById('namaAyah').value,
                 nama_ibu: document.getElementById('namaIbu').value,
+                no_akta: document.getElementById('noAkta').value,
+                no_kk: document.getElementById('noKk').value,
+                tahun_masuk: document.getElementById('tahunMasuk').value,
                 tahun_lulus: document.getElementById('tahunLulus').value
             };
 
             try {
-                const { error } = await supabaseClient
-                    .from('alumni')
-                    .insert([formData]);
+                // --- Upload Photo Alumni (jika user memilih file baru, sudah dikompres ke maks 20KB) ---
+                let fotoAlumniUrlVal = document.getElementById('fotoAlumniUrl').value || null;
 
-                if (error) throw error;
+                if (compressedFotoBlob) {
+                    const nisnForFile = formData.nisn || formData.kode_maping || 'alumni';
+                    const fileName = `alumni_${nisnForFile}_${Date.now()}.jpg`;
 
-                alert('Data Alumni Berhasil Disimpan!');
+                    const { error: uploadError } = await simpedikClient
+                        .storage
+                        .from('aset')
+                        .upload(fileName, compressedFotoBlob, {
+                            upsert: true,
+                            contentType: 'image/jpeg'
+                        });
+
+                    if (uploadError) throw uploadError;
+
+                    const { data: publicUrlData } = simpedikClient
+                        .storage
+                        .from('aset')
+                        .getPublicUrl(fileName);
+
+                    fotoAlumniUrlVal = publicUrlData.publicUrl;
+                }
+
+                formData.photo = fotoAlumniUrlVal;
+
+                const isEdit = document.getElementById('isEditModeAlumni').value === 'true';
+                const editId = document.getElementById('editAlumniId').value;
+
+                let result;
+                if (isEdit && editId) {
+                    // kode_maping adalah primary key & readonly saat edit, jadi tidak perlu dikirim di payload update
+                    const { kode_maping, ...updateData } = formData;
+                    result = await supabaseClient
+                        .from('alumni')
+                        .update(updateData)
+                        .eq('kode_maping', editId);
+                } else {
+                    result = await supabaseClient
+                        .from('alumni')
+                        .insert([formData]);
+                }
+
+                if (result.error) throw result.error;
+
+                alert(isEdit ? 'Data Alumni Berhasil Diperbarui!' : 'Data Alumni Berhasil Disimpan!');
                 closeModal();
                 loadAlumniData();
 
@@ -547,10 +848,10 @@
             }
         });
 
-        // --- Hapus Data Alumni ---
-        window.deleteAlumni = async function(id) {
+        // --- Hapus Data Alumni (kode_maping adalah primary key tabel alumni) ---
+        window.deleteAlumni = async function(kodeMaping) {
             if (confirm('Apakah Anda yakin ingin menghapus data alumni ini?')) {
-                const { error } = await supabaseClient.from('alumni').delete().eq('id', id);
+                const { error } = await supabaseClient.from('alumni').delete().eq('kode_maping', kodeMaping);
                 if (error) {
                     alert('Gagal menghapus: ' + error.message);
                 } else {
@@ -563,11 +864,13 @@
         window.downloadTemplateExcel = function() {
             const headers = [
                 'kode_maping', 'nisn', 'nama_siswa', 'alamat', 'tempat_lahir',
-                'tanggal_lahir', 'nama_ayah', 'nama_ibu', 'tahun_lulus'
+                'tanggal_lahir', 'nama_ayah', 'nama_ibu', 'no_akta', 'no_kk',
+                'tahun_masuk', 'tahun_lulus'
             ];
             const contohBaris = [
                 'ID.X TKJ-1234567890', '1234567890', 'Contoh Nama Siswa', 'Jl. Contoh Alamat',
-                'Simpang Teritip', '2007-05-10', 'Nama Ayah', 'Nama Ibu', '2024/2025'
+                'Simpang Teritip', '2007-05-10', 'Nama Ayah', 'Nama Ibu', '1234/AK/2020',
+                '1234567890123456', '2021/2022', '2024/2025'
             ];
             const ws = XLSX.utils.aoa_to_sheet([headers, contohBaris]);
             const wb = XLSX.utils.book_new();
@@ -623,6 +926,9 @@
                             tanggal_lahir: tanggalLahir || null,
                             nama_ayah: (normalizedRow['nama_ayah'] || '').toString().trim(),
                             nama_ibu: (normalizedRow['nama_ibu'] || '').toString().trim(),
+                            no_akta: (normalizedRow['no_akta'] || '').toString().trim(),
+                            no_kk: (normalizedRow['no_kk'] || '').toString().trim(),
+                            tahun_masuk: (normalizedRow['tahun_masuk'] || '').toString().trim(),
                             tahun_lulus: (normalizedRow['tahun_lulus'] || '').toString().trim()
                         };
                     }).filter(item => item.nama_siswa); // Lewati baris tanpa nama siswa
@@ -657,9 +963,107 @@
             reader.readAsArrayBuffer(file);
         }
 
+        // --- Export PDF Individu (Buku Induk Alumni) ---
+        window.exportAlumniSinglePdf = async function(kodeMaping) {
+            const item = alumniCache.find(a => String(a.kode_maping) === String(kodeMaping));
+            if (!item) {
+                alert('Data alumni tidak ditemukan.');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let yPos = 20;
+
+            // Tambahkan KOP Sekolah jika ada
+            if (schoolData.kop_sekolah) {
+                try {
+                    const response = await fetch(schoolData.kop_sekolah);
+                    const blob = await response.blob();
+                    const base64data = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+
+                    const imgProps = doc.getImageProperties(base64data);
+                    const pdfWidth = pageWidth - 20;
+                    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                    doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                    yPos = 10 + imgHeight + 10;
+                } catch (err) {
+                    console.error('Gagal memuat KOP Sekolah:', err);
+                }
+            }
+
+            // Judul Dokumen
+            doc.setFontSize(15);
+            doc.setTextColor(0);
+            doc.text('Buku Induk Alumni', pageWidth / 2, yPos, { align: 'center' });
+            yPos += 8;
+
+            // Foto Alumni (tampil di tengah, di bawah judul), jika ada
+            const photoW = 35;
+            const photoH = 42;
+            if (item.photo) {
+                try {
+                    const response = await fetch(item.photo);
+                    const blob = await response.blob();
+                    const base64Photo = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+                    const photoX = (pageWidth - photoW) / 2;
+                    doc.addImage(base64Photo, 'JPEG', photoX, yPos, photoW, photoH);
+                    yPos += photoH + 8;
+                } catch (err) {
+                    console.error('Gagal memuat foto alumni:', err);
+                    yPos += 3;
+                }
+            } else {
+                yPos += 3;
+            }
+
+            // Data Alumni dalam tabel bernomor + garis (No, Label, :, Value)
+            const rows = [
+                ['1', 'Kode Mapping', ':', item.kode_maping || '-'],
+                ['2', 'NISN', ':', item.nisn || '-'],
+                ['3', 'Nama Siswa', ':', item.nama_siswa || '-'],
+                ['4', 'Tempat Lahir', ':', item.tempat_lahir || '-'],
+                ['5', 'Tanggal Lahir', ':', item.tanggal_lahir || '-'],
+                ['6', 'Nama Ayah', ':', item.nama_ayah || '-'],
+                ['7', 'Nama Ibu', ':', item.nama_ibu || '-'],
+                ['8', 'Nomor Akta Kelahiran', ':', item.no_akta || '-'],
+                ['9', 'Nomor Kartu Keluarga', ':', item.no_kk || '-'],
+                ['10', 'Tahun Masuk', ':', item.tahun_masuk || '-'],
+                ['11', 'Tahun Lulus', ':', item.tahun_lulus || '-'],
+                ['12', 'Alamat', ':', item.alamat || '-']
+            ];
+
+            doc.autoTable({
+                body: rows,
+                startY: yPos,
+                theme: 'grid',
+                styles: { fontSize: 10, cellPadding: 2.5, minCellHeight: 0, valign: 'middle', lineColor: [0, 0, 0], lineWidth: 0.2 },
+                columnStyles: {
+                    0: { cellWidth: 10, halign: 'center' },
+                    1: { fontStyle: 'bold', cellWidth: 50 },
+                    2: { cellWidth: 6, halign: 'center' },
+                    3: { cellWidth: pageWidth - 20 - 10 - 50 - 6 }
+                },
+                margin: { left: 10, right: 10 }
+            });
+
+            doc.save(`Buku_Induk_Alumni_${(item.nama_siswa || item.nisn || 'data').replace(/\s+/g, '_')}.pdf`);
+        };
+
         // --- Export PDF Function ---
         window.exportAlumniPdf = async function() {
-            if (!alumniCache || alumniCache.length === 0) {
+            const dataToExport = currentFilteredAlumni;
+            if (!dataToExport || dataToExport.length === 0) {
                 alert('Tidak ada data untuk diexport.');
                 return;
             }
@@ -700,7 +1104,7 @@
             doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
             yPos += 10;
 
-            const tableData = alumniCache.map((item, index) => [
+            const tableData = dataToExport.map((item, index) => [
                 index + 1,
                 item.kode_maping || '-',
                 item.nisn || '-',
@@ -710,11 +1114,15 @@
                 item.tanggal_lahir || '-',
                 item.nama_ayah || '-',
                 item.nama_ibu || '-',
+                item.no_akta || '-',
+                item.no_kk || '-',
+                item.tahun_masuk || '-',
+                item.photo ? 'Ada' : '-',
                 item.tahun_lulus || '-'
             ]);
 
             doc.autoTable({
-                head: [['No', 'Kode', 'NISN', 'Nama Siswa', 'Alamat', 'Tempat Lahir', 'Tgl Lahir', 'Ayah', 'Ibu', 'Tahun Lulus']],
+                head: [['No', 'Kode', 'NISN', 'Nama Siswa', 'Alamat', 'Tempat Lahir', 'Tgl Lahir', 'Ayah', 'Ibu', 'No Akta', 'No KK', 'Thn Masuk', 'Foto', 'Tahun Lulus']],
                 body: tableData,
                 startY: yPos,
                 theme: 'grid',
