@@ -150,6 +150,7 @@
         .btn-danger:hover { background-color: #dc2626; }
         .btn-success { background-color: #10b981; }
         .btn-success:hover { background-color: #059669; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
 
         .table-responsive { overflow-x: auto; }
         .custom-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
@@ -239,6 +240,7 @@
                     <button class="btn btn-success" id="importBtn"><i class="fas fa-file-import"></i> Import CSV</button>
                     <button class="btn btn-primary" id="kirimLinkBtn"><i class="fas fa-share"></i> Kirim Link</button>
                     <button class="btn btn-danger" id="exportPdfBtn"><i class="fas fa-file-pdf"></i> Export Pdf</button>
+                    <button class="btn" id="alumniBtn" disabled style="background-color:#8b5cf6;"><i class="fas fa-user-graduate"></i> Alumni</button>
                 </div>
                 <input type="file" id="importFile" accept=".csv" style="display: none;" title="Pilih file CSV untuk diimport">
             </div>
@@ -248,6 +250,7 @@
                     <thead>
                         <tr>
                             <th>No</th>
+                            <th style="text-align:center;"><input type="checkbox" id="selectAllCheckbox" title="Pilih Semua"></th>
                             <th>NISN</th>
                             <th>Nama Siswa</th>
                             <th>Tempat Lahir</th>
@@ -265,7 +268,7 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td colspan="14" style="text-align: center; color: #888; padding: 20px;">Belum ada data siswa.</td>
+                            <td colspan="15" style="text-align: center; color: #888; padding: 20px;">Belum ada data siswa.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -368,12 +371,41 @@
         </div>
     </div>
 
+    <!-- Modal Alumni -->
+    <div id="alumniModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Jadikan Alumni</h3>
+                <span class="close-modal" id="closeAlumniModal">&times;</span>
+            </div>
+            <form id="alumniForm">
+                <div class="form-group">
+                    <label for="tahunLulus">Tahun Lulus</label>
+                    <input type="text" id="tahunLulus" name="tahunLulus" placeholder="Contoh: 2026" required>
+                </div>
+                <div class="form-group">
+                    <label>Siswa Terpilih (<span id="alumniSelectedCount">0</span>)</label>
+                    <ul id="alumniSelectedList" style="max-height: 150px; overflow-y: auto; padding-left: 20px; margin: 0; color: #444; font-size: 0.9rem;"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelAlumniBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Simpan sebagai Alumni</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // --- Supabase Integration for Navbar Identity ---
         const supabaseUrl = 'https://mjvobqfcoutazqcovtlp.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdm9icWZjb3V0YXpxY292dGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzEwMzYsImV4cCI6MjA4NjE0NzAzNn0.jz6JaC9mMTMhLVhXSh1OCnFWDPZ0Cy2tUnHEmWxAR8o';
         
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // --- Supabase Project Terpisah untuk Data Alumni ---
+        const alumniSupabaseUrl = 'https://ctbskvysuqecnaopqlam.supabase.co';
+        const alumniSupabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0YnNrdnlzdXFlY25hb3BxbGFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTAwODksImV4cCI6MjA4NjUyNjA4OX0.npr4SV6s8XFxXek0R0jNvdhlnIZrdTqrNvWGYVtMAcY';
+        const alumniSupabaseClient = supabase.createClient(alumniSupabaseUrl, alumniSupabaseKey);
 
         let schoolData = {}; // Menyimpan data sekolah untuk keperluan export
 
@@ -553,7 +585,7 @@
         // --- Load Data Siswa ---
         async function loadSiswaData() {
             const tableBody = document.querySelector('.custom-table tbody');
-            tableBody.innerHTML = '<tr><td colspan="14" style="text-align:center;">Memuat data...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="15" style="text-align:center;">Memuat data...</td></tr>';
 
             try {
                 const { data, error } = await supabaseClient
@@ -570,7 +602,7 @@
 
             } catch (err) {
                 console.error('Error loading siswa data:', err);
-                tableBody.innerHTML = `<tr><td colspan="14" style="text-align:center; color: #ef4444;">Gagal memuat data: ${err.message}</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="15" style="text-align:center; color: #ef4444;">Gagal memuat data: ${err.message}</td></tr>`;
             }
         }
 
@@ -596,7 +628,7 @@
             tableBody.innerHTML = '';
 
             if (!data || data.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="14" style="text-align: center; color: #888; padding: 20px;">Data tidak ditemukan.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="15" style="text-align: center; color: #888; padding: 20px;">Data tidak ditemukan.</td></tr>';
                 return;
             }
 
@@ -604,6 +636,7 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${index + 1}</td>
+                    <td style="text-align:center;"><input type="checkbox" class="siswaCheckbox" data-nisn="${siswa.nisn}"></td>
                     <td>${siswa.nisn}</td>
                     <td>${siswa.nama_siswa}</td>
                     <td>${siswa.tempat_lahir || '-'}</td>
@@ -628,7 +661,135 @@
                 `;
                 tableBody.appendChild(row);
             });
+
+            // Reset centang "Pilih Semua" & status tombol Alumni setiap kali tabel digambar ulang
+            const selectAllCb = document.getElementById('selectAllCheckbox');
+            if (selectAllCb) selectAllCb.checked = false;
+            updateAlumniButtonState();
         }
+
+        // --- Logic Checkbox Pilih Siswa & Tombol Alumni ---
+        function getSelectedSiswaNisn() {
+            return Array.from(document.querySelectorAll('.siswaCheckbox:checked')).map(cb => cb.dataset.nisn);
+        }
+
+        function updateAlumniButtonState() {
+            const selectedCount = document.querySelectorAll('.siswaCheckbox:checked').length;
+            document.getElementById('alumniBtn').disabled = selectedCount === 0;
+        }
+
+        // Delegasi event checkbox baris (karena tabel di-render ulang dinamis)
+        document.querySelector('.custom-table tbody').addEventListener('change', (e) => {
+            if (e.target.classList.contains('siswaCheckbox')) {
+                updateAlumniButtonState();
+            }
+        });
+
+        // Checkbox "Pilih Semua" di header
+        document.getElementById('selectAllCheckbox').addEventListener('change', (e) => {
+            const checked = e.target.checked;
+            document.querySelectorAll('.siswaCheckbox').forEach(cb => {
+                cb.checked = checked;
+            });
+            updateAlumniButtonState();
+        });
+
+        // Tombol Alumni - buka modal input Tahun Lulus
+        const alumniModal = document.getElementById('alumniModal');
+        const alumniForm = document.getElementById('alumniForm');
+
+        document.getElementById('alumniBtn').addEventListener('click', () => {
+            const selectedNisn = getSelectedSiswaNisn();
+            if (selectedNisn.length === 0) return;
+
+            const selectedSiswa = allSiswaData.filter(s => selectedNisn.includes(String(s.nisn)));
+
+            // Tampilkan daftar nama siswa terpilih di dalam modal
+            const listEl = document.getElementById('alumniSelectedList');
+            listEl.innerHTML = selectedSiswa.map(s => `<li>${s.nama_siswa}</li>`).join('');
+            document.getElementById('alumniSelectedCount').textContent = selectedSiswa.length;
+
+            alumniForm.reset();
+            alumniModal.classList.add('active');
+        });
+
+        function closeAlumniModal() {
+            alumniModal.classList.remove('active');
+        }
+        document.getElementById('closeAlumniModal').addEventListener('click', closeAlumniModal);
+        document.getElementById('cancelAlumniBtn').addEventListener('click', closeAlumniModal);
+        window.addEventListener('click', (e) => {
+            if (e.target === alumniModal) closeAlumniModal();
+        });
+
+        // Submit Modal Alumni - simpan siswa terpilih ke tabel alumni (project Supabase terpisah)
+        alumniForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = alumniForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Menyimpan...';
+            submitBtn.disabled = true;
+
+            try {
+                const tahunLulusVal = document.getElementById('tahunLulus').value;
+                const selectedNisn = getSelectedSiswaNisn();
+                const selectedSiswa = allSiswaData.filter(s => selectedNisn.includes(String(s.nisn)));
+
+                if (selectedSiswa.length === 0) {
+                    alert('Tidak ada siswa yang dipilih.');
+                    return;
+                }
+
+                const alumniRows = selectedSiswa.map(s => ({
+                    kode_maping: String(s.nisn),
+                    nisn: s.nisn,
+                    nama_siswa: s.nama_siswa,
+                    alamat: s.alamat,
+                    tempat_lahir: s.tempat_lahir,
+                    tanggal_lahir: s.tanggal_lahir,
+                    nama_ayah: s.nama_ayah,
+                    nama_ibu: s.nama_ibu,
+                    tahun_lulus: tahunLulusVal,
+                    no_akta: s.no_akta,
+                    no_kk: s.no_kk,
+                    tahun_masuk: s.tahun_masuk,
+                    photo: s.photo
+                }));
+
+                const { error } = await alumniSupabaseClient
+                    .from('alumni')
+                    .upsert(alumniRows, { onConflict: 'kode_maping' });
+
+                if (error) throw error;
+
+                // Setelah berhasil tersimpan di tabel alumni, hapus data siswa
+                // yang bersangkutan dari tabel datasiswa
+                const { error: deleteError } = await supabaseClient
+                    .from('datasiswa')
+                    .delete()
+                    .in('nisn', selectedNisn);
+
+                if (deleteError) throw deleteError;
+
+                alert(`${alumniRows.length} siswa berhasil disimpan sebagai Alumni dan dihapus dari Data Siswa.`);
+                closeAlumniModal();
+
+                // Kosongkan centang setelah berhasil
+                document.querySelectorAll('.siswaCheckbox:checked').forEach(cb => cb.checked = false);
+                document.getElementById('selectAllCheckbox').checked = false;
+                updateAlumniButtonState();
+
+                // Refresh tabel data siswa agar baris yang dipindah tidak tampil lagi
+                loadSiswaData();
+            } catch (err) {
+                console.error('Gagal menyimpan data Alumni:', err);
+                alert('Terjadi kesalahan: ' + err.message);
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
 
         // Event Listener Pencarian & Filter Jenis Kelamin / Tahun Masuk
         function applyFilters() {
