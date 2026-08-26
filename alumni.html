@@ -249,6 +249,7 @@
                             <th>Alamat</th>
                             <th>Tempat Lahir</th>
                             <th>Tanggal Lahir</th>
+                            <th>Jenis Kelamin</th>
                             <th>Nama Ayah</th>
                             <th>Nama Ibu</th>
                             <th>Nomor Akta</th>
@@ -260,7 +261,7 @@
                         </tr>
                     </thead>
                     <tbody id="alumniTbody">
-                        <tr><td colspan="15" style="text-align:center; padding:20px; color:#6b7280;">Memuat data...</td></tr>
+                        <tr><td colspan="16" style="text-align:center; padding:20px; color:#6b7280;">Memuat data...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -309,6 +310,14 @@
                     <div class="form-group">
                         <label>Tanggal Lahir</label>
                         <input type="date" id="tanggalLahir" name="tanggalLahir">
+                    </div>
+                    <div class="form-group">
+                        <label>Jenis Kelamin</label>
+                        <select id="jenisKelamin" name="jenisKelamin">
+                            <option value="">Pilih Jenis Kelamin</option>
+                            <option value="Laki-Laki">Laki-Laki</option>
+                            <option value="Perempuan">Perempuan</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Nama Ayah</label>
@@ -457,7 +466,7 @@
             const tbody = document.getElementById('alumniTbody');
 
             if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="15" style="text-align:center; padding:20px; color:#6b7280;">Tidak ada data alumni yang cocok.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="16" style="text-align:center; padding:20px; color:#6b7280;">Tidak ada data alumni yang cocok.</td></tr>';
                 return;
             }
 
@@ -470,6 +479,7 @@
                     <td>${item.alamat || '-'}</td>
                     <td>${item.tempat_lahir || '-'}</td>
                     <td>${item.tanggal_lahir || '-'}</td>
+                    <td>${item.jk || '-'}</td>
                     <td>${item.nama_ayah || '-'}</td>
                     <td>${item.nama_ibu || '-'}</td>
                     <td>${item.no_akta || '-'}</td>
@@ -569,6 +579,7 @@
             document.getElementById('alamat').value = item.alamat || '';
             document.getElementById('tempatLahir').value = item.tempat_lahir || '';
             document.getElementById('tanggalLahir').value = item.tanggal_lahir || '';
+            document.getElementById('jenisKelamin').value = item.jk || '';
             document.getElementById('namaAyah').value = item.nama_ayah || '';
             document.getElementById('namaIbu').value = item.nama_ibu || '';
             document.getElementById('noAkta').value = item.no_akta || '';
@@ -648,6 +659,7 @@
             document.getElementById('alamat').value = siswa.alamat || '';
             document.getElementById('tempatLahir').value = siswa.tempat_lahir || '';
             document.getElementById('tanggalLahir').value = siswa.tanggal_lahir || '';
+            document.getElementById('jenisKelamin').value = siswa.jk || '';
             document.getElementById('namaAyah').value = siswa.nama_ayah || '';
             document.getElementById('namaIbu').value = siswa.nama_ibu || '';
             document.getElementById('noAkta').value = siswa.no_akta || '';
@@ -780,6 +792,7 @@
                 alamat: document.getElementById('alamat').value,
                 tempat_lahir: document.getElementById('tempatLahir').value,
                 tanggal_lahir: document.getElementById('tanggalLahir').value || null,
+                jk: document.getElementById('jenisKelamin').value,
                 nama_ayah: document.getElementById('namaAyah').value,
                 nama_ibu: document.getElementById('namaIbu').value,
                 no_akta: document.getElementById('noAkta').value,
@@ -864,12 +877,12 @@
         window.downloadTemplateExcel = function() {
             const headers = [
                 'kode_maping', 'nisn', 'nama_siswa', 'alamat', 'tempat_lahir',
-                'tanggal_lahir', 'nama_ayah', 'nama_ibu', 'no_akta', 'no_kk',
+                'tanggal_lahir', 'jk', 'nama_ayah', 'nama_ibu', 'no_akta', 'no_kk',
                 'tahun_masuk', 'tahun_lulus'
             ];
             const contohBaris = [
                 'ID.X TKJ-1234567890', '1234567890', 'Contoh Nama Siswa', 'Jl. Contoh Alamat',
-                'Simpang Teritip', '2007-05-10', 'Nama Ayah', 'Nama Ibu', '1234/AK/2020',
+                'Simpang Teritip', '2007-05-10', 'Laki-Laki', 'Nama Ayah', 'Nama Ibu', '1234/AK/2020',
                 '1234567890123456', '2021/2022', '2024/2025'
             ];
             const ws = XLSX.utils.aoa_to_sheet([headers, contohBaris]);
@@ -924,6 +937,7 @@
                             alamat: (normalizedRow['alamat'] || '').toString().trim(),
                             tempat_lahir: (normalizedRow['tempat_lahir'] || '').toString().trim(),
                             tanggal_lahir: tanggalLahir || null,
+                            jk: (normalizedRow['jk'] || normalizedRow['jenis_kelamin'] || '').toString().trim(),
                             nama_ayah: (normalizedRow['nama_ayah'] || '').toString().trim(),
                             nama_ibu: (normalizedRow['nama_ibu'] || '').toString().trim(),
                             no_akta: (normalizedRow['no_akta'] || '').toString().trim(),
@@ -1001,7 +1015,7 @@
             // Judul Dokumen
             doc.setFontSize(15);
             doc.setTextColor(0);
-            doc.text('Buku Induk Alumni', pageWidth / 2, yPos, { align: 'center' });
+            doc.text('Buku Induk Siswa', pageWidth / 2, yPos, { align: 'center' });
             yPos += 8;
 
             // Foto Alumni (tampil di tengah, di bawah judul), jika ada
@@ -1034,13 +1048,14 @@
                 ['3', 'Nama Siswa', ':', item.nama_siswa || '-'],
                 ['4', 'Tempat Lahir', ':', item.tempat_lahir || '-'],
                 ['5', 'Tanggal Lahir', ':', item.tanggal_lahir || '-'],
-                ['6', 'Nama Ayah', ':', item.nama_ayah || '-'],
-                ['7', 'Nama Ibu', ':', item.nama_ibu || '-'],
-                ['8', 'Nomor Akta Kelahiran', ':', item.no_akta || '-'],
-                ['9', 'Nomor Kartu Keluarga', ':', item.no_kk || '-'],
-                ['10', 'Tahun Masuk', ':', item.tahun_masuk || '-'],
-                ['11', 'Tahun Lulus', ':', item.tahun_lulus || '-'],
-                ['12', 'Alamat', ':', item.alamat || '-']
+                ['6', 'Jenis Kelamin', ':', item.jk || '-'],
+                ['7', 'Nama Ayah', ':', item.nama_ayah || '-'],
+                ['8', 'Nama Ibu', ':', item.nama_ibu || '-'],
+                ['9', 'Nomor Akta Kelahiran', ':', item.no_akta || '-'],
+                ['10', 'Nomor Kartu Keluarga', ':', item.no_kk || '-'],
+                ['11', 'Tahun Masuk', ':', item.tahun_masuk || '-'],
+                ['12', 'Tahun Lulus', ':', item.tahun_lulus || '-'],
+                ['13', 'Alamat', ':', item.alamat || '-']
             ];
 
             doc.autoTable({
@@ -1060,7 +1075,7 @@
             doc.save(`Buku_Induk_Alumni_${(item.nama_siswa || item.nisn || 'data').replace(/\s+/g, '_')}.pdf`);
         };
 
-        // --- Export PDF Function ---
+        // --- Export PDF Function (Sesuai Filter Aktif, 1 Halaman per Alumni - Format Buku Induk Siswa) ---
         window.exportAlumniPdf = async function() {
             const dataToExport = currentFilteredAlumni;
             if (!dataToExport || dataToExport.length === 0) {
@@ -1069,68 +1084,103 @@
             }
 
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('l', 'mm', 'a4');
+            const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth();
-            let yPos = 20;
 
+            // Preload KOP Sekolah sekali saja (dipakai ulang di setiap halaman)
+            let kopBase64 = null;
+            let kopImgProps = null;
             if (schoolData.kop_sekolah) {
                 try {
                     const response = await fetch(schoolData.kop_sekolah);
                     const blob = await response.blob();
-                    const base64data = await new Promise((resolve) => {
+                    kopBase64 = await new Promise((resolve) => {
                         const reader = new FileReader();
                         reader.onloadend = () => resolve(reader.result);
                         reader.readAsDataURL(blob);
                     });
-
-                    const imgProps = doc.getImageProperties(base64data);
-                    const pdfWidth = pageWidth - 20;
-                    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-                    doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
-                    yPos = 10 + imgHeight + 10;
+                    kopImgProps = doc.getImageProperties(kopBase64);
                 } catch (err) {
-                    console.error("Gagal memuat KOP Sekolah:", err);
+                    console.error('Gagal memuat KOP Sekolah:', err);
                 }
             }
 
-            doc.setFontSize(18);
-            doc.text('Data Alumni', pageWidth / 2, yPos, { align: 'center' });
-            yPos += 8;
+            for (let i = 0; i < dataToExport.length; i++) {
+                const item = dataToExport[i];
+                if (i > 0) doc.addPage();
 
-            const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span')?.textContent || 'SMK Negeri 1 Simpang Teritip';
-            doc.setFontSize(12);
-            doc.setTextColor(100);
-            doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
-            yPos += 10;
+                let yPos = 20;
 
-            const tableData = dataToExport.map((item, index) => [
-                index + 1,
-                item.kode_maping || '-',
-                item.nisn || '-',
-                item.nama_siswa || '-',
-                item.alamat || '-',
-                item.tempat_lahir || '-',
-                item.tanggal_lahir || '-',
-                item.nama_ayah || '-',
-                item.nama_ibu || '-',
-                item.no_akta || '-',
-                item.no_kk || '-',
-                item.tahun_masuk || '-',
-                item.photo ? 'Ada' : '-',
-                item.tahun_lulus || '-'
-            ]);
+                // KOP Sekolah
+                if (kopBase64) {
+                    const pdfWidth = pageWidth - 20;
+                    const imgHeight = (kopImgProps.height * pdfWidth) / kopImgProps.width;
+                    doc.addImage(kopBase64, 'PNG', 10, 10, pdfWidth, imgHeight);
+                    yPos = 10 + imgHeight + 10;
+                }
 
-            doc.autoTable({
-                head: [['No', 'Kode', 'NISN', 'Nama Siswa', 'Alamat', 'Tempat Lahir', 'Tgl Lahir', 'Ayah', 'Ibu', 'No Akta', 'No KK', 'Thn Masuk', 'Foto', 'Tahun Lulus']],
-                body: tableData,
-                startY: yPos,
-                theme: 'grid',
-                styles: { fontSize: 9 },
-                headStyles: { fillColor: [102, 126, 234] }
-            });
+                // Judul Dokumen
+                doc.setFontSize(15);
+                doc.setTextColor(0);
+                doc.text('Buku Induk Siswa', pageWidth / 2, yPos, { align: 'center' });
+                yPos += 8;
 
-            doc.save('Data_Alumni.pdf');
+                // Foto Alumni (tampil di tengah, di bawah judul), jika ada
+                const photoW = 35;
+                const photoH = 42;
+                if (item.photo) {
+                    try {
+                        const response = await fetch(item.photo);
+                        const blob = await response.blob();
+                        const base64Photo = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+                        const photoX = (pageWidth - photoW) / 2;
+                        doc.addImage(base64Photo, 'JPEG', photoX, yPos, photoW, photoH);
+                        yPos += photoH + 8;
+                    } catch (err) {
+                        console.error('Gagal memuat foto alumni:', err);
+                        yPos += 3;
+                    }
+                } else {
+                    yPos += 3;
+                }
+
+                // Data Alumni dalam tabel bernomor + garis (No, Label, :, Value)
+                const rows = [
+                    ['1', 'Kode Mapping', ':', item.kode_maping || '-'],
+                    ['2', 'NISN', ':', item.nisn || '-'],
+                    ['3', 'Nama Siswa', ':', item.nama_siswa || '-'],
+                    ['4', 'Tempat Lahir', ':', item.tempat_lahir || '-'],
+                    ['5', 'Tanggal Lahir', ':', item.tanggal_lahir || '-'],
+                    ['6', 'Jenis Kelamin', ':', item.jk || '-'],
+                    ['7', 'Nama Ayah', ':', item.nama_ayah || '-'],
+                    ['8', 'Nama Ibu', ':', item.nama_ibu || '-'],
+                    ['9', 'Nomor Akta Kelahiran', ':', item.no_akta || '-'],
+                    ['10', 'Nomor Kartu Keluarga', ':', item.no_kk || '-'],
+                    ['11', 'Tahun Masuk', ':', item.tahun_masuk || '-'],
+                    ['12', 'Tahun Lulus', ':', item.tahun_lulus || '-'],
+                    ['13', 'Alamat', ':', item.alamat || '-']
+                ];
+
+                doc.autoTable({
+                    body: rows,
+                    startY: yPos,
+                    theme: 'grid',
+                    styles: { fontSize: 10, cellPadding: 2.5, minCellHeight: 0, valign: 'middle', lineColor: [0, 0, 0], lineWidth: 0.2 },
+                    columnStyles: {
+                        0: { cellWidth: 10, halign: 'center' },
+                        1: { fontStyle: 'bold', cellWidth: 50 },
+                        2: { cellWidth: 6, halign: 'center' },
+                        3: { cellWidth: pageWidth - 20 - 10 - 50 - 6 }
+                    },
+                    margin: { left: 10, right: 10 }
+                });
+            }
+
+            doc.save('Buku_Induk_Alumni.pdf');
         }
     </script>
 </body>
