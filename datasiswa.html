@@ -294,7 +294,7 @@
                 <input type="hidden" id="isEditMode" value="false">
                 <div class="form-group">
                     <label for="nisn">NISN</label>
-                    <input type="number" id="nisn" name="nisn" placeholder="Nomor Induk Siswa Nasional" required>
+                    <input type="text" id="nisn" name="nisn" placeholder="Nomor Induk Siswa Nasional" inputmode="numeric" pattern="[0-9]*" maxlength="20" required>
                 </div>
                 <div class="form-group">
                     <label for="namaSiswa">Nama Siswa</label>
@@ -443,6 +443,11 @@
         const siswaForm = document.getElementById('siswaForm');
         const isEditModeInput = document.getElementById('isEditMode');
         const nisnInput = document.getElementById('nisn');
+
+        // Pastikan hanya angka yang bisa diketik di field NISN (nol di depan tetap dipertahankan)
+        nisnInput.addEventListener('input', () => {
+            nisnInput.value = nisnInput.value.replace(/\D/g, '');
+        });
 
         // Buka Modal
         addBtn.addEventListener('click', () => {
@@ -1063,9 +1068,12 @@
             doc.save(`Buku_Induk_${(siswa.nama_siswa || siswa.nisn).replace(/\s+/g, '_')}.pdf`);
         };
 
-        // --- Export PDF Logic (Sesuai Filter Aktif, 1 Halaman per Siswa - Format Buku Induk Siswa) ---
+        // --- Export PDF Logic (Sesuai Ceklis / Filter Aktif, 1 Halaman per Siswa - Format Buku Induk Siswa) ---
         document.getElementById('exportPdfBtn').addEventListener('click', async () => {
-            const dataToExport = currentFilteredData;
+            const selectedNisnForExport = getSelectedSiswaNisn();
+            const dataToExport = selectedNisnForExport.length > 0
+                ? currentFilteredData.filter(s => selectedNisnForExport.includes(String(s.nisn)))
+                : currentFilteredData;
 
             if (!dataToExport || dataToExport.length === 0) {
                 alert('Tidak ada data siswa untuk diexport.');
@@ -1169,9 +1177,14 @@
 
             // Simpan File
             const tahunMasukTerm = document.getElementById('filterTahunMasuk').value;
-            const fileName = tahunMasukTerm
-                ? `Buku_Induk_Siswa_Tahun_Masuk_${tahunMasukTerm}.pdf`
-                : 'Buku_Induk_Semua_Siswa.pdf';
+            let fileName;
+            if (selectedNisnForExport.length > 0) {
+                fileName = 'Buku_Induk_Siswa_Terpilih.pdf';
+            } else if (tahunMasukTerm) {
+                fileName = `Buku_Induk_Siswa_Tahun_Masuk_${tahunMasukTerm}.pdf`;
+            } else {
+                fileName = 'Buku_Induk_Semua_Siswa.pdf';
+            }
             doc.save(fileName);
         });
 
