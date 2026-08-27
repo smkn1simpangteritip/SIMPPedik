@@ -102,6 +102,9 @@
             margin-left: 0;
             padding: 2rem;
             flex: 1;
+            min-width: 0;
+            max-width: 100%;
+            overflow-x: hidden;
             overflow-y: auto;
             transition: margin-left 0.3s ease;
         }
@@ -152,7 +155,7 @@
         .btn-success:hover { background-color: #059669; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
 
-        .table-responsive { overflow-x: auto; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
         .custom-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .custom-table th, .custom-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
         .custom-table th { background-color: #f8f9fa; color: #555; font-weight: 600; }
@@ -196,6 +199,44 @@
             transform: translateY(-50%); color: #999; 
         }
         @media (max-width: 768px) { .search-box { width: 100%; margin-top: 10px; } #filterJk, #filterTahunMasuk { width: 100%; margin-top: 10px; } }
+
+        /* --- Perbaikan Responsif Tambahan (Mobile) --- */
+        .table-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .toolbar-filters {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .toolbar-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .main-content { padding: 1rem; }
+            .dashboard-card { padding: 15px; }
+            .toolbar-filters,
+            .toolbar-buttons { width: 100%; }
+            .toolbar-buttons .btn { flex: 1 1 calc(50% - 5px); justify-content: center; }
+            .form-group[style*="grid-template-columns"] {
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+            }
+            .modal-content { width: 92%; padding: 18px; }
+        }
+
+        @media (max-width: 400px) {
+            .toolbar-buttons .btn { flex: 1 1 100%; }
+        }
     </style>
 </head>
 <body>
@@ -220,8 +261,8 @@
         
         <!-- Container Tabel Data Siswa -->
         <div class="dashboard-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <div class="table-toolbar">
+                <div class="toolbar-filters">
                     <button class="btn btn-primary" id="addSiswaBtn"><i class="fas fa-plus"></i> Tambah Siswa</button>
                     <div class="search-box" title="Cari data siswa">
                         <i class="fas fa-search"></i>
@@ -236,7 +277,7 @@
                         <option value="">Semua Tahun Masuk</option>
                     </select>
                 </div>
-                <div style="display: flex; gap: 10px;">
+                <div class="toolbar-buttons">
                     <button class="btn btn-success" id="importBtn"><i class="fas fa-file-import"></i> Import CSV</button>
                     <button class="btn btn-primary" id="kirimLinkBtn"><i class="fas fa-share"></i> Kirim Link</button>
                     <button class="btn btn-danger" id="exportPdfBtn"><i class="fas fa-file-pdf"></i> Export Pdf</button>
