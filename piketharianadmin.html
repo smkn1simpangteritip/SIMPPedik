@@ -160,6 +160,16 @@
             color: white;
         }
 
+        #statusFilter {
+            padding: 8px 10px;
+            border: 1px solid #4b5563;
+            border-radius: 5px;
+            background-color: #374151;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
         /* --- Table Responsive Styles --- */
         .table-responsive {
             width: 100%;
@@ -197,6 +207,9 @@
                 margin-top: 10px;
             }
             .search-box input {
+                width: 100%;
+            }
+            #statusFilter {
                 width: 100%;
             }
         }
@@ -276,6 +289,11 @@
                 <div style="display: flex; gap: 10px;">
                     <button class="btn btn-primary" id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
                     <button class="btn btn-danger" id="exportPdfBtn"><i class="fas fa-file-pdf"></i> Export Pdf</button>
+                    <select id="statusFilter">
+                        <option value="">Semua Status</option>
+                        <option value="Ya">Ya</option>
+                        <option value="Tidak">Tidak Melaksanakan</option>
+                    </select>
                 </div>
                 <div class="search-box">
                     <input type="text" id="searchInput" placeholder="Cari data...">
@@ -416,6 +434,7 @@
             currentPage = page;
             const tableBody = document.getElementById('jurnalTableBody');
             const searchFilter = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
 
             // Filter Data
             const filteredData = jurnalDataList.filter(item => {
@@ -427,7 +446,9 @@
                     (item.nisn || '') + ' ' +
                     (item.id_petugas || '')
                 ).toLowerCase();
-                return text.includes(searchFilter);
+                const matchSearch = text.includes(searchFilter);
+                const matchStatus = statusFilter ? item.status === statusFilter : true;
+                return matchSearch && matchStatus;
             });
 
             // Pagination Calculation
@@ -511,6 +532,7 @@
 
         // Event Listeners
         document.getElementById('searchInput').addEventListener('input', () => renderTable(1));
+        document.getElementById('statusFilter').addEventListener('change', () => renderTable(1));
         document.getElementById('refreshBtn').addEventListener('click', loadJurnalData);
 
         // Export PDF
@@ -555,22 +577,22 @@
             // Ambil data berdasarkan pencarian atau semua data jika kosong
             const searchInput = document.getElementById('searchInput');
             const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+            const statusFilterEl = document.getElementById('statusFilter');
+            const statusTerm = statusFilterEl ? statusFilterEl.value : '';
             
-            let dataToExport = jurnalDataList;
-
-            if (searchTerm) {
-                dataToExport = jurnalDataList.filter(item => {
-                    const text = (
-                        (item.id_piket || '') + ' ' +
-                        (item.nama_siswa || '') + ' ' + 
-                        (item.kelas || '') + ' ' + 
-                        (item.area || '') + ' ' + 
-                        (item.nisn || '') + ' ' +
-                        (item.id_petugas || '')
-                    ).toLowerCase();
-                    return text.includes(searchTerm);
-                });
-            }
+            let dataToExport = jurnalDataList.filter(item => {
+                const text = (
+                    (item.id_piket || '') + ' ' +
+                    (item.nama_siswa || '') + ' ' + 
+                    (item.kelas || '') + ' ' + 
+                    (item.area || '') + ' ' + 
+                    (item.nisn || '') + ' ' +
+                    (item.id_petugas || '')
+                ).toLowerCase();
+                const matchSearch = searchTerm ? text.includes(searchTerm) : true;
+                const matchStatus = statusTerm ? item.status === statusTerm : true;
+                return matchSearch && matchStatus;
+            });
 
             const tableBody = dataToExport.map(item => {
                 let formattedDate = item.tanggal;
