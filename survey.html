@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Survei Kepuasan Layanan Sekolah</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #1E2A38;
+    --paper: #F6F2E9;
+    --paper-line: #E4DCC9;
+    --forest: #2F4F41;
+    --forest-deep: #24392F;
+    --gold: #D9A441;
+    --gold-dark: #B9852B;
+    --muted: #6B7280;
+    --font-display: "Fraunces", Georgia, serif;
+    --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body{
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+
+  .wrap{
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    padding: 28px 0 0;
+  }
+  .header-row{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid var(--paper-line);
+    padding-bottom: 20px;
+  }
+  .header-brand{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .header-brand img{
+    height: 42px;
+    width: auto;
+    border-radius: 6px;
+    display: none;
+  }
+  .wordmark{
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  .wordmark .sub{
+    display: block;
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .badge-time{
+    font-size: 0.85rem;
+    color: var(--forest);
+    background: #fff;
+    border: 1px solid var(--paper-line);
+    padding: 7px 14px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items: center;
+    gap: 48px;
+    padding: 72px 0 88px;
+  }
+  .hero-copy{
+    opacity: 0;
+    transform: translateY(14px);
+    animation: rise 0.7s ease forwards 0.1s;
+  }
+  @keyframes rise{
+    to{ opacity: 1; transform: translateY(0); }
+  }
+  h1{
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(2.3rem, 4.2vw, 3.4rem);
+    line-height: 1.12;
+    margin: 0 0 22px;
+    max-width: 12ch;
+  }
+  .lede{
+    font-size: 1.08rem;
+    color: var(--muted);
+    max-width: 46ch;
+    margin: 0 0 34px;
+  }
+  .cta{
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--forest);
+    color: var(--paper);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 15px 30px;
+    border-radius: 10px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .cta:hover{ background: var(--forest-deep); transform: translateY(-1px); }
+  .cta:focus-visible{ outline: 3px solid var(--gold); outline-offset: 3px; }
+  .cta-note{
+    margin: 16px 0 0;
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+
+  /* ---------- Illustration ---------- */
+  .art{
+    display: flex;
+    justify-content: center;
+  }
+  .art svg{ width: 100%; max-width: 380px; height: auto; }
+
+  /* ---------- Reasons ---------- */
+  .reasons{
+    background: var(--forest);
+    color: var(--paper);
+    padding: 68px 0;
+  }
+  .reasons h2{
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 1.7rem;
+    margin: 0 0 40px;
+    max-width: 20ch;
+  }
+  .reason-grid{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 36px;
+  }
+  .reason h3{
+    font-family: var(--font-body);
+    font-size: 1.02rem;
+    font-weight: 600;
+    margin: 16px 0 8px;
+  }
+  .reason p{
+    font-size: 0.94rem;
+    color: #CBD8CF;
+    margin: 0;
+    max-width: 32ch;
+  }
+  .reason svg{ width: 30px; height: 30px; }
+
+  /* ---------- Footer ---------- */
+  footer{
+    padding: 30px 0 40px;
+  }
+  .footer-row{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-top: 24px;
+    border-top: 1px solid var(--paper-line);
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 820px){
+    .hero{ grid-template-columns: 1fr; padding: 48px 0 56px; gap: 36px; }
+    .art{ order: -1; }
+    .art svg{ max-width: 260px; }
+    h1{ max-width: none; }
+    .reason-grid{ grid-template-columns: 1fr; gap: 30px; }
+    .wrap{ padding: 0 20px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .hero-copy{ animation: none; opacity: 1; transform: none; }
+    html{ scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap header-row">
+    <div class="header-brand">
+      <img id="schoolLogo" src="" alt="Logo Sekolah">
+      <div class="wordmark">
+        <span id="schoolNameText">Nama Sekolah</span>
+        <span class="sub" id="schoolSubText">Survei Kepuasan Layanan &middot; Tahun Ajaran 2026/2027</span>
+      </div>
+    </div>
+    <div class="badge-time">Sekitar 3&ndash;5 menit</div>
+  </div>
+</header>
+
+<section class="hero wrap">
+  <div class="hero-copy">
+    <h1>Suara Anda, Wajah Sekolah Kami</h1>
+    <p class="lede">
+      Kami ingin layanan sekolah ini terus tumbuh lebih baik, dan itu dimulai dari
+      apa yang orang tua dan siswa rasakan. Ceritakan pengalaman Anda lewat survei singkat ini.
+    </p>
+    <a class="cta" href="pertanyaan.html">Mulai Survey</a>
+    <p class="cta-note">Jawaban Anda bersifat rahasia dan tidak memengaruhi nilai atau layanan yang diterima.</p>
+  </div>
+
+  <div class="art" aria-hidden="true">
+    <svg viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="170" cy="170" r="160" fill="#EFE8D6"/>
+      <rect x="95" y="60" width="150" height="200" rx="14" fill="#FFFFFF" stroke="#1E2A38" stroke-width="3"/>
+      <rect x="130" y="46" width="80" height="26" rx="8" fill="#2F4F41"/>
+      <line x1="118" y1="108" x2="222" y2="108" stroke="#E4DCC9" stroke-width="6" stroke-linecap="round"/>
+      <line x1="118" y1="130" x2="222" y2="130" stroke="#E4DCC9" stroke-width="6" stroke-linecap="round"/>
+      <line x1="118" y1="152" x2="190" y2="152" stroke="#E4DCC9" stroke-width="6" stroke-linecap="round"/>
+
+      <g transform="translate(118,180)">
+        <path d="M14 0 L18.5 9.5 L29 11 L21.5 18 L23.5 28.5 L14 23.5 L4.5 28.5 L6.5 18 L-1 11 L9.5 9.5 Z" fill="#D9A441"/>
+        <path d="M14 0 L18.5 9.5 L29 11 L21.5 18 L23.5 28.5 L14 23.5 L4.5 28.5 L6.5 18 L-1 11 L9.5 9.5 Z" fill="#D9A441" transform="translate(34,0)"/>
+        <path d="M14 0 L18.5 9.5 L29 11 L21.5 18 L23.5 28.5 L14 23.5 L4.5 28.5 L6.5 18 L-1 11 L9.5 9.5 Z" fill="#D9A441" transform="translate(68,0)"/>
+        <path d="M14 0 L18.5 9.5 L29 11 L21.5 18 L23.5 28.5 L14 23.5 L4.5 28.5 L6.5 18 L-1 11 L9.5 9.5 Z" fill="#D9A441" transform="translate(102,0)"/>
+        <path d="M14 0 L18.5 9.5 L29 11 L21.5 18 L23.5 28.5 L14 23.5 L4.5 28.5 L6.5 18 L-1 11 L9.5 9.5 Z" fill="#EFE8D6" stroke="#D9A441" stroke-width="2" transform="translate(136,0)"/>
+      </g>
+
+      <g transform="translate(214,224) rotate(38)">
+        <rect x="0" y="0" width="66" height="12" rx="3" fill="#2F4F41"/>
+        <polygon points="66,0 78,6 66,12" fill="#1E2A38"/>
+        <rect x="-8" y="0" width="8" height="12" fill="#D9A441"/>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<section class="reasons">
+  <div class="wrap">
+    <h2>Kenapa pendapat Anda penting bagi kami</h2>
+    <div class="reason-grid">
+      <div class="reason">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D9A441" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="4"/></svg>
+        <h3>Sekolah yang terus membaik</h3>
+        <p>Setiap masukan membantu kami memperbaiki layanan, dari kenyamanan kelas hingga kualitas pengajaran sehari-hari.</p>
+      </div>
+      <div class="reason">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D9A441" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <h3>Ditindaklanjuti, bukan sekadar dibaca</h3>
+        <p>Hasil survei dibahas bersama kepala sekolah dan guru, lalu dijadikan dasar rencana perbaikan tiap semester.</p>
+      </div>
+      <div class="reason">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D9A441" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <h3>Identitas Anda terjaga</h3>
+        <p>Jawaban disimpan tanpa nama dan hanya ditampilkan dalam bentuk rangkuman, bukan per orang.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-row">
+    <span id="footerAddress">Nama Sekolah &mdash; Jl. Pendidikan No. 1</span>
+    <span id="footerYear">&copy; 2026 &middot; Tahun Ajaran 2026/2027</span>
+  </div>
+</footer>
+
+<script>
+  // ---------- Konfigurasi Supabase (identitas sekolah) ----------
+  const IDENTITY_URL = "https://mjvobqfcoutazqcovtlp.supabase.co/rest/v1";
+  const IDENTITY_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdm9icWZjb3V0YXpxY292dGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzEwMzYsImV4cCI6MjA4NjE0NzAzNn0.jz6JaC9mMTMhLVhXSh1OCnFWDPZ0Cy2tUnHEmWxAR8o";
+
+  async function loadSchoolIdentity(){
+    try{
+      const res = await fetch(
+        IDENTITY_URL + "/identitassekolah?select=nama_sekolah,alamat,tahun_pelajaran,logo&limit=1",
+        {
+          headers: {
+            "apikey": IDENTITY_ANON_KEY,
+            "Authorization": "Bearer " + IDENTITY_ANON_KEY
+          }
+        }
+      );
+      if (!res.ok) return;
+      const rows = await res.json();
+      const data = rows && rows[0];
+      if (!data) return;
+
+      const namaSekolah = data.nama_sekolah || "Nama Sekolah";
+      const tahunPelajaran = data.tahun_pelajaran || "2026/2027";
+      const alamat = data.alamat || "";
+
+      document.getElementById("schoolNameText").textContent = namaSekolah;
+      document.getElementById("schoolSubText").textContent = "Survei Kepuasan Layanan \u00B7 Tahun Ajaran " + tahunPelajaran;
+
+      const footerAddress = document.getElementById("footerAddress");
+      footerAddress.textContent = alamat ? (namaSekolah + " \u2014 " + alamat) : namaSekolah;
+
+      const currentYear = new Date().getFullYear();
+      document.getElementById("footerYear").textContent = "\u00A9 " + currentYear + " \u00B7 Tahun Ajaran " + tahunPelajaran;
+
+      if (data.logo){
+        const img = document.getElementById("schoolLogo");
+        img.src = data.logo;
+        img.style.display = "block";
+      }
+
+      document.title = "Survei Kepuasan Layanan Sekolah \u2014 " + namaSekolah;
+    }catch(err){
+      console.error("Gagal memuat identitas sekolah:", err);
+    }
+  }
+  loadSchoolIdentity();
+</script>
+
+</body>
+</html>

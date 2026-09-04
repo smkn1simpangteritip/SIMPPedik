@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasil Survey - SMKN 1 Simpang Teritip</title>
+    <!-- Font Awesome untuk Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase JS SDK -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --header-height: 60px;
+            --bg-light: #f4f6f9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('bg2.jpg') no-repeat center center;
+            background-size: cover;
+            filter: blur(5px);
+            transform: scale(1.05);
+            z-index: -1;
+        }
+
+        /* --- Navbar --- */
+        .navbar {
+            height: var(--header-height);
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            z-index: 1002;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+            width: auto;
+        }
+
+        .navbar-brand span {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--secondary-color);
+        }
+
+        .navbar-back {
+            margin-left: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            color: #555;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .navbar-back:hover {
+            background-color: #f1f3f5;
+            color: var(--primary-color);
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            margin-top: var(--header-height);
+            margin-left: 0;
+            padding: 2rem;
+            flex: 1;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            overflow: visible;
+        }
+
+        /* --- Widgets --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-info h3 { font-size: 2rem; margin-bottom: 5px; color: #333; }
+        .stat-info p { color: #777; font-size: 0.9rem; }
+        .stat-icon { font-size: 2.5rem; opacity: 0.2; }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .chart-card, .table-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .card-header { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .card-header h3 { font-size: 1.1rem; color: #444; }
+
+        /* Tables */
+        .table-responsive { overflow-x: auto; }
+        .custom-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .custom-table th, .custom-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #f1f1f1; white-space: nowrap; }
+        .custom-table th { background-color: #f8f9fa; color: #555; font-weight: 600; }
+        .custom-table tr:hover { background-color: #f9f9f9; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; color: white; }
+        .bg-danger { background-color: #e74c3c; }
+        .bg-warning { background-color: #f1c40f; color: #333; }
+        .bg-success { background-color: #2ecc71; }
+        .bg-info { background-color: #3498db; }
+
+        /* Toolbar filter */
+        .table-toolbar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .table-toolbar input, .table-toolbar select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-family: inherit;
+        }
+        .table-toolbar input { flex: 1; min-width: 160px; }
+
+        .btn-detail {
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-detail:hover { opacity: 0.9; }
+
+        .btn-link {
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 4px;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+        .btn-link:hover { opacity: 0.9; }
+
+        .empty-state { text-align: center; color: #888; padding: 30px 10px; }
+
+        /* Footer */
+        .main-footer {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 0.85rem;
+            border-top: 1px solid #eee;
+            margin-top: 20px;
+        }
+
+        .header-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .header-stats-grid {
+                grid-template-columns: 3fr 1fr;
+            }
+        }
+
+        .header-stats-grid .dashboard-card {
+            margin-bottom: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand span { font-size: 1rem; }
+            .navbar-back span.label { display: none; }
+            .main-content { padding-left: 5px; padding-right: 5px; }
+        }
+
+        .chart-container { position: relative; height: 320px; }
+        .chart-container.small { height: 260px; }
+
+        /* --- Modal Detail --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 10px;
+            max-width: 640px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 24px;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            border: none;
+            background: #f1f3f5;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #555;
+        }
+        .modal-close:hover { background: #e2e6ea; }
+        .modal-box h2 {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 4px;
+            padding-right: 30px;
+        }
+        .modal-sub { color: #888; font-size: 0.85rem; margin-bottom: 18px; }
+        .modal-section-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 18px 0 10px;
+        }
+        .modal-qa-list { display: flex; flex-direction: column; gap: 10px; }
+        .modal-qa-item {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .modal-qa-item .q-text { font-size: 0.85rem; color: #444; }
+        .modal-saran-item {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+        }
+        .modal-saran-item .q-text { font-size: 0.8rem; color: #888; margin-bottom: 6px; }
+        .modal-saran-item .a-text { font-size: 0.92rem; color: #333; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="#" class="navbar-brand">
+            <img src="" alt="Logo Sekolah" style="display: none;">
+            <span></span>
+        </a>
+        <a href="dasboradmin.html" class="navbar-back">
+            <i class="fas fa-arrow-left"></i>
+            <span class="label">Kembali ke Dashboard</span>
+        </a>
+        <div class="navbar-date" style="margin-left: auto; display: flex; align-items: center; gap: 10px; color: #555; font-weight: 600; font-size: 0.9rem;">
+            <i class="far fa-calendar-alt" style="color: var(--primary-color);"></i>
+            <span id="navbarDate"></span>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+        <div class="header-stats-grid">
+            <div class="dashboard-card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
+                    <div>
+                        <h2><i class="fas fa-poll" style="color: var(--primary-color);"></i> Hasil Survey Kepuasan Layanan Sekolah</h2>
+                        <p style="color: #666; margin-top: 10px;">Rekap jawaban survey yang diisi oleh orang tua/wali, siswa, guru, dan staf melalui formulir survey online.</p>
+                    </div>
+                    <button id="btnKirimLink" class="btn-link" style="border: none; cursor: pointer; font-size: 0.9rem; padding: 10px 18px; display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+                        <i class="fas fa-paper-plane"></i> Kirim Link Survey
+                    </button>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3 id="totalResponden">0</h3>
+                    <p>Total Responden</p>
+                </div>
+                <i class="fas fa-users stat-icon" style="color: var(--primary-color);"></i>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3 id="avgOverallScore">0.0</h3>
+                    <p>Rata-rata Skor Kepuasan (1-5)</p>
+                </div>
+                <i class="fas fa-star stat-icon" style="color: #f1c40f;"></i>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3 id="satisfactionPercent">0%</h3>
+                    <p>Tingkat Kepuasan Keseluruhan</p>
+                </div>
+                <i class="fas fa-smile stat-icon" style="color: #2ecc71;"></i>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3 id="topRespondenType">-</h3>
+                    <p>Responden Terbanyak</p>
+                </div>
+                <i class="fas fa-user-graduate stat-icon" style="color: #2980b9;"></i>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3 id="totalSaran">0</h3>
+                    <p>Saran &amp; Kritik Masuk</p>
+                </div>
+                <i class="fas fa-comment-dots stat-icon" style="color: #e74c3c;"></i>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-card" style="grid-column: span 2;">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-bar" style="color: var(--primary-color);"></i> Rata-rata Skor per Pertanyaan</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="avgScoreChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-pie" style="color: var(--primary-color);"></i> Jenis Responden</h3>
+                </div>
+                <div class="chart-container small">
+                    <canvas id="jenisRespondenChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-venus-mars" style="color: var(--primary-color);"></i> Jenis Kelamin Responden</h3>
+                </div>
+                <div class="chart-container small">
+                    <canvas id="jenisKelaminChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabel Semua Responden -->
+        <div class="table-card" style="margin-bottom: 20px;">
+            <div class="card-header">
+                <h3><i class="fas fa-list"></i> Data Responden Survey</h3>
+                <span id="tableCountLabel" style="font-size: 0.85rem; color: #888;"></span>
+            </div>
+            <div class="table-toolbar">
+                <input type="text" id="searchInput" placeholder="Cari ID Responden...">
+                <select id="filterJenis">
+                    <option value="">Semua Jenis Responden</option>
+                    <option value="Orang Tua/Wali">Orang Tua / Wali Murid</option>
+                    <option value="Siswa">Siswa</option>
+                    <option value="Guru">Guru</option>
+                    <option value="Staf">Staf / Karyawan Sekolah</option>
+                </select>
+                <select id="filterKelamin">
+                    <option value="">Semua Jenis Kelamin</option>
+                    <option value="Laki-laki">Laki-laki</option>
+                    <option value="Perempuan">Perempuan</option>
+                </select>
+            </div>
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>ID Responden</th>
+                            <th>Jenis Responden</th>
+                            <th>Jenis Kelamin</th>
+                            <th>Usia</th>
+                            <th>Rata-rata Skor</th>
+                            <th>Tanggal Mengisi</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="responseTableBody">
+                        <tr><td colspan="7" class="empty-state">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tabel Saran & Kritik -->
+        <div class="table-card">
+            <div class="card-header">
+                <h3><i class="fas fa-comment-dots"></i> Saran &amp; Kritik Terbaru</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>ID Responden</th>
+                            <th>Jenis Responden</th>
+                            <th>Pertanyaan</th>
+                            <th>Jawaban</th>
+                        </tr>
+                    </thead>
+                    <tbody id="saranTableBody">
+                        <tr><td colspan="4" class="empty-state">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="main-footer">
+            <p>&copy; 2026 SMKN 1 SIMPANG TERITIP.</p>
+            <p>CopyRight Kenji Studio Developer.</p>
+        </footer>
+    </main>
+
+    <!-- Modal Detail Responden -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeDetailModal()"><i class="fas fa-times"></i></button>
+            <h2 id="modalTitle">Detail Responden</h2>
+            <p class="modal-sub" id="modalSub"></p>
+
+            <div class="modal-section-title">Jawaban Pertanyaan Kepuasan</div>
+            <div class="modal-qa-list" id="modalQaList"></div>
+
+            <div class="modal-section-title">Saran &amp; Kritik</div>
+            <div id="modalSaranList"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- Tombol Kirim Link Survey ---
+        document.getElementById('btnKirimLink').addEventListener('click', function() {
+            window.open('survey.html', '_blank');
+        });
+
+        // --- Date Display in Navbar ---
+        function updateNavbarDate() {
+            const now = new Date();
+            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            document.getElementById('navbarDate').textContent = now.toLocaleDateString('id-ID', options);
+        }
+        document.addEventListener('DOMContentLoaded', updateNavbarDate);
+
+        // --- Pertanyaan Kepuasan (harus sesuai urutan q1..q15 pada pertanyaan.html) ---
+        const likertQuestions = [
+            "Kemudahan mendapatkan informasi yang dibutuhkan dari sekolah",
+            "Kejelasan informasi yang disampaikan oleh pihak sekolah",
+            "Kecepatan pelayanan yang diberikan oleh sekolah",
+            "Ketepatan pelayanan sesuai dengan kebutuhan siswa",
+            "Keramahan dan sikap petugas/guru dalam memberikan pelayanan",
+            "Kesopanan dan komunikasi petugas/guru saat melayani siswa",
+            "Kemudahan prosedur pelayanan yang harus dilakukan siswa",
+            "Persyaratan administrasi yang ditetapkan oleh sekolah",
+            "Pelayanan administrasi siswa (surat-menyurat, dokumen, dll)",
+            "Pelayanan informasi mengenai kegiatan dan program sekolah",
+            "Penanganan pengaduan atau keluhan siswa oleh pihak sekolah",
+            "Keterbukaan sekolah dalam menerima kritik dan saran dari siswa",
+            "Keadilan dan kesetaraan pelayanan kepada seluruh siswa",
+            "Kenyamanan fasilitas dan tempat pelayanan yang disediakan sekolah",
+            "Kepuasan keseluruhan terhadap pelayanan sekolah"
+        ];
+
+        const saranQuestions = [
+            { field: "saran1", text: "Pelayanan apa yang menurut Anda perlu ditingkatkan oleh sekolah?" },
+            { field: "saran2", text: "Apa saran Anda untuk meningkatkan kualitas pelayanan sekolah?" },
+            { field: "saran3", text: "Apakah Anda memiliki keluhan atau pengalaman terkait pelayanan sekolah yang ingin disampaikan?" }
+        ];
+
+        const scaleLabels = ["Sangat Tidak Puas", "Tidak Puas", "Cukup", "Puas", "Sangat Puas"];
+
+        // --- Konfigurasi Supabase ---
+        // Project untuk identitas sekolah (sama dengan dasboradmin.html)
+        const supabaseUrl = 'https://mjvobqfcoutazqcovtlp.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdm9icWZjb3V0YXpxY292dGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzEwMzYsImV4cCI6MjA4NjE0NzAzNn0.jz6JaC9mMTMhLVhXSh1OCnFWDPZ0Cy2tUnHEmWxAR8o';
+
+        // Project untuk data survey (sama dengan pertanyaan.html, tabel survey_responses)
+        const surveyUrl = 'https://ctbskvysuqecnaopqlam.supabase.co';
+        const surveyKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0YnNrdnlzdXFlY25hb3BxbGFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTAwODksImV4cCI6MjA4NjUyNjA4OX0.npr4SV6s8XFxXek0R0jNvdhlnIZrdTqrNvWGYVtMAcY';
+
+        let allResponses = [];
+
+        if (typeof supabase !== 'undefined') {
+            const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+            const surveyClient = supabase.createClient(surveyUrl, surveyKey);
+
+            async function loadSchoolIdentity() {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('identitassekolah')
+                        .select('nama_sekolah, logo')
+                        .limit(1)
+                        .single();
+
+                    if (data) {
+                        if (data.nama_sekolah) {
+                            document.querySelector('.navbar-brand span').textContent = data.nama_sekolah;
+                        }
+                        if (data.logo) {
+                            const img = document.querySelector('.navbar-brand img');
+                            img.src = data.logo;
+                            img.style.display = 'block';
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error loading school identity:", err);
+                }
+            }
+
+            function getScoreBadgeClass(score) {
+                if (score < 2.5) return 'bg-danger';
+                if (score < 3.5) return 'bg-warning';
+                return 'bg-success';
+            }
+
+            function calcAverage(row) {
+                let total = 0, count = 0;
+                for (let i = 1; i <= 15; i++) {
+                    const v = row['q' + i];
+                    if (typeof v === 'number' && !isNaN(v)) {
+                        total += v;
+                        count++;
+                    }
+                }
+                return count > 0 ? total / count : 0;
+            }
+
+            function formatDate(value) {
+                if (!value) return '-';
+                const d = new Date(value);
+                if (isNaN(d.getTime())) return '-';
+                return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+            }
+
+            async function loadSurveyResponses() {
+                const tbody = document.getElementById('responseTableBody');
+                const saranBody = document.getElementById('saranTableBody');
+
+                try {
+                    let query = surveyClient.from('survey_responses').select('*');
+
+                    // Urutkan berdasarkan created_at jika ada, jika gagal fallback ke id
+                    let { data, error } = await query.order('created_at', { ascending: false }).limit(500);
+                    if (error) {
+                        const fallback = await surveyClient.from('survey_responses').select('*').order('id', { ascending: false }).limit(500);
+                        data = fallback.data;
+                        error = fallback.error;
+                    }
+
+                    if (error) throw error;
+
+                    allResponses = data || [];
+
+                    updateStats(allResponses);
+                    renderAvgScoreChart(allResponses);
+                    renderJenisRespondenChart(allResponses);
+                    renderJenisKelaminChart(allResponses);
+                    renderResponseTable(allResponses);
+                    renderSaranTable(allResponses);
+
+                } catch (err) {
+                    console.error("Error loading survey responses:", err);
+                    tbody.innerHTML = `<tr><td colspan="7" class="empty-state" style="color:#e74c3c;">Gagal memuat data: ${err.message}</td></tr>`;
+                    saranBody.innerHTML = `<tr><td colspan="4" class="empty-state" style="color:#e74c3c;">Gagal memuat data: ${err.message}</td></tr>`;
+                }
+            }
+
+            function updateStats(data) {
+                document.getElementById('totalResponden').textContent = data.length.toLocaleString('id-ID');
+
+                let totalAvg = 0;
+                data.forEach(row => { totalAvg += calcAverage(row); });
+                const overallAvg = data.length > 0 ? totalAvg / data.length : 0;
+                document.getElementById('avgOverallScore').textContent = overallAvg.toFixed(1);
+                document.getElementById('satisfactionPercent').textContent = data.length > 0 ? Math.round((overallAvg / 5) * 100) + '%' : '0%';
+
+                const typeCounts = {};
+                data.forEach(row => {
+                    const t = row.jenis_responden || 'Tidak diketahui';
+                    typeCounts[t] = (typeCounts[t] || 0) + 1;
+                });
+                let topType = '-', topCount = 0;
+                Object.keys(typeCounts).forEach(t => {
+                    if (typeCounts[t] > topCount) { topCount = typeCounts[t]; topType = t; }
+                });
+                document.getElementById('topRespondenType').textContent = topType;
+
+                let saranCount = 0;
+                data.forEach(row => {
+                    saranQuestions.forEach(sq => {
+                        if (row[sq.field] && row[sq.field].toString().trim() !== '') saranCount++;
+                    });
+                });
+                document.getElementById('totalSaran').textContent = saranCount.toLocaleString('id-ID');
+            }
+
+            let avgScoreChartInstance = null;
+            function renderAvgScoreChart(data) {
+                const ctx = document.getElementById('avgScoreChart').getContext('2d');
+                const sums = new Array(15).fill(0);
+                const counts = new Array(15).fill(0);
+
+                data.forEach(row => {
+                    for (let i = 1; i <= 15; i++) {
+                        const v = row['q' + i];
+                        if (typeof v === 'number' && !isNaN(v)) {
+                            sums[i - 1] += v;
+                            counts[i - 1]++;
+                        }
+                    }
+                });
+
+                const averages = sums.map((s, i) => counts[i] > 0 ? +(s / counts[i]).toFixed(2) : 0);
+                const labels = likertQuestions.map((q, i) => 'P' + (i + 1));
+
+                if (avgScoreChartInstance) avgScoreChartInstance.destroy();
+                avgScoreChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Rata-rata Skor',
+                            data: averages,
+                            backgroundColor: '#667eea',
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(items) {
+                                        const idx = items[0].dataIndex;
+                                        return likertQuestions[idx];
+                                    },
+                                    label: function(context) {
+                                        return 'Rata-rata: ' + context.parsed.y + ' / 5';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, max: 5, title: { display: true, text: 'Skor (1-5)' } },
+                            x: { ticks: { autoSkip: false } }
+                        }
+                    }
+                });
+            }
+
+            let jenisRespondenChartInstance = null;
+            function renderJenisRespondenChart(data) {
+                const ctx = document.getElementById('jenisRespondenChart').getContext('2d');
+                const counts = {};
+                data.forEach(row => {
+                    const t = row.jenis_responden || 'Tidak diketahui';
+                    counts[t] = (counts[t] || 0) + 1;
+                });
+                const labels = Object.keys(counts);
+                const values = labels.map(l => counts[l]);
+                const colors = ['#667eea', '#38ef7d', '#f7971e', '#ee0979', '#2980b9', '#8e2de2'];
+
+                if (jenisRespondenChartInstance) jenisRespondenChartInstance.destroy();
+                jenisRespondenChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{ data: values, backgroundColor: colors }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+
+            let jenisKelaminChartInstance = null;
+            function renderJenisKelaminChart(data) {
+                const ctx = document.getElementById('jenisKelaminChart').getContext('2d');
+                const counts = {};
+                data.forEach(row => {
+                    const t = row.jenis_kelamin || 'Tidak diketahui';
+                    counts[t] = (counts[t] || 0) + 1;
+                });
+                const labels = Object.keys(counts);
+                const values = labels.map(l => counts[l]);
+
+                if (jenisKelaminChartInstance) jenisKelaminChartInstance.destroy();
+                jenisKelaminChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{ data: values, backgroundColor: ['#2980b9', '#ee0979', '#aaaaaa'] }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+
+            function getFilteredData() {
+                const search = document.getElementById('searchInput').value.trim().toLowerCase();
+                const jenis = document.getElementById('filterJenis').value;
+                const kelamin = document.getElementById('filterKelamin').value;
+
+                return allResponses.filter(row => {
+                    if (search && !(row.responden_id || '').toString().toLowerCase().includes(search)) return false;
+                    if (jenis && row.jenis_responden !== jenis) return false;
+                    if (kelamin && row.jenis_kelamin !== kelamin) return false;
+                    return true;
+                });
+            }
+
+            function renderResponseTable(data) {
+                const tbody = document.getElementById('responseTableBody');
+                const filtered = data !== undefined ? data : getFilteredData();
+                document.getElementById('tableCountLabel').textContent = filtered.length + ' dari ' + allResponses.length + ' responden';
+
+                if (filtered.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Belum ada data survey.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                filtered.forEach(row => {
+                    const avg = calcAverage(row);
+                    const badgeClass = getScoreBadgeClass(avg);
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row.responden_id || '-'}</td>
+                        <td>${row.jenis_responden || '-'}</td>
+                        <td>${row.jenis_kelamin || '-'}</td>
+                        <td>${row.usia != null ? row.usia : '-'}</td>
+                        <td><span class="badge ${badgeClass}">${avg.toFixed(1)} / 5</span></td>
+                        <td>${formatDate(row.created_at)}</td>
+                        <td><button class="btn-detail" data-id="${row.id != null ? row.id : ''}"><i class="fas fa-eye"></i> Detail</button></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                tbody.querySelectorAll('.btn-detail').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        const row = allResponses.find(r => String(r.id) === String(id));
+                        if (row) openDetailModal(row);
+                    });
+                });
+            }
+
+            function renderSaranTable(data) {
+                const tbody = document.getElementById('saranTableBody');
+                const rows = [];
+
+                data.forEach(row => {
+                    saranQuestions.forEach(sq => {
+                        const answer = row[sq.field];
+                        if (answer && answer.toString().trim() !== '') {
+                            rows.push({
+                                responden_id: row.responden_id,
+                                jenis_responden: row.jenis_responden,
+                                pertanyaan: sq.text,
+                                jawaban: answer
+                            });
+                        }
+                    });
+                });
+
+                if (rows.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Belum ada saran atau kritik yang masuk.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                rows.slice(0, 20).forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${item.responden_id || '-'}</td>
+                        <td>${item.jenis_responden || '-'}</td>
+                        <td style="white-space: normal; min-width: 220px;">${item.pertanyaan}</td>
+                        <td style="white-space: normal; min-width: 260px;">${item.jawaban}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            function openDetailModal(row) {
+                document.getElementById('modalTitle').textContent = 'Detail Responden: ' + (row.responden_id || '-');
+                document.getElementById('modalSub').textContent =
+                    (row.jenis_responden || '-') + ' • ' + (row.jenis_kelamin || '-') + ' • ' +
+                    (row.usia != null ? row.usia + ' tahun' : '-') + ' • ' + formatDate(row.created_at);
+
+                const qaList = document.getElementById('modalQaList');
+                qaList.innerHTML = '';
+                for (let i = 1; i <= 15; i++) {
+                    const score = row['q' + i];
+                    const badgeClass = typeof score === 'number' ? getScoreBadgeClass(score) : 'bg-warning';
+                    const label = typeof score === 'number' && score >= 1 && score <= 5 ? scaleLabels[score - 1] : '-';
+                    const item = document.createElement('div');
+                    item.className = 'modal-qa-item';
+                    item.innerHTML = `
+                        <span class="q-text">${i}. ${likertQuestions[i - 1]}</span>
+                        <span class="badge ${badgeClass}" style="white-space: nowrap;">${score != null ? score : '-'} (${label})</span>
+                    `;
+                    qaList.appendChild(item);
+                }
+
+                const saranList = document.getElementById('modalSaranList');
+                saranList.innerHTML = '';
+                let hasSaran = false;
+                saranQuestions.forEach(sq => {
+                    const answer = row[sq.field];
+                    if (answer && answer.toString().trim() !== '') {
+                        hasSaran = true;
+                        const item = document.createElement('div');
+                        item.className = 'modal-saran-item';
+                        item.innerHTML = `<div class="q-text">${sq.text}</div><div class="a-text">${answer}</div>`;
+                        saranList.appendChild(item);
+                    }
+                });
+                if (!hasSaran) {
+                    saranList.innerHTML = '<p style="color:#888; font-size:0.9rem;">Tidak ada saran atau kritik dari responden ini.</p>';
+                }
+
+                document.getElementById('detailModal').classList.add('show');
+            }
+
+            window.closeDetailModal = function() {
+                document.getElementById('detailModal').classList.remove('show');
+            };
+
+            document.getElementById('detailModal').addEventListener('click', function(e) {
+                if (e.target === this) closeDetailModal();
+            });
+
+            document.getElementById('searchInput').addEventListener('input', () => renderResponseTable());
+            document.getElementById('filterJenis').addEventListener('change', () => renderResponseTable());
+            document.getElementById('filterKelamin').addEventListener('change', () => renderResponseTable());
+
+            document.addEventListener('DOMContentLoaded', loadSchoolIdentity);
+            document.addEventListener('DOMContentLoaded', loadSurveyResponses);
+        }
+    </script>
+</body>
+</html>
