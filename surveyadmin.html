@@ -10,6 +10,8 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <!-- Chart.js Library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS (xlsx) Library untuk export Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
             --primary-color: #667eea;
@@ -349,9 +351,14 @@
                         <h2><i class="fas fa-poll" style="color: var(--primary-color);"></i> Hasil Survey Kepuasan Layanan Sekolah</h2>
                         <p style="color: #666; margin-top: 10px;">Rekap jawaban survey yang diisi oleh orang tua/wali, siswa, guru, dan staf melalui formulir survey online.</p>
                     </div>
-                    <button id="btnKirimLink" class="btn-link" style="border: none; cursor: pointer; font-size: 0.9rem; padding: 10px 18px; display: flex; align-items: center; gap: 8px; white-space: nowrap;">
-                        <i class="fas fa-paper-plane"></i> Kirim Link Survey
-                    </button>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button id="btnUnduhLaporan" class="btn-link" style="border: none; cursor: pointer; font-size: 0.9rem; padding: 10px 18px; display: flex; align-items: center; gap: 8px; white-space: nowrap; background-color: #2ecc71;">
+                            <i class="fas fa-file-excel"></i> Unduh Laporan
+                        </button>
+                        <button id="btnKirimLink" class="btn-link" style="border: none; cursor: pointer; font-size: 0.9rem; padding: 10px 18px; display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+                            <i class="fas fa-paper-plane"></i> Kirim Link Survey
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="stat-card">
@@ -559,6 +566,7 @@
         const surveyKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0YnNrdnlzdXFlY25hb3BxbGFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTAwODksImV4cCI6MjA4NjUyNjA4OX0.npr4SV6s8XFxXek0R0jNvdhlnIZrdTqrNvWGYVtMAcY';
 
         let allResponses = [];
+        let schoolIdentityFull = {};
 
         if (typeof supabase !== 'undefined') {
             const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
@@ -568,11 +576,13 @@
                 try {
                     const { data, error } = await supabaseClient
                         .from('identitassekolah')
-                        .select('nama_sekolah, logo')
+                        .select('npsn, nama_sekolah, status, tahun_pelajaran, nama_kepsek, nip_kepsek, jabatan, alamat, tlp, email, slogan, logo')
                         .limit(1)
                         .single();
 
                     if (data) {
+                        schoolIdentityFull = data;
+
                         if (data.nama_sekolah) {
                             document.querySelector('.navbar-brand span').textContent = data.nama_sekolah;
                         }
@@ -867,6 +877,128 @@
                     tbody.appendChild(tr);
                 });
             }
+
+            // --- Unduh Laporan Excel ---
+            function generateExcelReport() {
+                if (typeof XLSX === 'undefined') {
+                    alert('Gagal memuat library Excel. Periksa koneksi internet Anda dan coba lagi.');
+                    return;
+                }
+                if (!allResponses || allResponses.length === 0) {
+                    alert('Belum ada data survey untuk diunduh.');
+                    return;
+                }
+
+                const tanggalCetak = new Date().toLocaleDateString('id-ID', {
+                    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+                });
+
+                const wb = XLSX.utils.book_new();
+
+                // --- Sheet 1: Identitas Sekolah ---
+                const identitasRows = [
+                    ['LAPORAN HASIL SURVEY KEPUASAN LAYANAN SEKOLAH'],
+                    [],
+                    ['Nama Sekolah', schoolIdentityFull.nama_sekolah || '-'],
+                    ['NPSN', schoolIdentityFull.npsn || '-'],
+                    ['Status', schoolIdentityFull.status || '-'],
+                    ['Tahun Pelajaran', schoolIdentityFull.tahun_pelajaran || '-'],
+                    ['Alamat', schoolIdentityFull.alamat || '-'],
+                    ['Telepon', schoolIdentityFull.tlp || '-'],
+                    ['Email', schoolIdentityFull.email || '-'],
+                    ['Kepala Sekolah', schoolIdentityFull.nama_kepsek || '-'],
+                    ['NIP Kepala Sekolah', schoolIdentityFull.nip_kepsek || '-'],
+                    ['Jabatan', schoolIdentityFull.jabatan || '-'],
+                    ['Slogan', schoolIdentityFull.slogan || '-'],
+                    [],
+                    ['Tanggal Cetak Laporan', tanggalCetak]
+                ];
+                const wsIdentitas = XLSX.utils.aoa_to_sheet(identitasRows);
+                wsIdentitas['!cols'] = [{ wch: 22 }, { wch: 55 }];
+                XLSX.utils.book_append_sheet(wb, wsIdentitas, 'Identitas Sekolah');
+
+                // --- Sheet 2: Ringkasan ---
+                const overallAvg = allResponses.reduce((sum, r) => sum + calcAverage(r), 0) / allResponses.length;
+                const typeCounts = {};
+                allResponses.forEach(row => {
+                    const t = row.jenis_responden || 'Tidak diketahui';
+                    typeCounts[t] = (typeCounts[t] || 0) + 1;
+                });
+                let topType = '-', topCount = 0;
+                Object.keys(typeCounts).forEach(t => {
+                    if (typeCounts[t] > topCount) { topCount = typeCounts[t]; topType = t; }
+                });
+                let saranCount = 0;
+                allResponses.forEach(row => {
+                    saranQuestions.forEach(sq => {
+                        if (row[sq.field] && row[sq.field].toString().trim() !== '') saranCount++;
+                    });
+                });
+
+                const ringkasanRows = [
+                    ['RINGKASAN HASIL SURVEY'],
+                    [],
+                    ['Total Responden', allResponses.length],
+                    ['Rata-rata Skor Kepuasan (1-5)', +overallAvg.toFixed(2)],
+                    ['Tingkat Kepuasan Keseluruhan', Math.round((overallAvg / 5) * 100) + '%'],
+                    ['Responden Terbanyak', topType + ' (' + topCount + ' orang)'],
+                    ['Total Saran & Kritik Masuk', saranCount],
+                    [],
+                    ['Distribusi Jenis Responden'],
+                ];
+                Object.keys(typeCounts).forEach(t => ringkasanRows.push([t, typeCounts[t]]));
+
+                const wsRingkasan = XLSX.utils.aoa_to_sheet(ringkasanRows);
+                wsRingkasan['!cols'] = [{ wch: 32 }, { wch: 20 }];
+                XLSX.utils.book_append_sheet(wb, wsRingkasan, 'Ringkasan');
+
+                // --- Sheet 3: Detail Responden ---
+                const detailHeader = ['No', 'ID Responden', 'Jenis Responden', 'Jenis Kelamin', 'Usia', 'Tanggal Mengisi'];
+                for (let i = 1; i <= 15; i++) detailHeader.push('P' + i);
+                detailHeader.push('Rata-rata Skor', 'Saran 1', 'Saran 2', 'Saran 3');
+
+                const detailRows = [detailHeader];
+                allResponses.forEach((row, idx) => {
+                    const r = [
+                        idx + 1,
+                        row.responden_id || '-',
+                        row.jenis_responden || '-',
+                        row.jenis_kelamin || '-',
+                        row.usia != null ? row.usia : '-',
+                        formatDate(row.created_at)
+                    ];
+                    for (let i = 1; i <= 15; i++) {
+                        const v = row['q' + i];
+                        r.push(typeof v === 'number' && !isNaN(v) ? v : '-');
+                    }
+                    r.push(+calcAverage(row).toFixed(2));
+                    r.push(row.saran1 || '');
+                    r.push(row.saran2 || '');
+                    r.push(row.saran3 || '');
+                    detailRows.push(r);
+                });
+
+                const wsDetail = XLSX.utils.aoa_to_sheet(detailRows);
+                wsDetail['!cols'] = [
+                    { wch: 5 }, { wch: 16 }, { wch: 16 }, { wch: 14 }, { wch: 6 }, { wch: 14 },
+                    ...Array(15).fill({ wch: 6 }),
+                    { wch: 13 }, { wch: 35 }, { wch: 35 }, { wch: 35 }
+                ];
+                XLSX.utils.book_append_sheet(wb, wsDetail, 'Detail Responden');
+
+                // --- Sheet 4: Daftar Pertanyaan (keterangan kode P1-P15) ---
+                const pertanyaanRows = [['Kode', 'Pertanyaan']];
+                likertQuestions.forEach((q, i) => pertanyaanRows.push(['P' + (i + 1), q]));
+                const wsPertanyaan = XLSX.utils.aoa_to_sheet(pertanyaanRows);
+                wsPertanyaan['!cols'] = [{ wch: 8 }, { wch: 75 }];
+                XLSX.utils.book_append_sheet(wb, wsPertanyaan, 'Daftar Pertanyaan');
+
+                const namaFileSekolah = (schoolIdentityFull.nama_sekolah || 'Sekolah').replace(/[^a-zA-Z0-9]+/g, '_');
+                const tanggalFile = new Date().toISOString().slice(0, 10);
+                XLSX.writeFile(wb, `Laporan_Survey_${namaFileSekolah}_${tanggalFile}.xlsx`);
+            }
+
+            document.getElementById('btnUnduhLaporan').addEventListener('click', generateExcelReport);
 
             function openDetailModal(row) {
                 document.getElementById('modalTitle').textContent = 'Detail Responden: ' + (row.responden_id || '-');
