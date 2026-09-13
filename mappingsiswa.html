@@ -209,6 +209,8 @@
         .form-group input { width: 100%; padding: 10px; background: #374151; border: 1px solid #4b5563; border-radius: 6px; font-size: 0.95rem; color: #fff; transition: border-color 0.3s; }
         .form-group input:focus { outline: none; border-color: var(--primary-color); }
         .form-group input[readonly] { background-color: #111827; cursor: not-allowed; }
+        .form-group select { width: 100%; padding: 10px; background: #374151; border: 1px solid #4b5563; border-radius: 6px; font-size: 0.95rem; color: #fff; transition: border-color 0.3s; }
+        .form-group select:focus { outline: none; border-color: var(--primary-color); }
 
         .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
         .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.9rem; color: white; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.2s; }
@@ -218,6 +220,8 @@
         .btn-danger { background-color: #ef4444; }
         .btn-warning { background-color: #f59e0b; }
         .btn-warning:hover { opacity: 0.9; }
+        .btn-info { background-color: #0ea5e9; }
+        .btn-info:hover { opacity: 0.9; }
 
         /* Searchable Dropdown */
         .searchable-dropdown { position: relative; }
@@ -370,6 +374,59 @@
         </div>
     </div>
 
+    <!-- Modal Buat Absensi -->
+    <div id="absensiModal" class="modal">
+        <div class="modal-content" style="max-width: 420px;">
+            <div class="modal-header">
+                <h3>Buat Absensi - <span id="absensiKelasLabel"></span></h3>
+                <span class="close-modal" id="closeAbsensiModal" title="Tutup" aria-label="Close">&times;</span>
+            </div>
+            <div class="form-group">
+                <label>Nama Kegiatan</label>
+                <input type="text" id="absensiNamaKegiatan" placeholder="Contoh: Upacara Bendera">
+            </div>
+            <div class="form-group">
+                <label>Nama Sub Kegiatan</label>
+                <input type="text" id="absensiNamaSubKegiatan" placeholder="Contoh: Pembinaan Wali Kelas (opsional)">
+            </div>
+            <div class="form-group">
+                <label>Hari</label>
+                <select id="absensiHari">
+                    <option value="">-- Pilih Hari --</option>
+                    <option value="Senin">Senin</option>
+                    <option value="Selasa">Selasa</option>
+                    <option value="Rabu">Rabu</option>
+                    <option value="Kamis">Kamis</option>
+                    <option value="Jumat">Jumat</option>
+                    <option value="Sabtu">Sabtu</option>
+                    <option value="Minggu">Minggu</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Tanggal</label>
+                <input type="date" id="absensiTanggal">
+            </div>
+            <div class="form-group">
+                <label>Nama Guru <span style="font-weight:400; color:#9ca3af;">(untuk tanda tangan di bawah tabel)</span></label>
+                <select id="absensiNamaGuru">
+                    <option value="">-- Pilih Guru --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>NIP</label>
+                <input type="text" id="absensiNipGuru" readonly placeholder="Otomatis terisi">
+            </div>
+            <div class="form-group">
+                <label>Jabatan Dalam Kegiatan</label>
+                <input type="text" id="absensiJabatanGuru" placeholder="Contoh: Guru Pembina Kegiatan">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelAbsensiBtn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="exportAbsensiBtn"><i class="fas fa-file-export"></i> Export Absensi</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // --- Supabase Integration for Absensi (Mapping Siswa) ---
         const supabaseUrl = 'https://ctbskvysuqecnaopqlam.supabase.co';
@@ -412,6 +469,39 @@
                 }
             }
             document.addEventListener('DOMContentLoaded', loadSchoolIdentity);
+
+        // --- Load Daftar Guru untuk Dropdown Tanda Tangan Absensi ---
+        let daftarGuru = [];
+        async function loadDaftarGuru() {
+            try {
+                const { data, error } = await simpedikClient
+                    .from('dataguru')
+                    .select('nama_guru, nip')
+                    .order('nama_guru', { ascending: true });
+
+                if (error) throw error;
+
+                daftarGuru = data || [];
+                const select = document.getElementById('absensiNamaGuru');
+                if (select) {
+                    select.innerHTML = '<option value="">-- Pilih Guru --</option>' +
+                        daftarGuru.map(g => `<option value="${g.nama_guru}">${g.nama_guru}</option>`).join('');
+                }
+            } catch (err) {
+                console.error('Gagal memuat data guru:', err);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', loadDaftarGuru);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const selGuru = document.getElementById('absensiNamaGuru');
+            if (selGuru) {
+                selGuru.addEventListener('change', function() {
+                    const guru = daftarGuru.find(g => g.nama_guru === this.value);
+                    document.getElementById('absensiNipGuru').value = guru && guru.nip ? guru.nip : '';
+                });
+            }
+        });
         }
 
         // (logic lanjutan)
@@ -481,6 +571,7 @@
                         <button class="btn btn-primary" onclick="openMappingModal('${kelasName}')"><i class="fas fa-plus"></i> Tambah Mapping</button>
                         <button class="btn btn-danger" onclick="exportMappingPdf('${kelasName}')"><i class="fas fa-file-pdf"></i> Export Pdf</button>
                         <button class="btn btn-warning" onclick="pindahkanKeAlumni('${kelasName}')"><i class="fas fa-user-graduate"></i> Pindahkan Ke Alumni</button>
+                        <button class="btn btn-info" onclick="bukaAbsensiModal('${kelasName}')"><i class="fas fa-clipboard-list"></i> Buat Absensi</button>
                     `;
                     pane.appendChild(actionDiv);
 
@@ -928,6 +1019,225 @@
                 confirmAlumniTahunBtn.disabled = false;
             }
         });
+
+        // --- Modal Buat Absensi ---
+        const absensiModal = document.getElementById('absensiModal');
+        const absensiKelasLabel = document.getElementById('absensiKelasLabel');
+        const absensiNamaKegiatan = document.getElementById('absensiNamaKegiatan');
+        const absensiNamaSubKegiatan = document.getElementById('absensiNamaSubKegiatan');
+        const absensiHari = document.getElementById('absensiHari');
+        const absensiTanggal = document.getElementById('absensiTanggal');
+        const absensiNamaGuru = document.getElementById('absensiNamaGuru');
+        const absensiNipGuru = document.getElementById('absensiNipGuru');
+        const absensiJabatanGuru = document.getElementById('absensiJabatanGuru');
+        const exportAbsensiBtn = document.getElementById('exportAbsensiBtn');
+        const cancelAbsensiBtn = document.getElementById('cancelAbsensiBtn');
+        const closeAbsensiModal = document.getElementById('closeAbsensiModal');
+        let kelasUntukAbsensi = null;
+
+        window.bukaAbsensiModal = function(kelasName) {
+            kelasUntukAbsensi = kelasName;
+            absensiKelasLabel.textContent = kelasName;
+            absensiNamaKegiatan.value = '';
+            absensiNamaSubKegiatan.value = '';
+            absensiHari.value = '';
+            absensiTanggal.value = '';
+            absensiNamaGuru.value = '';
+            absensiNipGuru.value = '';
+            absensiJabatanGuru.value = '';
+            absensiModal.classList.add('active');
+        }
+
+        function closeAbsensiModalFn() {
+            absensiModal.classList.remove('active');
+            kelasUntukAbsensi = null;
+        }
+
+        cancelAbsensiBtn.addEventListener('click', closeAbsensiModalFn);
+        closeAbsensiModal.addEventListener('click', closeAbsensiModalFn);
+        absensiModal.addEventListener('click', (e) => {
+            if (e.target === absensiModal) closeAbsensiModalFn();
+        });
+
+        exportAbsensiBtn.addEventListener('click', async function() {
+            const namaKegiatan = absensiNamaKegiatan.value.trim();
+            const namaSubKegiatan = absensiNamaSubKegiatan.value.trim();
+            const hari = absensiHari.value;
+            const tanggal = absensiTanggal.value;
+            const namaGuru = absensiNamaGuru.value;
+            const nipGuru = absensiNipGuru.value.trim();
+            const jabatanGuru = absensiJabatanGuru.value.trim();
+            const kelasName = kelasUntukAbsensi;
+
+            if (!namaKegiatan) {
+                alert('Nama Kegiatan wajib diisi terlebih dahulu!');
+                absensiNamaKegiatan.focus();
+                return;
+            }
+            if (!hari) {
+                alert('Hari wajib dipilih terlebih dahulu!');
+                absensiHari.focus();
+                return;
+            }
+            if (!tanggal) {
+                alert('Tanggal wajib diisi terlebih dahulu!');
+                absensiTanggal.focus();
+                return;
+            }
+            if (!kelasName) {
+                alert('Kelas tidak valid.');
+                return;
+            }
+
+            const originalText = exportAbsensiBtn.innerHTML;
+            exportAbsensiBtn.textContent = 'Memproses...';
+            exportAbsensiBtn.disabled = true;
+
+            try {
+                await exportAbsensiPdf(kelasName, namaKegiatan, namaSubKegiatan, hari, tanggal, namaGuru, nipGuru, jabatanGuru);
+                closeAbsensiModalFn();
+            } finally {
+                exportAbsensiBtn.innerHTML = originalText;
+                exportAbsensiBtn.disabled = false;
+            }
+        });
+
+        // --- Export Absensi PDF Function ---
+        async function exportAbsensiPdf(kelasName, namaKegiatan, namaSubKegiatan, hari, tanggal, namaGuru, nipGuru, jabatanGuru) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4'); // Portrait orientation
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let yPos = 20;
+
+            // Tambahkan KOP Sekolah jika ada (sama seperti Export Pdf)
+            if (schoolData.kop_sekolah) {
+                try {
+                    const response = await fetch(schoolData.kop_sekolah);
+                    const blob = await response.blob();
+                    const base64data = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+
+                    const imgProps = doc.getImageProperties(base64data);
+                    const pdfWidth = pageWidth - 20; // Margin kiri kanan 10
+                    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                    doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                    yPos = 10 + imgHeight + 10; // Update posisi Y di bawah gambar
+                } catch (err) {
+                    console.error("Gagal memuat KOP Sekolah:", err);
+                }
+            }
+
+            try {
+                // Fetch data siswa untuk kelas ini
+                const { data, error } = await supabaseClient
+                    .from('mappingsiswa')
+                    .select('*')
+                    .eq('kelas', kelasName)
+                    .order('nama_siswa', { ascending: true });
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    alert('Tidak ada data siswa untuk diexport.');
+                    return;
+                }
+
+                // Judul (diisi dari Nama Kegiatan)
+                doc.setFontSize(16);
+                doc.setTextColor(0);
+                doc.text(`ABSENSI ${namaKegiatan.toUpperCase()}`, pageWidth / 2, yPos, { align: 'center' });
+                yPos += 7;
+
+                // Nama Sub Kegiatan (jika diisi), tampil di bawah Nama Kegiatan
+                if (namaSubKegiatan) {
+                    doc.setFontSize(12);
+                    doc.setTextColor(40);
+                    doc.text(namaSubKegiatan, pageWidth / 2, yPos, { align: 'center' });
+                    yPos += 7;
+                }
+
+                // Sub judul kelas
+                doc.setFontSize(12);
+                doc.setTextColor(60);
+                doc.text(`Kelas ${kelasName}`, pageWidth / 2, yPos, { align: 'center' });
+                yPos += 10;
+
+                // Info Hari / Tanggal
+                const tanggalFormatted = new Date(tanggal + 'T00:00:00').toLocaleDateString('id-ID', {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                });
+                doc.setFontSize(10);
+                doc.setTextColor(0);
+                doc.text(`Hari`, 14, yPos);
+                doc.text(`: ${hari}`, 40, yPos);
+                yPos += 6;
+                doc.text(`Tanggal`, 14, yPos);
+                doc.text(`: ${tanggalFormatted}`, 40, yPos);
+                yPos += 8;
+
+                // Siapkan data tabel absensi
+                const tableData = data.map((item, index) => [
+                    index + 1,
+                    item.nisn || '-',
+                    item.nama_siswa,
+                    '',
+                    ''
+                ]);
+
+                // Generate Tabel Absensi
+                doc.autoTable({
+                    head: [['No', 'NISN', 'Nama Siswa', 'Tanda Tangan', 'Keterangan']],
+                    body: tableData,
+                    startY: yPos,
+                    theme: 'grid',
+                    styles: { fontSize: 9, valign: 'middle' },
+                    headStyles: { fillColor: [102, 126, 234] },
+                    columnStyles: {
+                        0: { cellWidth: 12, halign: 'center' },
+                        1: { cellWidth: 30 },
+                        3: { cellWidth: 40 },
+                        4: { cellWidth: 30 }
+                    }
+                });
+
+                // --- Blok Tanda Tangan Guru di Bawah Tabel ---
+                const pageHeight = doc.internal.pageSize.getHeight();
+                let signY = doc.lastAutoTable.finalY + 15;
+
+                // Jika ruang tidak cukup, buat halaman baru
+                if (signY + 35 > pageHeight - 10) {
+                    doc.addPage();
+                    signY = 20;
+                }
+
+                const signX = pageWidth - 75; // Blok tanda tangan rata kanan
+                const tanggalFormatted2 = new Date(tanggal + 'T00:00:00').toLocaleDateString('id-ID', {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                });
+
+                doc.setFontSize(10);
+                doc.setTextColor(0);
+                doc.text(`Simpang Teritip, ${tanggalFormatted2}`, signX, signY, { align: 'center' });
+                signY += 6;
+                doc.text(jabatanGuru || 'Guru Pembina Kegiatan,', signX, signY, { align: 'center' });
+                signY += 25; // Ruang kosong untuk tanda tangan basah
+
+                doc.setFont(undefined, 'bold');
+                doc.text(namaGuru || '(..............................)', signX, signY, { align: 'center' });
+                doc.setFont(undefined, 'normal');
+                signY += 5;
+                doc.text(`NIP. ${nipGuru || '-'}`, signX, signY, { align: 'center' });
+
+                doc.save(`Absensi_${namaKegiatan.replace(/\s+/g, '_')}_${kelasName}.pdf`);
+            } catch (err) {
+                console.error('Export absensi error:', err);
+                alert('Gagal export Absensi: ' + err.message);
+            }
+        }
     </script>
 </body>
 </html>
