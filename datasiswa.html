@@ -13,6 +13,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <!-- PapaParse for CSV Import -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
             --primary-color: #667eea;
@@ -281,6 +283,7 @@
                     <button class="btn btn-success" id="importBtn"><i class="fas fa-file-import"></i> Import CSV</button>
                     <button class="btn btn-primary" id="kirimLinkBtn"><i class="fas fa-share"></i> Kirim Link</button>
                     <button class="btn btn-danger" id="exportPdfBtn"><i class="fas fa-file-pdf"></i> Export Pdf</button>
+                    <button class="btn btn-success" id="exportExcelBtn" style="background-color:#217346;"><i class="fas fa-file-excel"></i> Export Excel</button>
                     <button class="btn" id="alumniBtn" disabled style="background-color:#8b5cf6;"><i class="fas fa-user-graduate"></i> Alumni</button>
                 </div>
                 <input type="file" id="importFile" accept=".csv" style="display: none;" title="Pilih file CSV untuk diimport">
@@ -296,6 +299,7 @@
                             <th>Nama Siswa</th>
                             <th>Tempat Lahir</th>
                             <th>Tanggal Lahir</th>
+                            <th>Usia</th>
                             <th>Jenis Kelamin</th>
                             <th>Nama Ayah</th>
                             <th>Nama Ibu</th>
@@ -668,13 +672,36 @@
             }
         }
 
+        // Fungsi Hitung Usia Saat Ini dari Tanggal Lahir
+        function hitungUsia(tanggalLahir) {
+            if (!tanggalLahir) return '-';
+            const lahir = new Date(tanggalLahir);
+            if (isNaN(lahir.getTime())) return '-';
+
+            const sekarang = new Date();
+            let tahun = sekarang.getFullYear() - lahir.getFullYear();
+            let bulan = sekarang.getMonth() - lahir.getMonth();
+            let hari = sekarang.getDate() - lahir.getDate();
+
+            if (hari < 0) {
+                bulan -= 1;
+                hari += new Date(sekarang.getFullYear(), sekarang.getMonth(), 0).getDate();
+            }
+            if (bulan < 0) {
+                tahun -= 1;
+                bulan += 12;
+            }
+
+            return `${tahun} th`;
+        }
+
         // Fungsi Render Tabel
         function renderSiswaTable(data) {
             const tableBody = document.querySelector('.custom-table tbody');
             tableBody.innerHTML = '';
 
             if (!data || data.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="15" style="text-align: center; color: #888; padding: 20px;">Data tidak ditemukan.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="16" style="text-align: center; color: #888; padding: 20px;">Data tidak ditemukan.</td></tr>';
                 return;
             }
 
@@ -687,6 +714,7 @@
                     <td>${siswa.nama_siswa}</td>
                     <td>${siswa.tempat_lahir || '-'}</td>
                     <td>${siswa.tanggal_lahir || '-'}</td>
+                    <td>${hitungUsia(siswa.tanggal_lahir)}</td>
                     <td>${siswa.jk || '-'}</td>
                     <td>${siswa.nama_ayah || '-'}</td>
                     <td>${siswa.nama_ibu || '-'}</td>
@@ -1083,13 +1111,14 @@
                 ['2', 'Nama Siswa', ':', siswa.nama_siswa || '-'],
                 ['3', 'Tempat Lahir', ':', siswa.tempat_lahir || '-'],
                 ['4', 'Tanggal Lahir', ':', siswa.tanggal_lahir || '-'],
-                ['5', 'Jenis Kelamin', ':', siswa.jk || '-'],
-                ['6', 'Nama Ayah', ':', siswa.nama_ayah || '-'],
-                ['7', 'Nama Ibu', ':', siswa.nama_ibu || '-'],
-                ['8', 'Nomor Akta Kelahiran', ':', siswa.no_akta || '-'],
-                ['9', 'Nomor Kartu Keluarga', ':', siswa.no_kk || '-'],
-                ['10', 'Tahun Masuk', ':', siswa.tahun_masuk || '-'],
-                ['11', 'Alamat', ':', siswa.alamat || '-']
+                ['5', 'Usia', ':', hitungUsia(siswa.tanggal_lahir)],
+                ['6', 'Jenis Kelamin', ':', siswa.jk || '-'],
+                ['7', 'Nama Ayah', ':', siswa.nama_ayah || '-'],
+                ['8', 'Nama Ibu', ':', siswa.nama_ibu || '-'],
+                ['9', 'Nomor Akta Kelahiran', ':', siswa.no_akta || '-'],
+                ['10', 'Nomor Kartu Keluarga', ':', siswa.no_kk || '-'],
+                ['11', 'Tahun Masuk', ':', siswa.tahun_masuk || '-'],
+                ['12', 'Alamat', ':', siswa.alamat || '-']
             ];
 
             doc.autoTable({
@@ -1192,13 +1221,14 @@
                     ['2', 'Nama Siswa', ':', siswa.nama_siswa || '-'],
                     ['3', 'Tempat Lahir', ':', siswa.tempat_lahir || '-'],
                     ['4', 'Tanggal Lahir', ':', siswa.tanggal_lahir || '-'],
-                    ['5', 'Jenis Kelamin', ':', siswa.jk || '-'],
-                    ['6', 'Nama Ayah', ':', siswa.nama_ayah || '-'],
-                    ['7', 'Nama Ibu', ':', siswa.nama_ibu || '-'],
-                    ['8', 'Nomor Akta Kelahiran', ':', siswa.no_akta || '-'],
-                    ['9', 'Nomor Kartu Keluarga', ':', siswa.no_kk || '-'],
-                    ['10', 'Tahun Masuk', ':', siswa.tahun_masuk || '-'],
-                    ['11', 'Alamat', ':', siswa.alamat || '-']
+                    ['5', 'Usia', ':', hitungUsia(siswa.tanggal_lahir)],
+                    ['6', 'Jenis Kelamin', ':', siswa.jk || '-'],
+                    ['7', 'Nama Ayah', ':', siswa.nama_ayah || '-'],
+                    ['8', 'Nama Ibu', ':', siswa.nama_ibu || '-'],
+                    ['9', 'Nomor Akta Kelahiran', ':', siswa.no_akta || '-'],
+                    ['10', 'Nomor Kartu Keluarga', ':', siswa.no_kk || '-'],
+                    ['11', 'Tahun Masuk', ':', siswa.tahun_masuk || '-'],
+                    ['12', 'Alamat', ':', siswa.alamat || '-']
                 ];
 
                 doc.autoTable({
@@ -1227,6 +1257,51 @@
                 fileName = 'Buku_Induk_Semua_Siswa.pdf';
             }
             doc.save(fileName);
+        });
+
+        // --- Export Excel Logic (Selalu Seluruh Data Siswa) ---
+        document.getElementById('exportExcelBtn').addEventListener('click', () => {
+            if (!allSiswaData || allSiswaData.length === 0) {
+                alert('Tidak ada data siswa untuk diexport.');
+                return;
+            }
+
+            const dataForExcel = allSiswaData.map((siswa, index) => ({
+                'No': index + 1,
+                'NISN': siswa.nisn ?? '-',
+                'Nama Siswa': siswa.nama_siswa || '-',
+                'Tempat Lahir': siswa.tempat_lahir || '-',
+                'Tanggal Lahir': siswa.tanggal_lahir || '-',
+                'Usia': hitungUsia(siswa.tanggal_lahir),
+                'Jenis Kelamin': siswa.jk || '-',
+                'Nama Ayah': siswa.nama_ayah || '-',
+                'Nama Ibu': siswa.nama_ibu || '-',
+                'Alamat': siswa.alamat || '-',
+                'Nomor Akta': siswa.no_akta || '-',
+                'Nomor KK': siswa.no_kk || '-',
+                'Tahun Masuk': siswa.tahun_masuk || '-'
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
+            worksheet['!cols'] = [
+                { wch: 5 },  // No
+                { wch: 15 }, // NISN
+                { wch: 25 }, // Nama Siswa
+                { wch: 18 }, // Tempat Lahir
+                { wch: 15 }, // Tanggal Lahir
+                { wch: 8 },  // Usia
+                { wch: 15 }, // Jenis Kelamin
+                { wch: 20 }, // Nama Ayah
+                { wch: 20 }, // Nama Ibu
+                { wch: 30 }, // Alamat
+                { wch: 20 }, // Nomor Akta
+                { wch: 20 }, // Nomor KK
+                { wch: 12 }  // Tahun Masuk
+            ];
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Data Siswa');
+            XLSX.writeFile(workbook, 'Data_Semua_Siswa.xlsx');
         });
 
         // --- Import CSV Logic ---
