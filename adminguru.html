@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Admin Guru - SMKN 1 Simpang Teritip</title>
     <!-- Font Awesome untuk Icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -319,6 +319,174 @@
         .modal.active { display: flex; }
         .modal-content { background-color: white; width: 90%; max-width: 400px; padding: 30px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: slideDown 0.3s ease; text-align: center; }
         @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* --- Mobile: Sticky Footer Bar + Slide-up Menu --- */
+        .mobile-bottom-bar, .menu-sheet, .menu-sheet-backdrop { display: none; }
+
+        @media (max-width: 768px) {
+            .menu-dashboard-card { display: none; }
+
+            .main-content {
+                padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+            }
+
+            .mobile-bottom-bar {
+                display: flex;
+                position: fixed;
+                left: 0; right: 0; bottom: 0;
+                z-index: 1003;
+                gap: 10px;
+                padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+                background: #ffffff;
+                border-top: 1px solid #eee;
+                box-shadow: 0 -4px 16px rgba(0,0,0,0.08);
+            }
+            .mobile-bottom-bar .bar-btn {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                height: 46px;
+                border: none;
+                border-radius: 12px;
+                font-family: inherit;
+                font-size: 0.95rem;
+                font-weight: 700;
+                text-decoration: none;
+                cursor: pointer;
+                -webkit-tap-highlight-color: transparent;
+                transition: transform 0.15s ease, filter 0.15s ease;
+            }
+            .mobile-bottom-bar .bar-btn:active { transform: scale(0.97); }
+            /* Default: putih. Hover/tekan: Menu hijau, Logout merah */
+            .mobile-bottom-bar .bar-btn {
+                background: #ffffff;
+                color: #444;
+                border: 1.5px solid #e2e5ea;
+                transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+            }
+            .mobile-bottom-bar .bar-btn-menu:active,
+            .mobile-bottom-bar .bar-btn-menu:focus-visible {
+                background: #1A8754; border-color: #1A8754; color: #fff;
+            }
+            .mobile-bottom-bar .bar-btn-logout:active,
+            .mobile-bottom-bar .bar-btn-logout:focus-visible {
+                background: #dc2626; border-color: #dc2626; color: #fff;
+            }
+            @media (hover: hover) {
+                .mobile-bottom-bar .bar-btn-menu:hover {
+                    background: #1A8754; border-color: #1A8754; color: #fff;
+                }
+                .mobile-bottom-bar .bar-btn-logout:hover {
+                    background: #dc2626; border-color: #dc2626; color: #fff;
+                }
+            }
+
+            .menu-sheet-backdrop {
+                display: block;
+                position: fixed;
+                inset: 0;
+                z-index: 1600;
+                background: rgba(0,0,0,0.32);
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.35s ease, visibility 0s linear 0.35s;
+            }
+            .menu-sheet-backdrop.open {
+                opacity: 1;
+                visibility: visible;
+                transition: opacity 0.35s ease, visibility 0s;
+            }
+
+            .menu-sheet {
+                display: flex;
+                flex-direction: column;
+                position: fixed;
+                left: 0; right: 0; bottom: 0;
+                z-index: 1601;
+                max-height: 78vh;
+                font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                /* Gaya iOS: kaca buram (frosted glass) abu terang */
+                background: rgba(242, 242, 247, 0.78);
+                -webkit-backdrop-filter: saturate(180%) blur(28px);
+                backdrop-filter: saturate(180%) blur(28px);
+                border-radius: 26px 26px 0 0;
+                border-top: 0.5px solid rgba(255, 255, 255, 0.7);
+                box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.18);
+                transform: translateY(100%);
+                visibility: hidden;
+                transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1), visibility 0s linear 0.45s;
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+            }
+            .menu-sheet.open {
+                transform: translateY(0);
+                visibility: visible;
+                transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1), visibility 0s;
+            }
+            @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+                .menu-sheet { background: #f2f2f7; }
+            }
+            .menu-sheet.dragging { transition: none; }
+
+            .menu-sheet-head {
+                flex: 0 0 auto;
+                padding: 8px 16px 6px;
+                touch-action: none;
+            }
+            .menu-sheet-handle {
+                width: 36px; height: 5px;
+                border-radius: 3px;
+                background: rgba(60, 60, 67, 0.3);
+                margin: 0 auto 12px;
+            }
+            .menu-sheet-title {
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 30px;
+                font-size: 1.06rem;
+                font-weight: 600;
+                letter-spacing: -0.2px;
+                color: #1c1c1e;
+            }
+            .menu-sheet-close {
+                position: absolute;
+                right: 0; top: 50%;
+                transform: translateY(-50%);
+                width: 30px; height: 30px;
+                display: flex; align-items: center; justify-content: center;
+                border: none;
+                border-radius: 50%;
+                background: rgba(120, 120, 128, 0.16);
+                color: rgba(60, 60, 67, 0.6);
+                font-size: 1.2rem;
+                line-height: 1;
+                cursor: pointer;
+                -webkit-tap-highlight-color: transparent;
+            }
+            .menu-sheet-close:active { background: rgba(120, 120, 128, 0.3); }
+            .menu-sheet-body {
+                flex: 1 1 auto;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                padding: 8px 16px 22px;
+            }
+            .menu-sheet-body .menu-grid {
+                padding: 18px 10px 8px;
+                background: rgba(255, 255, 255, 0.72);
+                border-radius: 18px;
+            }
+            .menu-sheet-body .menu-card span { color: #1c1c1e; font-weight: 500; }
+            .menu-sheet-body .icon-box {
+                border-radius: 14px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            }
+            .menu-sheet-body .menu-card:active .icon-box { transform: scale(0.92); filter: brightness(0.92); }
+            /* Log Out sudah ada di footer sticky, jadi disembunyikan dari sheet */
+            .menu-sheet-body .logout-card { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -380,8 +548,8 @@
             </div>
         </div>
 
-        <!-- Container Menu Grid -->
-        <div class="dashboard-card">
+        <!-- Container Menu Grid (di smartphone, grid ini dipindah ke Slide-up Menu) -->
+        <div class="dashboard-card menu-dashboard-card" id="menuGridHome">
             <div class="menu-grid">
 
 
@@ -447,7 +615,7 @@
                     </div>
                     <span>Praktik Kerja Lapangan</span>
                 </a>
-                <a href="index.html" class="menu-card" onclick="return confirm('Apakah Anda yakin ingin keluar?');">
+                <a href="index.html" class="menu-card logout-card" onclick="return confirm('Apakah Anda yakin ingin keluar?');">
                     <div class="icon-box ic-slate">
                         <i class="fas fa-sign-out-alt"></i>
                     </div>
@@ -1050,5 +1218,98 @@
             });
         }
     </script>
+    <!-- Footer Sticky (khusus smartphone) -->
+    <div class="mobile-bottom-bar">
+        <button type="button" class="bar-btn bar-btn-menu" id="btnOpenMenuSheet" aria-haspopup="dialog" aria-controls="menuSheet">
+            <i class="fas fa-th-large"></i> Menu
+        </button>
+        <a href="index.html" class="bar-btn bar-btn-logout" onclick="return confirm('Apakah Anda yakin ingin keluar?');">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+
+    <!-- Slide-up Menu (khusus smartphone) -->
+    <div class="menu-sheet-backdrop" id="menuSheetBackdrop"></div>
+    <div class="menu-sheet" id="menuSheet" role="dialog" aria-modal="true" aria-labelledby="menuSheetTitle" aria-hidden="true">
+        <div class="menu-sheet-head" id="menuSheetHead">
+            <div class="menu-sheet-handle"></div>
+            <div class="menu-sheet-title">
+                <span id="menuSheetTitle">Menu</span>
+                <button type="button" class="menu-sheet-close" id="btnCloseMenuSheet" aria-label="Tutup menu">&times;</button>
+            </div>
+        </div>
+        <div class="menu-sheet-body" id="menuSheetBody"></div>
+    </div>
+
+    <script>
+        // Slide-up Menu: di layar <= 768px, grid menu asli dipindahkan ke dalam sheet
+        // (bukan disalin) sehingga semua event listener & modal yang ada tetap berfungsi.
+        (function () {
+            const mq = window.matchMedia('(max-width: 768px)');
+            const grid = document.querySelector('.menu-grid');
+            const home = document.getElementById('menuGridHome');
+            const sheet = document.getElementById('menuSheet');
+            const sheetBody = document.getElementById('menuSheetBody');
+            const sheetHead = document.getElementById('menuSheetHead');
+            const backdrop = document.getElementById('menuSheetBackdrop');
+            const btnOpen = document.getElementById('btnOpenMenuSheet');
+            const btnClose = document.getElementById('btnCloseMenuSheet');
+            if (!grid || !home || !sheet) return;
+
+            function openSheet() {
+                sheet.style.transform = '';
+                sheet.classList.add('open');
+                backdrop.classList.add('open');
+                sheet.setAttribute('aria-hidden', 'false');
+            }
+            function closeSheet() {
+                sheet.style.transform = '';
+                sheet.classList.remove('open');
+                backdrop.classList.remove('open');
+                sheet.setAttribute('aria-hidden', 'true');
+            }
+            function placeGrid() {
+                if (mq.matches) {
+                    sheetBody.appendChild(grid);
+                } else {
+                    home.appendChild(grid);
+                    closeSheet();
+                }
+            }
+
+            btnOpen.addEventListener('click', openSheet);
+            btnClose.addEventListener('click', closeSheet);
+            backdrop.addEventListener('click', closeSheet);
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
+
+            // Tutup sheet setelah salah satu menu dipilih (baik pindah halaman maupun buka modal)
+            sheetBody.addEventListener('click', (e) => {
+                if (e.target.closest('.menu-card')) closeSheet();
+            });
+
+            // Geser ke bawah pada bagian atas sheet untuk menutup
+            let startY = null, dy = 0;
+            sheetHead.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY; dy = 0;
+                sheet.classList.add('dragging');
+            }, { passive: true });
+            sheetHead.addEventListener('touchmove', (e) => {
+                if (startY === null) return;
+                dy = Math.max(0, e.touches[0].clientY - startY);
+                sheet.style.transform = 'translateY(' + dy + 'px)';
+            }, { passive: true });
+            sheetHead.addEventListener('touchend', () => {
+                if (startY === null) return;
+                sheet.classList.remove('dragging');
+                startY = null;
+                if (dy > 90) closeSheet(); else sheet.style.transform = '';
+            });
+
+            placeGrid();
+            if (mq.addEventListener) mq.addEventListener('change', placeGrid);
+            else mq.addListener(placeGrid);
+        })();
+    </script>
+
 </body>
 </html>
