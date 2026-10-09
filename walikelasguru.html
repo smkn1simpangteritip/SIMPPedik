@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
             --primary-color: #667eea;
@@ -354,6 +355,15 @@
             background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
         }
         .btn-export i { font-size: 1.1em; }
+
+        .ledger-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 15px; border-bottom: 1px solid #374151; }
+        .ledger-tab { background: transparent; border: none; color: #9ca3af; padding: 10px 18px; cursor: pointer; font-size: 0.9rem; font-weight: 600; border-bottom: 3px solid transparent; transition: all 0.2s; }
+        .ledger-tab:hover { color: #e5e7eb; }
+        .ledger-tab.active { color: #06b6d4; border-bottom-color: #06b6d4; }
+        #ledgerTable th, #ledgerTable td { white-space: nowrap; }
+        #ledgerTable th.ledger-mapel { white-space: normal; min-width: 90px; text-align: center; }
+        .form-group select { width: 100%; padding: 10px; background: #374151; border: 1px solid #4b5563; border-radius: 6px; font-size: 0.95rem; color: #fff; }
+        .ledger-nilai-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
 
         .accordion-item {
             transition: all 0.3s ease;
@@ -736,7 +746,7 @@
                             <div id="listBelumTuntasUS" style="font-size: 0.85rem; color: #cbd5e1; max-height: 150px; overflow-y: auto;"></div>
                         </div>
                         <div class="stat-card" style="border-left: 4px solid #ec4899; display: block; height: auto;">
-                            <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: #ec4899; border-bottom: 1px solid #374151; padding-bottom: 5px;">Daftar Siswa Belum Tuntas Nilai Raport</h4>
+                            <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: #ec4899; border-bottom: 1px solid #374151; padding-bottom: 5px;">Daftar Siswa Belum Tuntas Nilai Akhir</h4>
                             <div id="listBelumTuntasNR" style="font-size: 0.85rem; color: #cbd5e1; max-height: 150px; overflow-y: auto;"></div>
                         </div>
                     </div>
@@ -767,6 +777,46 @@
                                 <tr>
                                     <td colspan="6" style="text-align: center;">Memuat data nilai...</td>
                                 </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item" id="ledgerKelasItem">
+                <div class="card-header-dark accordion-header" onclick="toggleAccordion(this)" style="display: flex; justify-content: space-between; align-items: center; padding: 20px;">
+                    <h3 style="margin: 0; font-size: 1.2rem; display: flex; align-items: center;">
+                        <i class="fas fa-book" style="color: #06b6d4; margin-right: 10px;"></i>
+                        Ledger
+                    </h3>
+                    <i class="fas fa-chevron-down accordion-icon" style="color: #9ca3af;"></i>
+                </div>
+
+                <div class="accordion-content">
+                    <div class="ledger-tabs" id="ledgerTabs">
+                        <button class="ledger-tab active" data-sem="1">Semester 1</button>
+                        <button class="ledger-tab" data-sem="2">Semester 2</button>
+                        <button class="ledger-tab" data-sem="3">Semester 3</button>
+                        <button class="ledger-tab" data-sem="4">Semester 4</button>
+                        <button class="ledger-tab" data-sem="5">Semester 5</button>
+                        <button class="ledger-tab" data-sem="6">Nilai PKL</button>
+                        <button class="ledger-tab" data-sem="raport">Nilai Akhir</button>
+                    </div>
+
+                    <div style="margin-bottom: 12px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button id="btnTambahNilaiAkhir" class="btn-export" style="background: #10b981; box-shadow: none;"><i class="fas fa-plus"></i> Tambah Nilai Akhir</button>
+                        <button id="btnExportTemplateLedger" class="btn-export" style="background: #0ea5e9; box-shadow: none;"><i class="fas fa-file-excel"></i> Export Template (Excel)</button>
+                        <button id="btnImportNilaiLedger" class="btn-export" style="background: #f59e0b; box-shadow: none;"><i class="fas fa-file-import"></i> Import Nilai</button>
+                        <button id="exportLedgerPdfBtn" class="btn-export" style="box-shadow: none;"><i class="fas fa-file-pdf"></i> Export PDF</button>
+                        <button id="btnResetNilaiLedger" class="btn-export" style="background: #6b7280; box-shadow: none;"><i class="fas fa-rotate-left"></i> Reset Semua Nilai</button>
+                        <input type="file" id="inputImportLedger" accept=".xlsx,.xls,.csv" style="display: none;">
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="custom-table" id="ledgerTable">
+                            <thead id="ledgerThead"></thead>
+                            <tbody id="ledgerTbody">
+                                <tr><td style="text-align: center;">Memuat data ledger...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -901,6 +951,72 @@
             <h3 style="color: #333; margin-bottom: 10px;">Akses Ditolak</h3>
             <p style="color: #666; margin-bottom: 25px;">Maaf, anda tidak memiliki tugas tambahan sebagai walikelas...!</p>
             <button onclick="document.getElementById('walikelasWarningModal').classList.remove('active')" style="background: #f59e0b; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: 600; width: 100%;">Tutup</button>
+        </div>
+    </div>
+
+    <div id="ledgerUpdateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Update / Hapus Nilai</h3>
+                <button type="button" onclick="document.getElementById('ledgerUpdateModal').classList.remove('active')" style="background:none; border:none; color:#9ca3af; font-size:1.5rem; cursor:pointer;">&times;</button>
+            </div>
+            <form id="ledgerUpdateForm">
+                <div class="form-group">
+                    <label>Nama Siswa</label>
+                    <input type="text" id="ledgerUpdateNama" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Semester</label>
+                    <input type="text" id="ledgerUpdateSem" readonly>
+                </div>
+                <label style="display:block; margin-bottom:8px; color:#cbd5e1; font-size:0.9rem; font-weight:500;">Nilai Akhir per Mata Pelajaran</label>
+                <div id="ledgerUpdateInputs" class="ledger-nilai-grid"></div>
+                <div class="modal-footer" style="justify-content: space-between;">
+                    <button type="button" class="btn" id="ledgerHapusBtn" style="background-color:#ef4444;"><i class="fas fa-trash"></i> Hapus Nilai</button>
+                    <div style="display:flex; gap:10px;">
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('ledgerUpdateModal').classList.remove('active')">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="ledgerUpdateSubmitBtn">Simpan Update</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="ledgerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Tambah Nilai Akhir</h3>
+                <button type="button" onclick="document.getElementById('ledgerModal').classList.remove('active')" style="background:none; border:none; color:#9ca3af; font-size:1.5rem; cursor:pointer;">&times;</button>
+            </div>
+            <form id="ledgerForm">
+                <div class="form-group">
+                    <label>Semester</label>
+                    <select id="ledgerSemSelect">
+                        <option value="1">Semester 1</option>
+                        <option value="2">Semester 2</option>
+                        <option value="3">Semester 3</option>
+                        <option value="4">Semester 4</option>
+                        <option value="5">Semester 5</option>
+                        <option value="6">Nilai PKL</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+                    <button type="button" class="btn" id="btnModalExportTemplate" style="background-color:#0ea5e9;"><i class="fas fa-file-excel"></i> Export Template (Excel)</button>
+                    <button type="button" class="btn" id="btnModalImportNilai" style="background-color:#f59e0b;"><i class="fas fa-file-import"></i> Import Nilai</button>
+                    <input type="file" id="inputModalImportLedger" accept=".xlsx,.xls,.csv" style="display:none;">
+                </div>
+                <div class="form-group">
+                    <label>Nama Siswa</label>
+                    <select id="ledgerSiswaSelect" required></select>
+                </div>
+                <div id="ledgerPendingNote" style="display:none; margin-bottom:12px; padding:10px; border-radius:6px; background:#78350f; color:#fde68a; font-size:0.85rem;"></div>
+                <label style="display:block; margin-bottom:8px; color:#cbd5e1; font-size:0.9rem; font-weight:500;">Nilai Akhir per Mata Pelajaran</label>
+                <div id="ledgerNilaiInputs" class="ledger-nilai-grid"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('ledgerModal').classList.remove('active')">Batal</button>
+                    <button type="submit" class="btn btn-primary" id="ledgerSubmitBtn">Simpan</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -1096,6 +1212,7 @@
                         loadKasusKelas(waliData.kelas);
                         loadPembinaanKelas(waliData.kelas);
                         loadMapelOptions(waliData.kelas);
+                        loadLedgerKelas(waliData.kelas);
 
                         const photoEl = document.getElementById('bioPhoto');
                         if (session.photo) {
@@ -2043,6 +2160,1016 @@
                 console.error("Error counting jurnal:", err);
             }
         }
+
+        // ===================== LEDGER =====================
+        const LEDGER_KKTP_DEFAULT = 75;
+        let ledgerState = { kelas: '', mapel: [], siswa: [], nilai: {}, semester: 1 };
+
+        const ledgerSemNum = (v) => { const m = String(v ?? '').match(/\d+/); return m ? parseInt(m[0], 10) : null; };
+        // Nilai PKL disimpan di tabel ledgernilai sebagai "semester 6" dengan satu mapel bernama "PKL"
+        const LEDGER_PKL_SEM = 6;
+        const LEDGER_PKL_MAPEL = ['PKL'];
+        const ledgerMapelFor = (sem) => sem === LEDGER_PKL_SEM ? LEDGER_PKL_MAPEL : ledgerState.mapel;
+        const ledgerSemLabel = (sem) => sem === LEDGER_PKL_SEM ? 'Nilai PKL' : `Semester ${sem}`;
+        const ledgerEsc = (t) => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        // Mapel yang disembunyikan berdasarkan kode kelas
+        const LEDGER_MAPEL_DPIB = ['Dasar dasar DPIB', 'Desain Permodelan Bangunan', 'Estimasi Biaya', 'Kontruksi Jalan dan Jembatan', 'Konstruksi Jalan dan Jembatan', 'Kreativitas, Inovasi dan Kewirausahaan DPIB', 'Landscape', 'Utilitas dan Plambing'];
+        const LEDGER_MAPEL_TPL = ['Dasar Dasar Teknik Pengelasan', 'Gambar Teknik', 'Kreativitas, Inovasi dan Kewirausahaan TPL', 'Mutu Pengelasan', 'Pengelasan FCAW Dasar', 'Pengelasan GMAW', 'Pengelasan GTAW', 'Pengelasan SMAW Dasar', 'Penggunaan Perkakas Bengkel', 'Teknik Gambar Pengelasan', 'CAD Mesin'];
+        // Label tampilan mapel (nama di database tetap dipakai untuk pencocokan nilai)
+        const LEDGER_MAPEL_LABEL = { 'seni teater': 'Seni Teater/Seni Musik', 'pkl': 'Nilai PKL' };
+        const ledgerLabel = (m) => LEDGER_MAPEL_LABEL[String(m || '').toLowerCase().replace(/\s+/g, ' ').trim()] || m;
+        // Kode singkat mapel untuk header PDF
+        const LEDGER_MAPEL_KODE = {
+            'bahasa indonesia': 'BINDO',
+            'bahasa inggris': 'BING',
+            'pendidikan pancasila': 'PP',
+            'pendidikan pancasila dan kewarganegaraan': 'PP',
+            'pendidikan jasmani olahraga dan kesehatan': 'PJOK',
+            'matematika': 'MTK',
+            'sejarah': 'SEJ',
+            'informatika': 'INFO',
+            'seni teater': 'SENI',
+            'dasar dasar dpib': 'DDPIB',
+            'desain permodelan bangunan': 'DPB',
+            'estimasi biaya': 'EB',
+            'kontruksi jalan dan jembatan': 'KJJ',
+            'konstruksi jalan dan jembatan': 'KJJ',
+            'kreativitas inovasi dan kewirausahaan dpib': 'KIK DPIB',
+            'landscape': 'LNDSC',
+            'utilitas dan plambing': 'UTP',
+            'dasar dasar teknik pengelasan': 'DDTP',
+            'gambar teknik': 'GT',
+            'kreativitas inovasi dan kewirausahaan tpl': 'KIK TPL',
+            'mutu pengelasan': 'MP',
+            'pengelasan fcaw dasar': 'FCAW',
+            'pengelasan gmaw': 'GMAW',
+            'pengelasan gtaw': 'GTAW',
+            'pengelasan smaw dasar': 'SMAW',
+            'penggunaan perkakas bengkel': 'PPB',
+            'teknik gambar pengelasan': 'TGP',
+            'cad mesin': 'CAD',
+            'projek ipas tpl 1': 'PIPAS TPL1',
+            'projek ipas tpl 2': 'PIPAS TPL2'
+        };
+        function ledgerKode(m) {
+            const n = String(m || '').toLowerCase().replace(/[\s,]+/g, ' ').trim();
+            if (LEDGER_MAPEL_KODE[n]) return LEDGER_MAPEL_KODE[n];
+            if (n.startsWith('pendidikan agama islam')) return 'PAI';
+            if (n.startsWith('pendidikan agama kristen')) return 'PAK';
+            if (n.startsWith('pendidikan pancasila')) return 'PP';
+            const stop = ['dan', 'dengan', 'untuk', 'di', 'yang', 'atau'];
+            const k = n.split(' ').filter(w => w && !stop.includes(w)).map(w => /^\d+$/.test(w) ? w : w[0].toUpperCase()).join('');
+            return k || String(m);
+        }
+        // Lebar minimum kolom agar teks (header kode / angka) tidak terpotong atau bertumpuk
+        function ledgerMinW(doc, text, fontSize, pad) {
+            doc.setFontSize(fontSize);
+            return doc.getTextWidth(String(text)) + (pad || 3);
+        }
+
+        // Hitung ukuran huruf & lebar kolom agar seluruh tabel muat di lebar halaman (tidak terpotong)
+        function ledgerFitColumns(doc, head, body, startFS, avail, namaIdx, wrapWords) {
+            const n = head.length;
+            const calc = (fs, namaCap) => {
+                const widths = [];
+                let total = 0;
+                for (let i = 0; i < n; i++) {
+                    const mw = (t, pad) => wrapWords
+                        ? Math.max(...String(t).split(' ').map(word => ledgerMinW(doc, word, fs, pad)))
+                        : ledgerMinW(doc, t, fs, pad);
+                    let w = mw(head[i], 4.5);
+                    body.forEach(r => { w = Math.max(w, mw(r[i], 4)); });
+                    if (i === namaIdx) w = Math.min(w, namaCap);
+                    widths.push(w);
+                    total += w;
+                }
+                return { widths, total };
+            };
+            for (let fs = startFS; fs >= 5; fs -= 0.5) {
+                let res = calc(fs, 55);
+                if (res.total > avail && namaIdx >= 0) {
+                    // persempit kolom nama (teks nama boleh turun baris) sebelum mengecilkan huruf
+                    const cap = Math.max(32, res.widths[namaIdx] - (res.total - avail));
+                    res = calc(fs, cap);
+                }
+                if (res.total <= avail) return { fs, widths: res.widths, fits: true };
+            }
+            return { fs: 5, widths: null, fits: false };
+        }
+
+        // Tabel legenda kode -> nama mapel (3 pasang per baris)
+        function ledgerLegendBody() {
+            const items = ledgerState.mapel.map(m => [ledgerKode(m), ledgerLabel(m)]);
+            const rows = [];
+            for (let i = 0; i < items.length; i += 3) {
+                const r = [];
+                for (let j = 0; j < 3; j++) { const it = items[i + j]; r.push(it ? it[0] : '', it ? it[1] : ''); }
+                rows.push(r);
+            }
+            return rows;
+        }
+        function ledgerDrawLegend(doc) {
+            let y = doc.lastAutoTable.finalY + 8;
+            if (y > doc.internal.pageSize.getHeight() - 30) { doc.addPage(); y = 15; }
+            doc.setFontSize(10);
+            doc.setTextColor(0);
+            doc.text('Keterangan Kode Mata Pelajaran:', 14, y);
+            doc.autoTable({
+                body: ledgerLegendBody(),
+                startY: y + 3,
+                theme: 'plain',
+                margin: { left: 8, right: 8 },
+                tableWidth: doc.internal.pageSize.getWidth() - 16,
+                styles: { fontSize: 8, cellPadding: 1.5, overflow: 'linebreak' },
+                columnStyles: { 0: { fontStyle: 'bold', cellWidth: 22 }, 2: { fontStyle: 'bold', cellWidth: 22 }, 4: { fontStyle: 'bold', cellWidth: 22 } }
+            });
+        }
+
+        const ledgerNorm = (t) => String(t || '').toLowerCase().replace(/[\s,]+/g, ' ').trim();
+
+        function filterMapelByKelas(list, kelas) {
+            const k = String(kelas || '').toUpperCase();
+            let hide = [];
+            if (k.includes('TPL')) hide = LEDGER_MAPEL_DPIB;
+            else if (k.includes('DPIB')) hide = LEDGER_MAPEL_TPL;
+            const hideSet = new Set(hide.map(ledgerNorm));
+
+            // Projek IPAS TPL 1 / TPL 2 hanya untuk kelas X TPL 1 / X TPL 2
+            const kelasNorm = k.replace(/\s+/g, ' ').trim();
+            return list.filter(m => {
+                const n = ledgerNorm(m);
+                if (hideSet.has(n)) return false;
+                const pj = n.match(/^projek ipas tpl (\d+)$/);
+                if (pj) return new RegExp('(^|\\s)X\\s*TPL\\s*' + pj[1] + '(\\s|$)').test(kelasNorm);
+                return true;
+            });
+        }
+
+        async function loadLedgerKelas(kelas) {
+            ledgerState.kelas = kelas;
+            const tbody = document.getElementById('ledgerTbody');
+            if (tbody) tbody.innerHTML = '<tr><td style="text-align:center;">Memuat data ledger...</td></tr>';
+            try {
+                const [mapelRes, siswaRes, nilaiRes, manualRes, pklRes] = await Promise.all([
+                    absensiClient.from('matapelajaran').select('nama_mapel').order('nama_mapel', { ascending: true }),
+                    absensiClient.from('mappingsiswa').select('nama_siswa').eq('kelas', kelas).order('nama_siswa', { ascending: true }),
+                    absensiClient.from('nilaimapel').select('*').eq('kelas', kelas),
+                    absensiClient.from('ledgernilai').select('*').eq('kelas', kelas),
+                    absensiClient.from('nilai_pkl').select('*').eq('kelas', kelas)
+                ]);
+                if (mapelRes.error) throw mapelRes.error;
+                if (siswaRes.error) throw siswaRes.error;
+                if (nilaiRes.error) throw nilaiRes.error;
+                // manualRes.error diabaikan (tabel ledgernilai mungkin belum dibuat)
+                if (manualRes.error) console.warn('Tabel ledgernilai belum tersedia:', manualRes.error.message);
+
+                ledgerState.mapel = [...new Set((mapelRes.data || []).map(m => m.nama_mapel))];
+                ledgerState.mapel = filterMapelByKelas(ledgerState.mapel, kelas);
+                const names = new Set((siswaRes.data || []).map(s => s.nama_siswa));
+                (nilaiRes.data || []).forEach(n => names.add(n.nama_siswa));
+                ledgerState.siswa = [...names].sort((a, b) => a.localeCompare(b));
+
+                // nilai[sem][siswa][mapel] = {nilai, kktp}
+                const nilai = {};
+                const put = (sem, siswa, mapel, val, kktp) => {
+                    if (!sem || isNaN(val)) return;
+                    nilai[sem] = nilai[sem] || {};
+                    nilai[sem][siswa] = nilai[sem][siswa] || {};
+                    nilai[sem][siswa][mapel] = { nilai: val, kktp: kktp };
+                };
+                (nilaiRes.data || []).forEach(n => put(ledgerSemNum(n.semester), n.nama_siswa, n.mapel, parseFloat(n.nr), parseFloat(n.kktp)));
+                (manualRes.data || []).forEach(n => {
+                    const sm = ledgerSemNum(n.semester);
+                    if (n.nilai === null || n.nilai === undefined) {
+                        // baris kosong = nilai sengaja dihapus di Ledger (menimpa nilai dari nilaimapel)
+                        if (nilai[sm] && nilai[sm][n.nama_siswa]) delete nilai[sm][n.nama_siswa][n.mapel];
+                    } else {
+                        put(sm, n.nama_siswa, n.mapel, parseFloat(n.nilai), NaN);
+                    }
+                });
+                if (pklRes.error) console.warn('Tabel nilai_pkl belum tersedia:', pklRes.error.message);
+                (pklRes.data || []).forEach(n => {
+                    const v = parseFloat(n.nilai);
+                    if (!isNaN(v)) put(LEDGER_PKL_SEM, n.nama_siswa, LEDGER_PKL_MAPEL[0], v, NaN);
+                });
+                ledgerState.nilai = nilai;
+                renderLedger();
+            } catch (err) {
+                console.error('Error loading ledger:', err);
+                if (tbody) tbody.innerHTML = `<tr><td style="text-align:center; color:red;">Gagal memuat data: ${ledgerEsc(err.message)}</td></tr>`;
+            }
+        }
+
+        function getLedgerRows(sem) {
+            const data = (ledgerState.nilai[sem]) || {};
+            return ledgerState.siswa.map((nama, i) => {
+                const per = data[nama] || {};
+                const vals = [];
+                let tuntas = true;
+                ledgerMapelFor(sem).forEach(m => {
+                    if (per[m]) {
+                        vals.push(per[m].nilai);
+                        const k = isNaN(per[m].kktp) ? LEDGER_KKTP_DEFAULT : per[m].kktp;
+                        if (per[m].nilai < k) tuntas = false;
+                    }
+                });
+                const avg = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+                return {
+                    no: i + 1,
+                    nama,
+                    nilai: ledgerMapelFor(sem).map(m => per[m] ? per[m].nilai : null),
+                    avg,
+                    rapor: avg === null ? null : Math.round(avg),
+                    ket: avg === null ? '-' : (tuntas ? 'Tuntas' : 'Belum Tuntas')
+                };
+            });
+        }
+
+        function getRaportRows() {
+            const per = [1, 2, 3, 4, 5].map(n => getLedgerRows(n));
+            return ledgerState.siswa.map((nama, i) => {
+                const sems = per.map(rows => rows[i]);               // nilai rapor tiap semester
+                const vals = sems.filter(x => x.rapor !== null).map(x => x.rapor);
+                const avg = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+                const filled = sems.filter(x => x.ket !== '-');
+                const ket = !filled.length ? '-' : (filled.every(x => x.ket === 'Tuntas') ? 'Tuntas' : 'Belum Tuntas');
+                const pklVal = (((ledgerState.nilai[LEDGER_PKL_SEM] || {})[nama]) || {})[LEDGER_PKL_MAPEL[0]];
+                const pkl = pklVal ? pklVal.nilai : null;   // hanya ditampilkan, tidak masuk rata-rata
+                return { no: i + 1, nama, sems, pkl, avg, rapor: avg === null ? null : Math.round(avg), ket };
+            });
+        }
+
+        function renderRaport() {
+            const thead = document.getElementById('ledgerThead');
+            const tbody = document.getElementById('ledgerTbody');
+            const hs = 'text-align:center;background-color:#3b82f6;color:white;';
+            thead.innerHTML = `<tr>
+                <th style="${hs}">No</th>
+                <th style="${hs}">Nama Siswa</th>
+                ${[1, 2, 3, 4, 5].map(n => `<th style="${hs}">Semester ${n}</th>`).join('')}
+                <th style="${hs}">Nilai PKL</th>
+                <th style="${hs}">Nilai Rata-Rata</th>
+                <th style="${hs}">Nilai Akhir</th>
+                <th style="${hs}">Keterangan</th>
+                <th style="${hs}">Aksi</th>
+            </tr>`;
+            const rows = getRaportRows();
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;">Belum ada data siswa.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = rows.map(r => {
+                const color = r.ket === 'Tuntas' ? '#10b981' : (r.ket === 'Belum Tuntas' ? '#ef4444' : '#6b7280');
+                return `<tr>
+                    <td style="text-align:center;">${r.no}</td>
+                    <td>${ledgerEsc(r.nama)}</td>
+                    ${r.sems.map(x => `<td style="text-align:center;">${x.rapor === null ? '-' : x.rapor}</td>`).join('')}
+                    <td style="text-align:center;">${r.pkl === null ? '-' : r.pkl}</td>
+                    <td style="text-align:center;">${r.avg === null ? '-' : r.avg.toFixed(2)}</td>
+                    <td style="text-align:center;">${r.rapor === null ? '-' : r.rapor}</td>
+                    <td style="text-align:center;"><span class="badge" style="background-color:${color};">${r.ket}</span></td>
+                    <td style="text-align:center;"><button type="button" class="btn-sm-export ledger-pdf-btn" data-nama="${encodeURIComponent(r.nama)}" title="Export PDF nilai akhir siswa" style="background-color:#ef4444;"><i class="fas fa-file-pdf"></i></button></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderPkl() {
+            const thead = document.getElementById('ledgerThead');
+            const tbody = document.getElementById('ledgerTbody');
+            const hs = 'text-align:center;background-color:#3b82f6;color:white;';
+            thead.innerHTML = `<tr>
+                <th style="${hs}">No</th>
+                <th style="${hs}">Nama Siswa</th>
+                <th style="${hs}">Nilai</th>
+                <th style="${hs}">Keterangan</th>
+                <th style="${hs}">Aksi</th>
+            </tr>`;
+            const rows = getLedgerRows(LEDGER_PKL_SEM);
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Belum ada data siswa.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = rows.map(r => {
+                const color = r.ket === 'Tuntas' ? '#10b981' : (r.ket === 'Belum Tuntas' ? '#ef4444' : '#6b7280');
+                const nilai = r.nilai[0];
+                return `<tr>
+                    <td style="text-align:center;">${r.no}</td>
+                    <td>${ledgerEsc(r.nama)}</td>
+                    <td style="text-align:center;">${nilai === null ? '-' : nilai}</td>
+                    <td style="text-align:center;"><span class="badge" style="background-color:${color};">${r.ket}</span></td>
+                    <td style="text-align:center;"><button type="button" class="btn-sm-export ledger-update-btn" data-nama="${encodeURIComponent(r.nama)}" style="background-color:#3b82f6;"><i class="fas fa-edit"></i> Update</button> <button type="button" class="btn-sm-export ledger-pdf-btn" data-nama="${encodeURIComponent(r.nama)}" title="Export PDF nilai PKL siswa" style="background-color:#ef4444;"><i class="fas fa-file-pdf"></i></button></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderLedger() {
+            if (ledgerState.semester === 'raport') { renderRaport(); return; }
+            const sem = ledgerState.semester;
+            const thead = document.getElementById('ledgerThead');
+            const tbody = document.getElementById('ledgerTbody');
+            if (sem === LEDGER_PKL_SEM) { renderPkl(); return; }
+            const th = 'style="background-color: #3b82f6; color: white;"';
+            thead.innerHTML = '<tr>' +
+                `<th ${th}>No</th><th ${th}>Nama Siswa</th>` +
+                ledgerState.mapel.map(m => `<th class="ledger-mapel" ${th}>${ledgerEsc(ledgerLabel(m))}</th>`).join('') +
+                `<th style="text-align:center;background-color:#3b82f6;color:white;">Rata-Rata</th>` +
+                `<th style="text-align:center;background-color:#3b82f6;color:white;">Nilai Akhir</th>` +
+                `<th style="text-align:center;background-color:#3b82f6;color:white;">Keterangan</th><th style="text-align:center;background-color:#3b82f6;color:white;">Aksi</th></tr>`;
+
+            const rows = getLedgerRows(sem);
+            const colCount = ledgerState.mapel.length + 6;
+            if (!rows.length) {
+                tbody.innerHTML = `<tr><td colspan="${colCount}" style="text-align:center;">Belum ada data siswa.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = rows.map(r => {
+                const color = r.ket === 'Tuntas' ? '#10b981' : (r.ket === 'Belum Tuntas' ? '#ef4444' : '#6b7280');
+                return `<tr>
+                    <td style="text-align:center;">${r.no}</td>
+                    <td>${ledgerEsc(r.nama)}</td>
+                    ${r.nilai.map(v => `<td style="text-align:center;">${v === null ? '-' : v}</td>`).join('')}
+                    <td style="text-align:center;">${r.avg === null ? '-' : r.avg.toFixed(2)}</td>
+                    <td style="text-align:center;">${r.rapor === null ? '-' : r.rapor}</td>
+                    <td style="text-align:center;"><span class="badge" style="background-color:${color};">${r.ket}</span></td>
+                    <td style="text-align:center;"><button type="button" class="btn-sm-export ledger-update-btn" data-nama="${encodeURIComponent(r.nama)}" style="background-color:#3b82f6;"><i class="fas fa-edit"></i> Update</button> <button type="button" class="btn-sm-export ledger-pdf-btn" data-nama="${encodeURIComponent(r.nama)}" title="Export PDF nilai siswa" style="background-color:#ef4444;"><i class="fas fa-file-pdf"></i></button></td>
+                </tr>`;
+            }).join('');
+        }
+
+        document.getElementById('ledgerTabs').addEventListener('click', (e) => {
+            const btn = e.target.closest('.ledger-tab');
+            if (!btn) return;
+            document.querySelectorAll('#ledgerTabs .ledger-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const isRaport = btn.dataset.sem === 'raport';
+            ledgerState.semester = isRaport ? 'raport' : parseInt(btn.dataset.sem, 10);
+            // tombol input nilai hanya untuk tab semester
+            ['btnTambahNilaiAkhir', 'btnExportTemplateLedger', 'btnImportNilaiLedger', 'btnResetNilaiLedger'].forEach(id => {
+                document.getElementById(id).style.display = isRaport ? 'none' : '';
+            });
+            renderLedger();
+        });
+
+        // ---- Modal Tambah Nilai Akhir ----
+        let ledgerPending = { sem: null, rows: {} };
+        const ledgerPendKey = (r) => `${r.semester}|${r.nama_siswa}|${r.mapel}`;
+
+        function updateLedgerPendingNote() {
+            const el = document.getElementById('ledgerPendingNote');
+            const n = Object.keys(ledgerPending.rows).length;
+            el.style.display = n ? 'block' : 'none';
+            el.textContent = n ? `${n} nilai hasil import siap disimpan untuk ${ledgerSemLabel(ledgerPending.sem)}. Klik Simpan untuk menyimpan.` : '';
+        }
+
+        function fillLedgerInputs() {
+            const sem = parseInt(document.getElementById('ledgerSemSelect').value, 10);
+            const siswa = document.getElementById('ledgerSiswaSelect').value;
+            const per = ((ledgerState.nilai[sem] || {})[siswa]) || {};
+            const pend = {};
+            if (ledgerPending.sem === sem) {
+                Object.values(ledgerPending.rows).forEach(r => { if (r.nama_siswa === siswa) pend[r.mapel] = r.nilai; });
+            }
+            const box = document.getElementById('ledgerNilaiInputs');
+            const mapelList = ledgerMapelFor(sem);
+            if (!mapelList.length) {
+                box.innerHTML = '<div style="color:#9ca3af;">Belum ada data mata pelajaran.</div>';
+                return;
+            }
+            box.innerHTML = mapelList.map((m, i) => `
+                <div class="form-group" style="margin-bottom:0;">
+                    <label style="font-size:0.8rem;">${ledgerEsc(ledgerLabel(m))}</label>
+                    <input type="number" min="0" max="100" step="any" data-mapel-idx="${i}" value="${m in pend ? pend[m] : (per[m] ? per[m].nilai : '')}">
+                </div>`).join('');
+            updateLedgerPendingNote();
+        }
+
+        document.getElementById('btnTambahNilaiAkhir').addEventListener('click', () => {
+            const selSiswa = document.getElementById('ledgerSiswaSelect');
+            selSiswa.innerHTML = ledgerState.siswa.map(n => `<option value="${ledgerEsc(n)}">${ledgerEsc(n)}</option>`).join('');
+            document.getElementById('ledgerSemSelect').value = String(ledgerState.semester);
+            ledgerPending = { sem: null, rows: {} };
+            fillLedgerInputs();
+            document.getElementById('ledgerModal').classList.add('active');
+        });
+        document.getElementById('ledgerSemSelect').addEventListener('change', () => {
+            if (Object.keys(ledgerPending.rows).length && !confirm('Hasil import yang belum disimpan akan dibuang jika semester diganti. Lanjutkan?')) {
+                document.getElementById('ledgerSemSelect').value = String(ledgerPending.sem);
+                return;
+            }
+            ledgerPending = { sem: null, rows: {} };
+            fillLedgerInputs();
+        });
+        document.getElementById('ledgerSiswaSelect').addEventListener('change', fillLedgerInputs);
+
+        document.getElementById('ledgerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const sem = parseInt(document.getElementById('ledgerSemSelect').value, 10);
+            const siswa = document.getElementById('ledgerSiswaSelect').value;
+            const payload = [];
+            // hasil import yang belum disimpan (siswa lain dari yang sedang dipilih)
+            if (ledgerPending.sem === sem) {
+                Object.values(ledgerPending.rows).forEach(r => { if (r.nama_siswa !== siswa) payload.push(r); });
+            }
+            document.querySelectorAll('#ledgerNilaiInputs input').forEach(inp => {
+                if (inp.value === '') return;
+                const v = parseFloat(inp.value);
+                if (isNaN(v)) return;
+                payload.push({
+                    kelas: ledgerState.kelas,
+                    semester: sem,
+                    nama_siswa: siswa,
+                    mapel: ledgerMapelFor(sem)[parseInt(inp.dataset.mapelIdx, 10)],
+                    nilai: v
+                });
+            });
+            if (!payload.length) { alert('Isi minimal satu nilai.'); return; }
+
+            const btn = document.getElementById('ledgerSubmitBtn');
+            btn.disabled = true; btn.textContent = 'Menyimpan...';
+            const error = await ledgerUpsertBatch(payload);
+            btn.disabled = false; btn.textContent = 'Simpan';
+            if (error) { alert('Gagal menyimpan: ' + error.message); return; }
+            alert('Nilai akhir berhasil disimpan!');
+            ledgerPending = { sem: null, rows: {} };
+            document.getElementById('ledgerModal').classList.remove('active');
+            await loadLedgerKelas(ledgerState.kelas);
+        });
+
+        // ---- Export PDF Ledger ----
+        document.getElementById('exportLedgerPdfBtn').addEventListener('click', async () => {
+            if (ledgerState.semester === 'raport') { await ledgerExportRaportPdf(null); return; }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape' });
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let yPos = 15;
+
+            if (schoolData.kop_sekolah) {
+                try {
+                    const response = await fetch(schoolData.kop_sekolah);
+                    const blob = await response.blob();
+                    const base64data = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+                    const imgProps = doc.getImageProperties(base64data);
+                    const pdfWidth = pageWidth - 20;
+                    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                    doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                    yPos = 10 + imgHeight + 10;
+                } catch (err) {
+                    console.error('Gagal memuat KOP Sekolah:', err);
+                }
+            }
+
+            const sem = ledgerState.semester;
+            doc.setFontSize(16);
+            doc.setTextColor(0);
+            doc.text(sem === LEDGER_PKL_SEM ? `Nilai PKL - Kelas ${ledgerState.kelas}` : `Ledger Nilai - Kelas ${ledgerState.kelas} - Semester ${sem}`, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 8;
+
+            if (sem === LEDGER_PKL_SEM) {
+                const headP = [['No', 'Nama Siswa', 'Nilai', 'Keterangan']];
+                const bodyP = getLedgerRows(sem).map(r => [r.no, r.nama, r.nilai[0] === null ? '-' : r.nilai[0], r.ket]);
+                doc.autoTable({
+                    head: headP, body: bodyP,
+                    startY: yPos,
+                    margin: { left: 8, right: 8 },
+                    theme: 'grid',
+                    headStyles: { fillColor: [59, 130, 246], halign: 'center' },
+                    styles: { fontSize: 10, cellPadding: 2, overflow: 'linebreak' },
+                    columnStyles: { 0: { halign: 'center', cellWidth: 14 }, 2: { halign: 'center', cellWidth: 30 }, 3: { halign: 'center', cellWidth: 40 } }
+                });
+                doc.save(`Nilai_PKL_${ledgerState.kelas}.pdf`);
+                return;
+            }
+
+            const head = [['No', 'Nama Siswa', ...ledgerState.mapel.map(ledgerKode), 'Rata-Rata', 'Nilai Akhir', 'Keterangan']];
+            const body = getLedgerRows(sem).map(r => [
+                r.no, r.nama,
+                ...r.nilai.map(v => v === null ? '-' : v),
+                r.avg === null ? '-' : r.avg.toFixed(2),
+                r.rapor === null ? '-' : r.rapor,
+                r.ket
+            ]);
+            const avail = pageWidth - 16;
+            const fit = ledgerFitColumns(doc, head[0], body, 9, avail, 1);
+            const FS = fit.fs;
+            const center = {};
+            for (let i = 0; i < head[0].length; i++) {
+                center[i] = {};
+                if (fit.widths) center[i].minCellWidth = fit.widths[i];
+                if (i !== 1) center[i].halign = 'center';
+            }
+
+            doc.autoTable({
+                head, body,
+                startY: yPos,
+                margin: { left: 8, right: 8 },
+                tableWidth: avail,
+                theme: 'grid',
+                headStyles: { fillColor: [59, 130, 246], halign: 'center', fontSize: FS },
+                styles: { fontSize: FS, cellPadding: 1.5, overflow: 'linebreak' },
+                columnStyles: center
+            });
+            ledgerDrawLegend(doc);
+            doc.save(`Ledger_${ledgerState.kelas}_Semester_${sem}.pdf`);
+        });
+        // ---- Export Template Excel & Import Nilai (per semester/tab aktif) ----
+        function ledgerExportTemplate(sem) {
+            if (typeof XLSX === 'undefined') { alert('Library Excel belum termuat. Periksa koneksi internet.'); return; }
+            const per = ledgerState.nilai[sem] || {};
+            const mapelList = ledgerMapelFor(sem);
+            const aoa = [['No', 'Nama Siswa', ...mapelList.map(ledgerLabel)]];
+            ledgerState.siswa.forEach((nama, i) => {
+                aoa.push([i + 1, nama, ...mapelList.map(m => (per[nama] && per[nama][m]) ? per[nama][m].nilai : '')]);
+            });
+            const ws = XLSX.utils.aoa_to_sheet(aoa);
+            ws['!cols'] = [{ wch: 5 }, { wch: 32 }, ...mapelList.map(() => ({ wch: 16 }))];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, ledgerSemLabel(sem));
+            XLSX.writeFile(wb, sem === LEDGER_PKL_SEM ? `Template_Nilai_PKL_${ledgerState.kelas}.xlsx` : `Template_Nilai_Ledger_${ledgerState.kelas}_Semester_${sem}.xlsx`);
+        }
+
+        async function ledgerImportFile(file, sem, btn, afterSuccess, stage = false) {
+            if (!file) return;
+            if (typeof XLSX === 'undefined') { alert('Library Excel belum termuat. Periksa koneksi internet.'); return; }
+
+            try {
+                const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+                const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '' });
+                if (rows.length < 2) { alert('File kosong atau tidak ada baris data.'); return; }
+
+                // pemetaan kolom header -> nama mapel
+                const labelToMapel = {};
+                ledgerMapelFor(sem).forEach(m => { labelToMapel[ledgerNorm(ledgerLabel(m))] = m; labelToMapel[ledgerNorm(m)] = m; });
+                const header = rows[0];
+                const namaCol = header.findIndex(h => ledgerNorm(h) === 'nama siswa');
+                if (namaCol === -1) { alert('Kolom "Nama Siswa" tidak ditemukan. Gunakan file dari Export Template.'); return; }
+                const colMapel = {};
+                const unknownCols = [];
+                header.forEach((h, idx) => {
+                    const key = ledgerNorm(h);
+                    if (!key || idx === namaCol || ['no', 'rata rata', 'nilai rapor', 'nilai akhir', 'keterangan'].includes(key)) return;
+                    if (labelToMapel[key]) colMapel[idx] = labelToMapel[key]; else unknownCols.push(String(h));
+                });
+                if (!Object.keys(colMapel).length) { alert('Tidak ada kolom mata pelajaran yang cocok. Gunakan file dari Export Template.'); return; }
+
+                const siswaMap = {};
+                ledgerState.siswa.forEach(n => { siswaMap[ledgerNorm(n)] = n; });
+                const payload = [];
+                const unknownSiswa = [];
+                let invalid = 0;
+                rows.slice(1).forEach(r => {
+                    const nm = String(r[namaCol] ?? '').trim();
+                    if (!nm) return;
+                    const siswa = siswaMap[ledgerNorm(nm)];
+                    if (!siswa) { unknownSiswa.push(nm); return; }
+                    Object.entries(colMapel).forEach(([idx, mapel]) => {
+                        const raw = r[idx];
+                        if (raw === '' || raw === null || raw === undefined) return;
+                        const v = parseFloat(String(raw).replace(',', '.'));
+                        if (isNaN(v) || v < 0 || v > 100) { invalid++; return; }
+                        payload.push({ kelas: ledgerState.kelas, semester: sem, nama_siswa: siswa, mapel: mapel, nilai: v });
+                    });
+                });
+
+                if (!payload.length) {
+                    alert('Tidak ada nilai valid yang bisa diimpor.' + (unknownSiswa.length ? `\nNama tidak dikenali: ${unknownSiswa.slice(0, 5).join(', ')}` : ''));
+                    return;
+                }
+
+                let msg = stage
+                    ? `Muat ${payload.length} nilai dari file ke ${ledgerSemLabel(sem)}?\nNilai belum tersimpan sampai kamu klik tombol Simpan.`
+                    : `Impor ${payload.length} nilai ke ${ledgerSemLabel(sem)} kelas ${ledgerState.kelas}?`;
+                if (invalid) msg += `\n${invalid} sel dilewati (bukan angka 0-100).`;
+                if (unknownSiswa.length) msg += `\n${unknownSiswa.length} nama siswa tidak dikenali dan dilewati: ${unknownSiswa.slice(0, 5).join(', ')}${unknownSiswa.length > 5 ? ', ...' : ''}`;
+                if (unknownCols.length) msg += `\nKolom diabaikan: ${unknownCols.join(', ')}`;
+                if (!confirm(msg)) return;
+
+                if (stage) { afterSuccess(payload); return; }
+
+                btn.disabled = true;
+                const error = await ledgerUpsertBatch(payload);
+                btn.disabled = false;
+                if (error) { alert('Gagal mengimpor: ' + error.message); return; }
+                alert('Nilai berhasil diimpor!');
+                await loadLedgerKelas(ledgerState.kelas);
+                if (afterSuccess) afterSuccess();
+            } catch (err) {
+                btn.disabled = false;
+                console.error('Error import ledger:', err);
+                alert('Gagal membaca file: ' + err.message);
+            }
+        }
+
+        // Tombol di atas tabel (semester = tab aktif)
+        document.getElementById('btnExportTemplateLedger').addEventListener('click', () => ledgerExportTemplate(ledgerState.semester));
+        document.getElementById('btnImportNilaiLedger').addEventListener('click', () => document.getElementById('inputImportLedger').click());
+        document.getElementById('inputImportLedger').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            e.target.value = '';
+            ledgerImportFile(file, ledgerState.semester, document.getElementById('btnImportNilaiLedger'));
+        });
+
+        // Tombol di modal Tambah Nilai Akhir: template & import untuk SATU siswa (semua mapel)
+        function ledgerExportTemplateSiswa() {
+            if (typeof XLSX === 'undefined') { alert('Library Excel belum termuat. Periksa koneksi internet.'); return; }
+            const sem = parseInt(document.getElementById('ledgerSemSelect').value, 10);
+            const siswa = document.getElementById('ledgerSiswaSelect').value;
+            if (!siswa) { alert('Pilih nama siswa terlebih dahulu.'); return; }
+            const nilaiForm = {};
+            document.querySelectorAll('#ledgerNilaiInputs input').forEach(inp => {
+                nilaiForm[parseInt(inp.dataset.mapelIdx, 10)] = inp.value;
+            });
+            const aoa = [
+                ['Nama Siswa', siswa],
+                ['Kelas', ledgerState.kelas],
+                ['Semester', ledgerSemLabel(sem)],
+                [],
+                ['No', 'Mata Pelajaran', 'Nilai']
+            ];
+            ledgerMapelFor(sem).forEach((m, i) => aoa.push([i + 1, ledgerLabel(m), nilaiForm[i] === undefined || nilaiForm[i] === '' ? '' : parseFloat(nilaiForm[i])]));
+            const ws = XLSX.utils.aoa_to_sheet(aoa);
+            ws['!cols'] = [{ wch: 14 }, { wch: 42 }, { wch: 10 }];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, ledgerSemLabel(sem));
+            const aman = siswa.replace(/[^\w\-]+/g, '_');
+            XLSX.writeFile(wb, sem === LEDGER_PKL_SEM ? `Template_Nilai_PKL_${aman}.xlsx` : `Template_Nilai_${aman}_Semester_${sem}.xlsx`);
+        }
+
+        async function ledgerImportSiswaFile(file) {
+            if (!file) return;
+            if (typeof XLSX === 'undefined') { alert('Library Excel belum termuat. Periksa koneksi internet.'); return; }
+            try {
+                const sem = parseInt(document.getElementById('ledgerSemSelect').value, 10);
+                const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+                const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '' });
+
+                const findRow = (label) => rows.find(r => ledgerNorm(r[0]) === label);
+                const namaRow = findRow('nama siswa');
+                const semRow = findRow('semester');
+                const hdrIdx = rows.findIndex(r => ledgerNorm(r[1]) === 'mata pelajaran' && ledgerNorm(r[2]) === 'nilai');
+                if (!namaRow || hdrIdx === -1) { alert('Format file tidak dikenali. Gunakan file dari Export Template di modal ini.'); return; }
+
+                const siswaMap = {};
+                ledgerState.siswa.forEach(n => { siswaMap[ledgerNorm(n)] = n; });
+                const siswa = siswaMap[ledgerNorm(namaRow[1])];
+                if (!siswa) { alert(`Nama siswa "${namaRow[1]}" tidak ditemukan di kelas ${ledgerState.kelas}.`); return; }
+
+                const semFile = semRow ? (ledgerNorm(semRow[1]) === 'nilai pkl' ? LEDGER_PKL_SEM : ledgerSemNum(semRow[1])) : null;
+                if (semFile !== null && semFile !== sem) {
+                    alert(`File ini untuk ${ledgerSemLabel(semFile)}, sedangkan modal memilih ${ledgerSemLabel(sem)}. Ganti semester di modal atau gunakan template yang sesuai.`);
+                    return;
+                }
+
+                const labelToMapel = {};
+                ledgerMapelFor(sem).forEach(m => { labelToMapel[ledgerNorm(ledgerLabel(m))] = m; labelToMapel[ledgerNorm(m)] = m; });
+                const newRows = [];
+                const unknown = [];
+                let invalid = 0;
+                rows.slice(hdrIdx + 1).forEach(r => {
+                    const label = String(r[1] ?? '').trim();
+                    if (!label) return;
+                    const mapel = labelToMapel[ledgerNorm(label)];
+                    if (!mapel) { unknown.push(label); return; }
+                    const raw = r[2];
+                    if (raw === '' || raw === null || raw === undefined) return;
+                    const v = parseFloat(String(raw).replace(',', '.'));
+                    if (isNaN(v) || v < 0 || v > 100) { invalid++; return; }
+                    newRows.push({ kelas: ledgerState.kelas, semester: sem, nama_siswa: siswa, mapel: mapel, nilai: v });
+                });
+                if (!newRows.length) { alert('Tidak ada nilai valid di file.'); return; }
+
+                let msg = `Muat ${newRows.length} nilai untuk ${siswa} (${ledgerSemLabel(sem)})?\nNilai belum tersimpan sampai kamu klik tombol Simpan.`;
+                if (invalid) msg += `\n${invalid} sel dilewati (bukan angka 0-100).`;
+                if (unknown.length) msg += `\nMapel tidak dikenali dan dilewati: ${unknown.join(', ')}`;
+                if (!confirm(msg)) return;
+
+                if (ledgerPending.sem !== sem) ledgerPending = { sem: sem, rows: {} };
+                newRows.forEach(r => { ledgerPending.rows[ledgerPendKey(r)] = r; });
+                document.getElementById('ledgerSiswaSelect').value = siswa;
+                fillLedgerInputs();
+            } catch (err) {
+                console.error('Error import siswa:', err);
+                alert('Gagal membaca file: ' + err.message);
+            }
+        }
+
+        document.getElementById('btnModalExportTemplate').addEventListener('click', ledgerExportTemplateSiswa);
+        document.getElementById('btnModalImportNilai').addEventListener('click', () => document.getElementById('inputModalImportLedger').click());
+        document.getElementById('inputModalImportLedger').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            e.target.value = '';
+            ledgerImportSiswaFile(file);
+        });
+        // ---- Update / Hapus nilai per siswa & Reset semua nilai semester ----
+        // Semester 1-5 -> tabel ledgernilai; Nilai PKL (semester 6) -> tabel nilai_pkl
+        async function ledgerUpsertBatch(payload) {
+            const pkl = payload.filter(r => r.semester === LEDGER_PKL_SEM);
+            const rest = payload.filter(r => r.semester !== LEDGER_PKL_SEM);
+            for (let i = 0; i < rest.length; i += 500) {
+                const { error } = await absensiClient.from('ledgernilai')
+                    .upsert(rest.slice(i, i + 500), { onConflict: 'kelas,semester,nama_siswa,mapel' });
+                if (error) return error;
+            }
+            const simpan = pkl.filter(r => r.nilai !== null && r.nilai !== undefined)
+                .map(r => ({ kelas: r.kelas, nama_siswa: r.nama_siswa, nilai: r.nilai }));
+            for (let i = 0; i < simpan.length; i += 500) {
+                const { error } = await absensiClient.from('nilai_pkl')
+                    .upsert(simpan.slice(i, i + 500), { onConflict: 'kelas,nama_siswa' });
+                if (error) return error;
+            }
+            const hapus = pkl.filter(r => r.nilai === null || r.nilai === undefined);
+            if (hapus.length) {
+                const kelas = [...new Set(hapus.map(r => r.kelas))];
+                for (const k of kelas) {
+                    const names = hapus.filter(r => r.kelas === k).map(r => r.nama_siswa);
+                    for (let i = 0; i < names.length; i += 200) {
+                        const { error } = await absensiClient.from('nilai_pkl').delete().eq('kelas', k).in('nama_siswa', names.slice(i, i + 200));
+                        if (error) return error;
+                    }
+                }
+            }
+            return null;
+        }
+
+        let ledgerUpdateTarget = '';
+
+        document.getElementById('ledgerTbody').addEventListener('click', (e) => {
+            const btn = e.target.closest('.ledger-update-btn');
+            if (!btn) return;
+            const nama = decodeURIComponent(btn.dataset.nama);
+            const sem = ledgerState.semester;
+            const per = ((ledgerState.nilai[sem] || {})[nama]) || {};
+            ledgerUpdateTarget = nama;
+            document.getElementById('ledgerUpdateNama').value = nama;
+            document.getElementById('ledgerUpdateSem').value = ledgerSemLabel(sem);
+            document.getElementById('ledgerUpdateInputs').innerHTML = ledgerMapelFor(sem).map((m, i) => `
+                <div class="form-group" style="margin-bottom:0;">
+                    <label style="font-size:0.8rem;">${ledgerEsc(ledgerLabel(m))}</label>
+                    <input type="number" min="0" max="100" step="any" data-mapel-idx="${i}" data-awal="${per[m] ? 1 : 0}" value="${per[m] ? per[m].nilai : ''}">
+                </div>`).join('');
+            document.getElementById('ledgerUpdateModal').classList.add('active');
+        });
+
+        document.getElementById('ledgerUpdateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const sem = ledgerState.semester;
+            const payload = [];
+            document.querySelectorAll('#ledgerUpdateInputs input').forEach(inp => {
+                const mapel = ledgerMapelFor(sem)[parseInt(inp.dataset.mapelIdx, 10)];
+                const base = { kelas: ledgerState.kelas, semester: sem, nama_siswa: ledgerUpdateTarget, mapel: mapel };
+                if (inp.value === '') {
+                    if (inp.dataset.awal === '1') payload.push({ ...base, nilai: null }); // nilai dikosongkan
+                    return;
+                }
+                const v = parseFloat(inp.value);
+                if (isNaN(v) || v < 0 || v > 100) return;
+                payload.push({ ...base, nilai: v });
+            });
+            if (!payload.length) { document.getElementById('ledgerUpdateModal').classList.remove('active'); return; }
+
+            const btn = document.getElementById('ledgerUpdateSubmitBtn');
+            btn.disabled = true; btn.textContent = 'Menyimpan...';
+            const error = await ledgerUpsertBatch(payload);
+            btn.disabled = false; btn.textContent = 'Simpan Update';
+            if (error) { alert('Gagal menyimpan: ' + error.message); return; }
+            document.getElementById('ledgerUpdateModal').classList.remove('active');
+            await loadLedgerKelas(ledgerState.kelas);
+        });
+
+        document.getElementById('ledgerHapusBtn').addEventListener('click', async () => {
+            const sem = ledgerState.semester;
+            if (!confirm(`Hapus semua nilai ${ledgerUpdateTarget} di ${ledgerSemLabel(sem)}?`)) return;
+            const payload = ledgerMapelFor(sem).map(m => ({ kelas: ledgerState.kelas, semester: sem, nama_siswa: ledgerUpdateTarget, mapel: m, nilai: null }));
+            const btn = document.getElementById('ledgerHapusBtn');
+            btn.disabled = true;
+            const error = await ledgerUpsertBatch(payload);
+            btn.disabled = false;
+            if (error) { alert('Gagal menghapus: ' + error.message); return; }
+            document.getElementById('ledgerUpdateModal').classList.remove('active');
+            await loadLedgerKelas(ledgerState.kelas);
+        });
+
+        document.getElementById('btnResetNilaiLedger').addEventListener('click', async () => {
+            const sem = ledgerState.semester;
+            if (!ledgerState.siswa.length || !ledgerMapelFor(sem).length) { alert('Tidak ada data untuk direset.'); return; }
+            if (!confirm(`Hapus SEMUA nilai di ${ledgerSemLabel(sem)} kelas ${ledgerState.kelas}?\nTindakan ini tidak bisa dibatalkan.`)) return;
+            const payload = [];
+            ledgerState.siswa.forEach(nama => ledgerMapelFor(sem).forEach(m => {
+                payload.push({ kelas: ledgerState.kelas, semester: sem, nama_siswa: nama, mapel: m, nilai: null });
+            }));
+            const btn = document.getElementById('btnResetNilaiLedger');
+            btn.disabled = true;
+            const error = await ledgerUpsertBatch(payload);
+            btn.disabled = false;
+            if (error) { alert('Gagal mereset: ' + error.message); return; }
+            alert(`Semua nilai ${ledgerSemLabel(sem)} berhasil dihapus.`);
+            await loadLedgerKelas(ledgerState.kelas);
+        });
+
+        // ---- Export PDF nilai per siswa (semester = tab aktif) ----
+        async function ledgerExportPdfSiswa(nama) {
+            if (ledgerState.semester === 'raport') { await ledgerExportRaportPdf(nama); return; }
+            const { jsPDF } = window.jspdf;
+            const sem = ledgerState.semester;
+            const row = getLedgerRows(sem).find(r => r.nama === nama);
+            if (!row) return;
+
+            if (sem === LEDGER_PKL_SEM) {
+                const docP = new jsPDF({ orientation: 'landscape' });
+                const pwP = docP.internal.pageSize.getWidth();
+                let yP = 20;
+                if (schoolData.kop_sekolah) {
+                    try {
+                        const resp = await fetch(schoolData.kop_sekolah);
+                        const blobP = await resp.blob();
+                        const b64 = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.readAsDataURL(blobP);
+                        });
+                        const ip = docP.getImageProperties(b64);
+                        const wP = pwP - 20;
+                        const hP = (ip.height * wP) / ip.width;
+                        docP.addImage(b64, 'PNG', 10, 10, wP, hP);
+                        yP = 10 + hP + 10;
+                    } catch (err) {
+                        console.error('Gagal memuat KOP Sekolah:', err);
+                    }
+                }
+                docP.setFontSize(16);
+                docP.setTextColor(0);
+                docP.text('Nilai PKL Siswa', pwP / 2, yP, { align: 'center' });
+                yP += 10;
+                docP.setFontSize(11);
+                docP.text('Nama Siswa', 14, yP);  docP.text(`: ${nama}`, 45, yP);  yP += 6;
+                docP.text('Kelas', 14, yP);       docP.text(`: ${ledgerState.kelas}`, 45, yP);  yP += 8;
+                docP.autoTable({
+                    head: [['No', 'Nilai', 'Keterangan']],
+                    body: [[1, row.nilai[0] === null ? '-' : row.nilai[0], row.ket]],
+                    startY: yP,
+                    margin: { left: 8, right: 8 },
+                    theme: 'grid',
+                    headStyles: { fillColor: [59, 130, 246], halign: 'center' },
+                    styles: { fontSize: 10, cellPadding: 2, halign: 'center' }
+                });
+                docP.save(`Nilai_PKL_${nama.replace(/[^\w\-]+/g, '_')}_${ledgerState.kelas}.pdf`);
+                return;
+            }
+
+            const doc = new jsPDF({ orientation: 'landscape' });
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let yPos = 20;
+
+            if (schoolData.kop_sekolah) {
+                try {
+                    const response = await fetch(schoolData.kop_sekolah);
+                    const blob = await response.blob();
+                    const base64data = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+                    const imgProps = doc.getImageProperties(base64data);
+                    const pdfWidth = pageWidth - 20;
+                    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                    doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                    yPos = 10 + imgHeight + 10;
+                } catch (err) {
+                    console.error('Gagal memuat KOP Sekolah:', err);
+                }
+            }
+
+            doc.setFontSize(16);
+            doc.setTextColor(0);
+            doc.text('Nilai Akhir Siswa', pageWidth / 2, yPos, { align: 'center' });
+            yPos += 10;
+
+            doc.setFontSize(11);
+            doc.text('Nama Siswa', 14, yPos);  doc.text(`: ${nama}`, 45, yPos);  yPos += 6;
+            doc.text('Kelas', 14, yPos);       doc.text(`: ${ledgerState.kelas}`, 45, yPos);  yPos += 6;
+            doc.text('Semester', 14, yPos);    doc.text(`: ${sem}`, 45, yPos);  yPos += 8;
+
+            const head = [['No', ...ledgerState.mapel.map(ledgerKode), 'Rata-Rata', 'Nilai Akhir', 'Keterangan']];
+            const body = [[
+                1,
+                ...row.nilai.map(v => v === null ? '-' : v),
+                row.avg === null ? '-' : row.avg.toFixed(2),
+                row.rapor === null ? '-' : row.rapor,
+                row.ket
+            ]];
+            const avail = pageWidth - 16;
+            const fit = ledgerFitColumns(doc, head[0], body, 10, avail, -1);
+            const FS = fit.fs;
+            const center = {};
+            for (let i = 0; i < head[0].length; i++) {
+                center[i] = { halign: 'center' };
+                if (fit.widths) center[i].minCellWidth = fit.widths[i];
+            }
+            doc.autoTable({
+                head, body,
+                startY: yPos,
+                margin: { left: 8, right: 8 },
+                tableWidth: avail,
+                theme: 'grid',
+                headStyles: { fillColor: [59, 130, 246], halign: 'center', fontSize: FS },
+                styles: { fontSize: FS, cellPadding: 2, overflow: 'linebreak' },
+                columnStyles: center
+            });
+            ledgerDrawLegend(doc);
+
+            const aman = nama.replace(/[^\w\-]+/g, '_');
+            doc.save(`Nilai_${aman}_${ledgerState.kelas}_Semester_${sem}.pdf`);
+        }
+
+        document.getElementById('ledgerTbody').addEventListener('click', (e) => {
+            const btn = e.target.closest('.ledger-pdf-btn');
+            if (!btn) return;
+            ledgerExportPdfSiswa(decodeURIComponent(btn.dataset.nama));
+        });
+
+        // ---- Export PDF Nilai Raport (semua siswa atau satu siswa) ----
+        async function ledgerExportRaportPdf(nama) {
+            const { jsPDF } = window.jspdf;
+            const all = getRaportRows();
+            const rows = nama ? all.filter(r => r.nama === nama) : all;
+            if (!rows.length) return;
+
+            const doc = new jsPDF({ orientation: 'landscape' });
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let yPos = 15;
+
+            if (schoolData.kop_sekolah) {
+                try {
+                    const response = await fetch(schoolData.kop_sekolah);
+                    const blob = await response.blob();
+                    const base64data = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+                    const imgProps = doc.getImageProperties(base64data);
+                    const pdfWidth = pageWidth - 20;
+                    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                    doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+                    yPos = 10 + imgHeight + 10;
+                } catch (err) {
+                    console.error('Gagal memuat KOP Sekolah:', err);
+                }
+            }
+
+            doc.setFontSize(16);
+            doc.setTextColor(0);
+            doc.text(nama ? 'Nilai Akhir Siswa' : `Nilai Akhir - Kelas ${ledgerState.kelas}`, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 5;
+            if (nama) {
+                doc.setFontSize(11);
+                yPos += 5;
+                doc.text(`Kelas: ${ledgerState.kelas}`, 14, yPos);
+                yPos += 3;
+            }
+            yPos += 5;
+
+            const avail = pageWidth - 16;
+            const head = [['No', 'Nama Siswa', 'Semester 1', 'Semester 2', 'Semester 3', 'Semester 4', 'Semester 5', 'Nilai PKL', 'Nilai Rata-Rata', 'Nilai Akhir', 'Keterangan']];
+            const body = rows.map(r => [
+                nama ? 1 : r.no, r.nama,
+                ...r.sems.map(x => x.rapor === null ? '-' : x.rapor),
+                r.pkl === null ? '-' : r.pkl,
+                r.avg === null ? '-' : r.avg.toFixed(2),
+                r.rapor === null ? '-' : r.rapor,
+                r.ket
+            ]);
+            const fit = ledgerFitColumns(doc, head[0], body, 10, avail, 1, true);
+            const FS = fit.fs;
+            const center = {};
+            head[0].forEach((_, i) => {
+                center[i] = {};
+                if (fit.widths) center[i].minCellWidth = fit.widths[i];
+                if (i !== 1) center[i].halign = 'center';
+            });
+            doc.autoTable({
+                head, body,
+                startY: yPos,
+                margin: { left: 8, right: 8 },
+                tableWidth: avail,
+                theme: 'grid',
+                headStyles: { fillColor: [59, 130, 246], halign: 'center', fontSize: FS },
+                styles: { fontSize: FS, cellPadding: 2, overflow: 'linebreak' },
+                columnStyles: center
+            });
+            if (nama) {
+                const aman = nama.replace(/[^\w\-]+/g, '_');
+                doc.save(`Nilai_Akhir_${aman}_${ledgerState.kelas}.pdf`);
+            } else {
+                doc.save(`Nilai_Akhir_${ledgerState.kelas}.pdf`);
+            }
+        }
+
+        // ===================== END LEDGER =====================
 
         function toggleAccordion(header) {
             const item = header.parentElement;
