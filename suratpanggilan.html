@@ -27,6 +27,14 @@ header.top{
 .top-in{max-width:1180px;margin:0 auto}
 .top h1{font-size:17px;font-weight:800;letter-spacing:-.01em}
 .top p{font-size:12.5px;color:#B8C6DB}
+.top-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.btn-dash{
+  display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:9px;
+  background:rgba(255,255,255,.14);color:#fff;text-decoration:none;font-weight:700;font-size:13px;flex:none;
+}
+.btn-dash:hover{background:rgba(255,255,255,.24)}
+.btn-dash:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.btn-dash svg{width:16px;height:16px}
 .tabs{display:flex;gap:4px;margin-top:10px}
 .tabs button{
   flex:none;height:36px;padding:0 16px;border:0;border-radius:8px 8px 0 0;background:transparent;
@@ -165,8 +173,16 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);bo
 
 <header class="top">
   <div class="top-in">
-    <h1>Surat Panggilan Orang Tua/Wali</h1>
-    <p>SMK Negeri 1 Simpang Teritip</p>
+    <div class="top-row">
+      <div>
+        <h1>Surat Panggilan Orang Tua/Wali</h1>
+        <p>SMK Negeri 1 Simpang Teritip</p>
+      </div>
+      <a href="dasboradmin.html" class="btn-dash" title="Kembali ke Dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/></svg>
+        Dashboard
+      </a>
+    </div>
     <nav class="tabs" aria-label="Menu">
       <button type="button" data-v="form" class="on">Isi Data</button>
       <button type="button" data-v="preview">Pratinjau</button>
@@ -488,6 +504,18 @@ function bacaIngatan(){
   try{ return JSON.parse(localStorage.getItem("sp_wali")||"{}") || {}; }catch(e){ return {}; }
 }
 
+/* Data baru: kosongkan semua isian (satu-satunya yang tersisa ialah pilihan Panggilan ke-1) */
+function kosongkan(){
+  editId = null;
+  $("editBanner").classList.remove("on");
+  const o = {};
+  FIELDS.forEach(k => o[k] = "");
+  o.jenis_panggilan = 1;
+  setData(o);
+  clearErr();
+  $("f_nomor_surat").focus();
+}
+
 function formBaru(){
   editId = null;
   $("editBanner").classList.remove("on");
@@ -714,7 +742,7 @@ FIELDS.forEach(k => {
 $("btnSimpan").onclick = simpan;
 $("btnCetak").onclick = cetak;
 $("btnCetak2").onclick = cetak;
-$("btnBaru").onclick = () => { formBaru(); toast("Formulir dikosongkan."); };
+$("btnBaru").onclick = () => { kosongkan(); toast("Semua isian dikosongkan."); };
 $("btnMuat").onclick = muatDaftar;
 $("cari").addEventListener("input", renderDaftar);
 
