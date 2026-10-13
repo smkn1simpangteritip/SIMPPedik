@@ -245,6 +245,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);bo
         <div class="fld" id="w_alamat_sekolah">
           <label for="f_alamat_sekolah">Alamat sekolah</label>
           <textarea id="f_alamat_sekolah" rows="2"></textarea>
+          <div class="hint" id="hintAlamat">Memuat Identitas Sekolah...</div>
         </div>
       </div>
 
@@ -373,7 +374,7 @@ const DEFAULT_TEMPAT = "Simpang Teritip";
 
 const FIELDS = ["jenis_panggilan","nomor_surat","nama_wali_kelas","nip","jabatan","alamat_sekolah",
                 "nama_siswa","kelas","tanggal_panggilan","waktu_panggilan","tempat_surat","tanggal_surat"];
-const INGAT = ["nama_wali_kelas","nip","jabatan","alamat_sekolah","tempat_surat"];
+const INGAT = ["nama_wali_kelas","nip","jabatan","tempat_surat"];
 
 const HARI  = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
 const BULAN = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
@@ -422,6 +423,7 @@ function setData(o){
 }
 
 /* ---------- Data Guru & Mapping Siswa ---------- */
+let alamatSekolah = "";     // dari tabel identitassekolah
 let guruList = [];          // [{nama_guru, nip}]
 let siswaByKelas = {};      // { "X TPL 1": ["Ahmad Zahki", ...] }
 let kelasList = [];
@@ -461,6 +463,23 @@ function cocokkanGuru(){
     $("f_nip").value = g.nip || "";
   }
   render();
+}
+async function muatIdentitas(){
+  const h = $("hintAlamat");
+  try{
+    const rows = await rest(SUPABASE_URL, SUPABASE_KEY, "identitassekolah?select=*&limit=1");
+    const r = (rows && rows[0]) || {};
+    const kunci = ["alamat_sekolah","alamat","alamat_lengkap","alamatsekolah"]
+      .find(k => r[k]) || Object.keys(r).find(k => /alamat/i.test(k) && r[k]);
+    if(!kunci) throw new Error("kolom alamat tidak ditemukan di tabel identitassekolah");
+    alamatSekolah = String(r[kunci]).trim();
+    if(!editId){ $("f_alamat_sekolah").value = alamatSekolah; render(); }
+    h.textContent = "Terisi otomatis dari Identitas Sekolah.";
+    h.style.color = "";
+  }catch(e){
+    h.textContent = "Alamat otomatis gagal diambil: " + e.message + ". Isi manual jika perlu.";
+    h.style.color = "var(--red)";
+  }
 }
 async function muatGuru(){
   const h = $("hintGuru");
@@ -524,7 +543,7 @@ function formBaru(){
     jenis_panggilan:1, nomor_surat:"", nama_siswa:"", kelas:"", tanggal_panggilan:"", waktu_panggilan:"09:00",
     nama_wali_kelas: ing.nama_wali_kelas || "", nip: ing.nip || "",
     jabatan: ing.jabatan || "Wali kelas",
-    alamat_sekolah: ing.alamat_sekolah || DEFAULT_ALAMAT,
+    alamat_sekolah: alamatSekolah || DEFAULT_ALAMAT,
     tempat_surat: ing.tempat_surat || DEFAULT_TEMPAT,
     tanggal_surat: hariIni()
   };
@@ -747,6 +766,7 @@ $("btnMuat").onclick = muatDaftar;
 $("cari").addEventListener("input", renderDaftar);
 
 formBaru();
+muatIdentitas();
 muatGuru();
 muatSiswa();
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(skala);
