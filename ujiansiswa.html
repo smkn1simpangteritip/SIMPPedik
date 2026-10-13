@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ujian - SMKN 1 Simpang Teritip</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+:root{--red:#dc2626;--pri:#667eea;--ink:#1e293b;--mut:#64748b;--line:#e2e8f0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f4f6f9;color:var(--ink);min-height:100vh;padding:70px 0 96px}
+.top{position:fixed;top:0;left:0;right:0;height:56px;background:var(--red);color:#fff;display:flex;align-items:center;gap:10px;padding:0 14px;z-index:20;box-shadow:0 2px 5px rgba(0,0,0,.12)}
+.top b{flex:1;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timer{display:none;background:#fff;color:var(--red);font-weight:800;border-radius:20px;padding:6px 14px;font-variant-numeric:tabular-nums}
+.timer.warn{background:#fbbf24;color:#7c2d12}
+.wrap{max-width:760px;margin:0 auto;padding:0 14px}
+section{display:none}
+.card{background:#fff;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.06);padding:20px;margin-bottom:14px}
+.center{text-align:center}.mut,.note{color:var(--mut);font-size:.88rem}.note{margin-top:10px}
+.big{font-size:3rem;color:var(--red);margin-bottom:10px}.big.ok{color:#16a34a}
+h2{margin-bottom:6px}h4{margin:14px 0 4px}p{margin-top:6px}
+.stats{display:flex;gap:24px;margin:14px 0}.stats b{display:block;font-size:1.5rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:46px;padding:0 22px;border:0;border-radius:12px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-family:inherit;font-weight:700;font-size:.95rem;cursor:pointer;text-decoration:none;margin:14px 6px 0 0}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+.pre{white-space:pre-wrap;word-wrap:break-word}.qt{font-size:1.05rem;line-height:1.55;margin:8px 0}
+.qno{font-weight:700;color:var(--red)}.qno small{color:var(--mut);font-weight:500}
+.qfig{display:flex;justify-content:center;align-items:center;margin:12px 0;padding:8px;background:#f8fafc;border:1px solid var(--line);border-radius:12px}
+.qimg{display:block;max-width:100%;max-height:360px;width:auto;height:auto;object-fit:contain;margin:0 auto;border-radius:8px}
+.opt{display:flex;gap:12px;align-items:flex-start;border:2px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;cursor:pointer}
+.opt input{margin-top:4px;accent-color:var(--pri);flex:none}
+.opt b{width:26px;height:26px;border-radius:50%;background:#eef2ff;color:var(--pri);display:flex;align-items:center;justify-content:center;flex:none;font-size:.85rem}
+.opt.on{border-color:var(--pri);background:#eef2ff}
+.txt{width:100%;border:2px solid var(--line);border-radius:12px;padding:12px;font:inherit;margin-top:8px}
+.nilai{font-size:4rem;font-weight:800;color:var(--pri);margin:10px 0 0}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#fff;border-top:1px solid #eee;box-shadow:0 -4px 16px rgba(0,0,0,.08);display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px))}
+.bar button{flex:1;height:46px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-family:inherit;font-weight:700;cursor:pointer}
+.bar #next{background:var(--pri);border-color:var(--pri);color:#fff}.bar button:disabled{opacity:.4}
+.mod{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:14px}.mod.on{display:flex}
+.mbox{background:#fff;border-radius:16px;width:100%;max-width:420px;max-height:85vh;overflow:auto;padding:20px}
+.nav{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:12px 0}
+.nav button{height:42px;border:2px solid var(--line);background:#fff;border-radius:10px;font-weight:700;cursor:pointer}
+.nav .done{background:#dcfce7;border-color:#16a34a}.nav .cur{outline:3px solid var(--pri)}
+.warn-t{color:#b45309}
+/* Panel identitas (di bawah navbar) */
+.idcard{display:none;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.idcard.on{display:grid}
+.idp{position:relative;overflow:hidden;border-radius:16px;padding:16px;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.12)}
+.idp.s{background:linear-gradient(135deg,#dc2626,#f97316)}
+.idp.u{background:linear-gradient(135deg,#667eea,#764ba2)}
+.idp::after{content:'';position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.12)}
+.idh{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
+.idh>div:last-child{min-width:0}
+.av{width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex:none}
+.idh small{display:block;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;opacity:.85;font-weight:700}
+.idh b{display:block;font-size:1.02rem;line-height:1.25;overflow-wrap:anywhere}
+.idh span{display:block;font-size:.8rem;opacity:.9}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;position:relative;z-index:1}
+.chips div{background:rgba(255,255,255,.18);border-radius:10px;padding:7px 10px;min-width:0}
+.chips small{display:block;font-size:.65rem;opacity:.85;text-transform:uppercase;letter-spacing:.05em}
+.chips b{display:block;font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:640px){.idcard{grid-template-columns:1fr}}
+/* Saat mengerjakan: panel diringkas agar soal tetap lega */
+.idcard.compact{grid-template-columns:1fr 1fr;gap:8px}
+.idcard.compact .chips,.idcard.compact .idh span{display:none}
+.idcard.compact .idp{padding:10px 12px;border-radius:12px}
+.idcard.compact .av{width:34px;height:34px;font-size:1rem;border-radius:10px}
+.idcard.compact .idh{gap:8px}
+.idcard.compact .idh b{font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.idcard.compact .idh small{font-size:.6rem}
+</style>
+</head>
+<body>
+<div class="top"><b id="judulTop">Ujian</b><span class="timer" id="timer"></span></div>
+<div class="wrap">
+  <div class="idcard" id="idCard"></div>
+  <section id="sMsg"></section>
+  <section id="sIntro"></section>
+  <section id="sExam"><div class="card" id="q"></div>
+    <div class="bar">
+      <button id="prev" onclick="cur--;render()"><i class="fas fa-chevron-left"></i> Sebelumnya</button>
+      <button onclick="nav()"><i class="fas fa-th"></i> Daftar</button>
+      <button id="next" onclick="cur===Q.length-1?ask():(cur++,render())"></button>
+    </div>
+  </section>
+  <section id="sDone"></section>
+</div>
+
+<div class="mod" id="mNav"><div class="mbox"><h3>Daftar Soal</h3><div class="nav" id="navGrid"></div>
+  <p class="note">Hijau = sudah dijawab.</p>
+  <button class="btn" onclick="ask()">Kumpulkan</button><button class="btn ghost" onclick="$('mNav').classList.remove('on')">Tutup</button></div></div>
+<div class="mod" id="mAsk"><div class="mbox center"><h3>Kumpulkan jawaban?</h3><p id="askInfo"></p>
+  <p class="note">Setelah dikumpulkan, jawaban tidak bisa diubah.</p>
+  <button class="btn" onclick="kumpul()">Ya, Kumpulkan</button><button class="btn ghost" onclick="$('mAsk').classList.remove('on')">Periksa Lagi</button></div></div>
+
+<script>
+const db = supabase.createClient('https://mjvobqfcoutazqcovtlp.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdm9icWZjb3V0YXpxY292dGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzEwMzYsImV4cCI6MjA4NjE0NzAzNn0.jz6JaC9mMTMhLVhXSh1OCnFWDPZ0Cy2tUnHEmWxAR8o');
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const H = 'ABCDEF';
+const kode = (new URLSearchParams(location.search).get('kode') || '').trim().toUpperCase();
+const ses = JSON.parse(sessionStorage.getItem('siswa_session') || 'null');
+const KEY = 'ujian_' + kode + '_' + (ses && ses.nisn);
+let U = null, S = null, Q = [], cur = 0, tick = null, sending = false;
+
+const fmt = iso => new Date(iso).toLocaleString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:false}).replace(/\./g, ':') + ' WIB';
+function show(id){ ['sMsg','sIntro','sExam','sDone'].forEach(x => $(x).style.display = x === id ? 'block' : 'none'); window.scrollTo(0, 0); }
+function msg(icon, title, text){
+  $('sMsg').innerHTML = `<div class="card center"><i class="fas ${icon} big"></i><h2>${title}</h2><p>${text}</p><a class="btn" href="adminsiswa.html">Kembali ke Beranda</a></div>`;
+  show('sMsg');
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function mix(a){ a = a.slice(); for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function done(i){ const a = S.ans[i]; return Array.isArray(a) ? a.length > 0 : (a !== undefined && a !== null && String(a).trim() !== ''); }
+
+(async () => {
+  if(!ses){ location.href = 'index.html'; return; }
+  if(!kode) return msg('fa-circle-xmark', 'Kode ujian kosong', 'Masukkan kode ujian lewat menu Ujian.');
+  try{
+    const r1 = await db.from('ujian').select('*').eq('kode_ujian', kode).limit(1);
+    if(r1.error) throw r1.error;
+    U = r1.data && r1.data[0];
+    if(!U) return msg('fa-circle-xmark', 'Kode tidak ditemukan', 'Periksa kembali kode ujian dari gurumu.');
+    $('judulTop').textContent = U.judul; renderId();
+    if(U.status !== 'terbit') return msg('fa-lock', 'Ujian belum aktif', 'Ujian ini belum diaktifkan oleh guru.');
+    const ks = String(ses.kelas || '').trim().toLowerCase(), ku = (U.kelas || []).map(k => String(k).trim().toLowerCase());
+    if(ks && ku.length && !ku.includes(ks)) return msg('fa-ban', 'Bukan untuk kelasmu', 'Ujian ini tidak ditujukan untuk kelasmu.');
+    const r2 = await db.from('hasilujian').select('nilai,skor,skor_maks,perlu_koreksi').eq('kode_ujian', kode).eq('nisn', String(ses.nisn)).limit(1);
+    if(r2.error) throw r2.error;
+    if(r2.data && r2.data[0]){ localStorage.removeItem(KEY); return selesai(r2.data[0], true); }
+    try{ S = JSON.parse(localStorage.getItem(KEY) || 'null'); }catch(e){ S = null; }
+    if(S) return mulai(true);
+    const now = Date.now();
+    if(U.mulai && now < new Date(U.mulai)) return msg('fa-clock', 'Ujian belum dibuka', 'Dibuka pada ' + fmt(U.mulai) + '.');
+    if(U.selesai && now > new Date(U.selesai)) return msg('fa-clock', 'Ujian sudah ditutup', 'Ditutup pada ' + fmt(U.selesai) + '.');
+    intro();
+  }catch(e){ msg('fa-triangle-exclamation', 'Gagal memuat ujian', esc(e.message) + '<br>Hubungi gurumu jika masalah berlanjut.'); }
+})();
+
+function tgl(v){ if(!v) return '-'; const d = new Date(v); return isNaN(d) ? String(v) : d.toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'}); }
+function renderId(){
+  const c = x => `<div><small>${x[0]}</small><b title="${esc(x[1])}">${esc(x[1])}</b></div>`;
+  const sem = ((U.semester || '') + ' ' + (U.tahun_ajaran || '')).trim();
+  $('idCard').innerHTML =
+    `<div class="idp s"><div class="idh"><div class="av"><i class="fas fa-user-graduate"></i></div><div><small>Identitas Siswa</small><b>${esc(ses.nama_siswa)}</b><span>Peserta Ujian</span></div></div>
+      <div class="chips">${[['NISN', ses.nisn || '-'], ['Kelas', ses.kelas || '-'], ['Tempat Lahir', ses.tempat_lahir || '-'], ['Tgl Lahir', tgl(ses.tanggal_lahir)]].map(c).join('')}</div></div>
+     <div class="idp u"><div class="idh"><div class="av"><i class="fas fa-file-pen"></i></div><div><small>Identitas Ujian</small><b>${esc(U.judul)}</b><span>Kode ${esc(U.kode_ujian)}${sem ? ' &middot; ' + esc(sem) : ''}</span></div></div>
+      <div class="chips">${[['Mata Pelajaran', U.mapel || '-'], ['Jenis Ujian', U.jenis || '-'], ['Jumlah Soal', (U.soal || []).length + ' soal'], ['Durasi', U.durasi_menit ? U.durasi_menit + ' menit' : '-']].map(c).join('')}</div></div>`;
+  $('idCard').classList.add('on');
+}
+
+function intro(){
+  $('sIntro').innerHTML = `<div class="card"><h4>Petunjuk</h4><p class="pre">${esc(U.petunjuk || '-')}</p>
+    <p class="note">Waktu berjalan sejak tombol Mulai ditekan dan tidak berhenti walau halaman ditutup. Jawaban tersimpan otomatis di perangkat ini.</p>
+    <button class="btn" onclick="mulai()"><i class="fas fa-play"></i> Mulai Mengerjakan</button><a class="btn ghost" href="adminsiswa.html">Kembali</a></div>`;
+  show('sIntro');
+}
+
+function mulai(resume){
+  const soal = U.soal || [];
+  if(!soal.length) return msg('fa-circle-xmark', 'Soal kosong', 'Ujian ini belum memiliki soal.');
+  if(!resume){
+    const now = Date.now();
+    let end = now + (U.durasi_menit || 60) * 60000;
+    if(U.selesai) end = Math.min(end, new Date(U.selesai).getTime());
+    const idx = soal.map((_, i) => i);
+    S = {start:now, end, order:U.acak_soal ? mix(idx) : idx, opt:{}, ans:{}, cur:0};
+    soal.forEach((s, i) => { if(s.opsi){ const o = s.opsi.map((_, j) => j); S.opt[i] = U.acak_opsi ? mix(o) : o; } });
+    save();
+  }
+  Q = S.order; cur = S.cur || 0;
+  show('sExam'); $('idCard').classList.add('compact'); $('timer').style.display = 'block'; render();
+  clearInterval(tick); tick = setInterval(tk, 1000); tk();
+}
+
+function tk(){
+  const sisa = S.end - Date.now();
+  if(sisa <= 0){ clearInterval(tick); $('timer').textContent = '00:00'; return kumpul(true); }
+  const t = Math.floor(sisa / 1000), h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), d = t % 60;
+  $('timer').textContent = (h ? h + ':' : '') + String(m).padStart(2, '0') + ':' + String(d).padStart(2, '0');
+  $('timer').classList.toggle('warn', sisa < 300000);
+}
+
+function render(){
+  const i = Q[cur], s = U.soal[i], a = S.ans[i];
+  let body = '';
+  if(s.opsi){
+    const tp = s.tipe === 'pgk' ? 'checkbox' : 'radio';
+    body = S.opt[i].map((o, p) => {
+      const on = s.tipe === 'pgk' ? (a || []).includes(o) : a === o;
+      return `<label class="opt ${on ? 'on' : ''}"><input type="${tp}" name="q" ${on ? 'checked' : ''} onchange="pick(${o})"><b>${H[p]}</b><span class="pre">${esc(s.opsi[o])}</span></label>`;
+    }).join('');
+  }else if(s.tipe === 'bs'){
+    body = [['B','Benar'], ['S','Salah']].map(([v, l]) => `<label class="opt ${a === v ? 'on' : ''}"><input type="radio" name="q" ${a === v ? 'checked' : ''} onchange="pick('${v}')"><b>${v}</b><span>${l}</span></label>`).join('');
+  }else if(s.tipe === 'isian'){
+    body = `<input class="txt" value="${esc(a || '')}" placeholder="Ketik jawabanmu" oninput="pick(this.value,1)">`;
+  }else{
+    body = `<textarea class="txt" rows="8" placeholder="Tulis jawabanmu" oninput="pick(this.value,1)">${esc(a || '')}</textarea>`;
+  }
+  $('q').innerHTML = `<div class="qno">Soal ${cur + 1} dari ${Q.length} <small>&middot; bobot ${esc(s.bobot)}</small></div>
+    <div class="pre qt">${esc(s.teks)}</div>${s.gambar ? `<figure class="qfig"><img class="qimg" src="${esc(s.gambar)}" alt="Gambar soal"></figure>` : ''}
+    ${s.tipe === 'pgk' ? '<p class="note">Pilih semua jawaban yang benar.</p>' : ''}<div>${body}</div>`;
+  $('prev').disabled = cur === 0;
+  $('next').innerHTML = cur === Q.length - 1 ? 'Kumpulkan <i class="fas fa-check"></i>' : 'Berikutnya <i class="fas fa-chevron-right"></i>';
+  S.cur = cur; save();
+}
+
+function pick(v, txt){
+  const i = Q[cur], s = U.soal[i];
+  if(s.tipe === 'pgk'){ const a = S.ans[i] || []; S.ans[i] = a.includes(v) ? a.filter(x => x !== v) : [...a, v].sort((x, y) => x - y); }
+  else S.ans[i] = v;
+  save(); if(!txt) render();
+}
+function nav(){
+  $('navGrid').innerHTML = Q.map((i, p) => `<button class="${done(i) ? 'done' : ''} ${p === cur ? 'cur' : ''}" onclick="go(${p})">${p + 1}</button>`).join('');
+  $('mNav').classList.add('on');
+}
+function go(p){ cur = p; $('mNav').classList.remove('on'); render(); }
+function ask(){
+  const n = Q.filter(done).length;
+  $('askInfo').innerHTML = `Terjawab <b>${n}</b> dari <b>${Q.length}</b> soal.` + (n < Q.length ? `<br><span class="warn-t">${Q.length - n} soal belum dijawab.</span>` : '');
+  $('mNav').classList.remove('on'); $('mAsk').classList.add('on');
+}
+
+/* Penilaian otomatis. Uraian dinilai guru (skor 0 sementara). PGK benar hanya jika semua pilihan tepat. */
+function hitung(){
+  let sk = 0, mx = 0, ur = false;
+  U.soal.forEach((s, i) => {
+    const b = Number(s.bobot) || 0, a = S.ans[i]; mx += b;
+    const n = t => String(t).trim().toLowerCase().replace(/\s+/g, ' ');
+    let ok = false;
+    if(s.tipe === 'uraian') ur = true;
+    else if(s.tipe === 'pg' || s.tipe === 'bs') ok = a === s.kunci;
+    else if(s.tipe === 'pgk') ok = Array.isArray(a) && Array.isArray(s.kunci) && a.length === s.kunci.length && [...s.kunci].sort((x, y) => x - y).every((v, k) => v === a[k]);
+    else if(s.tipe === 'isian') ok = a != null && n(a) !== '' && String(s.kunci).split('|').some(k => n(k) === n(a));
+    if(ok) sk += b;
+  });
+  return {skor:Math.round(sk * 100) / 100, skor_maks:Math.round(mx * 100) / 100, nilai:mx ? Math.round(sk / mx * 10000) / 100 : 0, perlu_koreksi:ur};
+}
+
+async function kumpul(auto){
+  if(sending) return;
+  sending = true; clearInterval(tick); $('mAsk').classList.remove('on'); $('mNav').classList.remove('on');
+  msg('fa-spinner fa-spin', 'Mengirim jawaban...', 'Jangan tutup halaman ini.');
+  const r = hitung();
+  const row = {kode_ujian:kode, ujian_id:String(U.id), nisn:String(ses.nisn), nama_siswa:ses.nama_siswa, kelas:ses.kelas || null,
+    jawaban:S.ans, ...r, mulai_at:new Date(S.start).toISOString(), selesai_at:new Date().toISOString()};
+  const { error } = await db.from('hasilujian').insert(row);
+  sending = false;
+  if(error && error.code !== '23505'){
+    $('sMsg').innerHTML = `<div class="card center"><i class="fas fa-triangle-exclamation big"></i><h2>Jawaban belum terkirim</h2><p>${esc(error.message)}</p>
+      <p class="note">Jawabanmu aman di perangkat ini. Periksa koneksi internet lalu coba lagi.</p><button class="btn" onclick="kumpul()">Coba Kirim Lagi</button></div>`;
+    return;
+  }
+  localStorage.removeItem(KEY); S = null;
+  selesai(r, false, auto);
+}
+
+function selesai(r, lama, auto){
+  $('timer').style.display = 'none'; $('idCard').classList.remove('compact');
+  const judul = lama ? 'Kamu sudah mengerjakan ujian ini' : (auto ? 'Waktu habis, jawaban terkirim' : 'Jawaban terkirim');
+  $('sDone').innerHTML = `<div class="card center"><i class="fas fa-circle-check big ok"></i><h2>${judul}</h2><p>${esc(U.judul)}</p>` +
+    (U.tampilkan_nilai ? `<div class="nilai">${r.nilai}</div><p>Skor ${r.skor} dari ${r.skor_maks}</p>` + (r.perlu_koreksi ? '<p class="note">Soal uraian dinilai oleh guru, nilai akhir bisa berubah.</p>' : '') : '<p>Nilai akan diumumkan oleh guru.</p>') +
+    `<a class="btn" href="adminsiswa.html">Kembali ke Beranda</a></div>`;
+  show('sDone');
+}
+window.addEventListener('beforeunload', e => { if(S && $('sExam').style.display === 'block'){ e.preventDefault(); e.returnValue = ''; } });
+</script>
+</body>
+</html>
