@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Survei Penjaringan Usulan PIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF2F8; --card:#FFFFFF; --ink:#13243D; --muted:#5B6B82; --line:#D5DDE8;
+  --blue:#1D5FC4; --blue-d:#154A9C; --blue-soft:#E6EFFC; --gold:#F0B323;
+  --red:#C73A3A; --green:#1E8E5A;
+  --r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:150px}
+body{
+  font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.55;font-size:15px;
+  padding-bottom:calc(158px + env(safe-area-inset-bottom,0px));
+}
+header.top{
+  position:sticky;top:0;z-index:20;background:var(--ink);color:#fff;
+  padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px;
+}
+.top-in{max-width:760px;margin:0 auto}
+.top h1{font-size:17px;font-weight:800;letter-spacing:-.01em}
+.top p{font-size:12.5px;color:#B8C6DB}
+.steps{display:flex;gap:6px;margin-top:10px}
+.steps button{
+  flex:1;height:30px;border:0;border-radius:8px;background:rgba(255,255,255,.12);
+  color:#B8C6DB;font-weight:700;font-size:12px;font-family:inherit;cursor:pointer;
+}
+.steps button.done{background:rgba(240,179,35,.28);color:#fff}
+.steps button.on{background:var(--gold);color:var(--ink)}
+.steps button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.step-name{margin-top:8px;font-size:12.5px;color:#DCE5F2}
+
+main{max-width:760px;margin:0 auto;padding:18px 14px}
+.notice{
+  background:var(--blue-soft);border-left:4px solid var(--blue);border-radius:10px;
+  padding:14px 16px;font-size:13.5px;margin-bottom:16px;
+}
+.notice b{display:block;margin-bottom:2px}
+section.sec{display:none}
+section.sec.on{display:block}
+.sec h2{font-size:21px;font-weight:800;letter-spacing:-.02em;margin:6px 2px 14px}
+.q{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:16px;margin-bottom:12px;
+}
+.q.hide{display:none}
+.q.err{border-color:var(--red);box-shadow:0 0 0 3px rgba(199,58,58,.12)}
+.q label.lbl{display:flex;gap:10px;font-weight:600;font-size:14.5px;margin-bottom:10px}
+.q .no{
+  flex:none;min-width:30px;height:22px;padding:0 6px;border-radius:6px;background:var(--blue-soft);
+  color:var(--blue-d);font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;margin-top:1px;
+}
+.q .req{color:var(--red);margin-left:2px}
+.q .hint{font-size:12.5px;color:var(--muted);margin:-4px 0 10px 40px}
+input[type=text],input[type=number],input[type=tel],input[type=date],textarea{
+  width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;
+  font:inherit;color:var(--ink);background:#fff;
+}
+textarea{min-height:96px;resize:vertical}
+input:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(29,95,196,.15)}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{position:relative}
+.opt input{position:absolute;opacity:0;inset:0;width:100%;height:100%;cursor:pointer;margin:0}
+.opt span{
+  display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:10px;
+  padding:10px 12px;background:#fff;transition:background .12s,border-color .12s;
+}
+.opt span::before{
+  content:"";flex:none;width:18px;height:18px;border-radius:50%;border:2px solid #9FB0C7;background:#fff;
+  transition:all .12s;
+}
+.opt input:checked + span{border-color:var(--blue);background:var(--blue-soft);font-weight:600}
+.opt input:checked + span::before{border-color:var(--blue);background:var(--blue);box-shadow:inset 0 0 0 3px #fff}
+.opt input:focus-visible + span{outline:2px solid var(--blue);outline-offset:2px}
+@media(min-width:620px){.opts.grid{display:grid;grid-template-columns:1fr 1fr}}
+.msg{display:none;color:var(--red);font-size:12.5px;font-weight:600;margin-top:8px}
+.q.err .msg{display:block}
+.statement{
+  background:#FFF8E5;border:1px solid #F0DDA2;border-radius:var(--r);padding:14px 16px;margin-bottom:12px;font-size:13.5px;
+}
+
+
+/* Upload berkas */
+.file-in{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.file-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;min-height:56px;border:2px dashed #9FB0C7;
+  border-radius:12px;background:#F7FAFD;color:var(--blue-d);font-weight:700;cursor:pointer;padding:10px;
+}
+.file-btn:hover{background:var(--blue-soft);border-color:var(--blue)}
+.file-in:focus-visible + .file-btn{outline:2px solid var(--blue);outline-offset:2px}
+.file-plus{width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:18px;line-height:1}
+.file-prev{display:flex;align-items:center;gap:12px;margin-top:10px;border:1.5px solid var(--line);border-radius:12px;padding:8px}
+.file-prev[hidden]{display:none}
+.file-thumb{flex:none;width:64px;height:64px;border-radius:8px;overflow:hidden;background:var(--blue-soft);display:flex;align-items:center;justify-content:center}
+.file-thumb img{width:100%;height:100%;object-fit:cover}
+.file-thumb img[hidden],.file-pdf[hidden]{display:none}
+.file-pdf{font-weight:800;color:var(--red);font-size:15px}
+.file-meta{flex:1;min-width:0;display:flex;flex-direction:column}
+.file-meta .fn{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-meta .fs{font-size:12.5px;color:var(--muted)}
+.file-del{border:1.5px solid var(--line);background:#fff;color:var(--red);border-radius:8px;padding:7px 12px;font-weight:700;font-size:13px;font-family:inherit;cursor:pointer}
+.file-del:hover{background:#FDEDED;border-color:var(--red)}
+.file-meta .fst{font-size:12.5px;font-weight:700;margin-top:2px}
+.fst.busy{color:var(--muted)}
+.fst.ok{color:var(--green)}
+.fst.bad{color:var(--red)}
+.fst.ready{color:var(--muted)}
+.q{position:relative}
+
+footer.bar{
+  position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(255,255,255,.96);
+  backdrop-filter:blur(8px);border-top:1px solid var(--line);
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));
+}
+.bar-in{max-width:760px;margin:0 auto;display:flex;gap:10px}
+.btn{
+  flex:1;height:48px;border-radius:12px;border:0;font-weight:700;font-size:15px;font-family:inherit;cursor:pointer;
+}
+.btn.ghost{background:#fff;border:1.5px solid var(--line);color:var(--ink)}
+.btn.main{background:var(--blue);color:#fff}
+.btn.main:hover{background:var(--blue-d)}
+.btn:disabled{opacity:.55;cursor:wait}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.btn.hidden{display:none}
+
+.done-box{text-align:center;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:38px 20px}
+.done-box .ic{
+  width:64px;height:64px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;
+  justify-content:center;margin:0 auto 14px;font-size:32px;
+}
+.done-box h2{margin:0 0 8px}
+.done-box p{color:var(--muted);max-width:44ch;margin:0 auto 18px}
+.done-box .btn{max-width:260px}
+#toast{
+  position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);
+  background:var(--ink);color:#fff;padding:11px 16px;border-radius:10px;font-size:13.5px;font-weight:600;
+  opacity:0;pointer-events:none;transition:all .2s;max-width:90vw;text-align:center;z-index:60;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.bad{background:var(--red)}
+
+/* Toolbar footer */
+.tools{margin-bottom:8px;gap:6px}
+.tool{
+  flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  min-height:52px;padding:6px 4px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);
+  font-weight:600;font-size:11.5px;line-height:1.15;font-family:inherit;cursor:pointer;text-decoration:none;text-align:center;
+}
+.tool svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tool:hover{background:var(--blue-soft);border-color:var(--blue);color:var(--blue-d)}
+.tool:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+body.publik .admin-only{display:none}
+body.publik .tool{flex-direction:row;gap:8px;font-size:13.5px;min-height:44px}
+
+/* Modal riwayat */
+.modal{position:fixed;inset:0;z-index:40;background:rgba(19,36,61,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.modal[hidden]{display:none}
+.modal-box{background:#fff;border-radius:18px;width:100%;max-width:760px;max-height:88vh;max-height:88dvh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.modal-head h2{flex:1;min-width:0;font-size:17px;font-weight:800;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.modal-x{flex:none;width:36px;height:36px;border-radius:50%;border:0;background:var(--bg);font-size:22px;line-height:1;cursor:pointer;color:var(--ink)}
+.modal-x:hover{background:var(--line)}
+.modal-x:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.modal-tools{padding:10px 16px;border-bottom:1px solid var(--line)}
+.modal-tools[hidden],.modal-foot[hidden]{display:none}
+.modal-tools input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;color:var(--ink)}
+.modal-tools input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(29,95,196,.15)}
+.modal-body{overflow:auto;padding:12px 16px;flex:1}
+.modal-foot{display:flex;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+@media(max-width:620px){.modal{align-items:flex-end;padding:0}.modal-box{border-radius:18px 18px 0 0;max-height:92vh;max-height:92dvh}}
+.rw-count{font-size:12.5px;color:var(--muted);margin-bottom:8px}
+.rw-row{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;padding:12px;border:1.5px solid var(--line);border-radius:12px;background:#fff;margin-bottom:8px;cursor:pointer;font-family:inherit;color:var(--ink);font-size:14px}
+.rw-row:hover{border-color:var(--blue);background:var(--blue-soft)}
+.rw-row:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.rw-main{display:flex;flex-direction:column;min-width:0}
+.rw-main b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rw-main small{color:var(--muted);font-size:12.5px}
+.rw-date{flex:none;font-size:12.5px;color:var(--muted);text-align:right}
+.rw-msg{text-align:center;color:var(--muted);padding:28px 8px}
+.rw-msg.bad{color:var(--red);font-weight:600}
+.dmeta{font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.dsec{font-size:15px;font-weight:800;margin:18px 0 4px}
+.dmeta + .dsec{margin-top:8px}
+.dl{padding:9px 0;border-bottom:1px solid var(--line)}
+.dt{font-size:12.5px;color:var(--muted)}
+.dd{font-size:14px;font-weight:600;white-space:pre-wrap;word-break:break-word}
+.dd a{color:var(--blue-d)}
+
+/* Area cetak formulir */
+#printArea{display:none}
+.pv{font-family:"Plus Jakarta Sans",Arial,sans-serif;color:#000;font-size:10pt;line-height:1.4}
+.pv h1{font-size:14pt;text-align:center;font-weight:800}
+.pv .pv-sub{text-align:center;margin-bottom:8px}
+.pv .pv-note{border:1px solid #000;padding:6px 8px;font-size:9pt;margin:8px 0}
+.pv h2{font-size:11pt;font-weight:800;border-bottom:1.5px solid #000;margin:14px 0 6px;padding-bottom:2px;break-after:avoid}
+.pv .pq{break-inside:avoid;margin-bottom:7px}
+.pv .pq-q{font-weight:600}
+.pv .pq-o{display:flex;flex-wrap:wrap;gap:2px 16px;margin:2px 0 0 18px}
+.pv .o{display:inline-flex;align-items:center;gap:5px}
+.pv .cb{width:11px;height:11px;border:1.2px solid #000;display:inline-block;position:relative;flex:none}
+.pv .cb.on::after{content:"";position:absolute;left:2px;top:-2px;width:3px;height:7px;border:solid #000;border-width:0 1.6px 1.6px 0;transform:rotate(40deg)}
+.pv .pq-line{margin:3px 0 0 18px;border-bottom:1px solid #000;min-height:17px;padding:0 2px;white-space:pre-wrap;word-break:break-word}
+.pv .pq-url{font-size:8pt;color:#333;word-break:break-all}
+.pv .ttd{margin:18px 0 0 auto;width:220px;text-align:center;break-inside:avoid}
+.pv .ttd-box{height:64px}
+@media print{
+  html,body{background:#fff!important}
+  body{padding:0!important}
+  body > *:not(#printArea){display:none!important}
+  #printArea{display:block}
+  @page{size:A4;margin:14mm}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <h1>Survei Penjaringan Usulan PIP</h1>
+    <p>Program Indonesia Pintar</p>
+    <div class="steps" id="steps"></div>
+    <div class="step-name" id="stepName"></div>
+  </div>
+</header>
+
+<main>
+  <div class="notice" id="notice">
+    <b>Petunjuk pengisian</b>
+    Mohon isi formulir ini dengan data yang benar dan sesuai kondisi keluarga saat ini. Data akan digunakan sebagai bahan pertimbangan sekolah dalam proses penjaringan usulan calon penerima PIP. Pengisian formulir tidak menjamin siswa otomatis mendapatkan bantuan PIP.
+  </div>
+  <form id="form" novalidate onsubmit="return false"></form>
+  <div id="doneBox" style="display:none"></div>
+</main>
+
+<footer class="bar" id="bar">
+  <div class="bar-in tools" id="tools">
+    <a class="tool admin-only" id="btnHome" href="dasboradmin.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg><span>Beranda</span></a>
+    <button type="button" class="tool admin-only" id="btnRiwayat"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9z"/><path d="M8.5 12h7M8.5 16h5"/></svg><span>Riwayat Survey</span></button>
+    <button type="button" class="tool" id="btnCetak"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5"/><rect x="4" y="9" width="16" height="8" rx="2"/><path d="M7 14h10v6H7z"/></svg><span>Cetak</span></button>
+    <button type="button" class="tool admin-only" id="btnShare"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg><span>Share Link</span></button>
+  </div>
+  <div class="bar-in" id="navRow">
+    <button type="button" class="btn ghost hidden" id="btnPrev">Kembali</button>
+    <button type="button" class="btn main" id="btnNext">Lanjut</button>
+  </div>
+</footer>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<div class="modal" id="riwayatModal" hidden>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="rwTitle">
+    <div class="modal-head">
+      <h2 id="rwTitle">Riwayat Survey</h2>
+      <button type="button" class="modal-x" id="rwClose" aria-label="Tutup">&times;</button>
+    </div>
+    <div class="modal-tools" id="rwTools">
+      <input type="search" id="rwSearch" placeholder="Cari nama siswa, NISN, atau kelas" autocomplete="off" aria-label="Cari data survei">
+    </div>
+    <div class="modal-body" id="rwBody"></div>
+    <div class="modal-foot" id="rwFoot" hidden>
+      <button type="button" class="btn ghost" id="rwToList">Kembali ke daftar</button>
+      <button type="button" class="btn main" id="rwPrint">Cetak formulir</button>
+    </div>
+  </div>
+</div>
+
+<div id="printArea" aria-hidden="true"></div>
+
+<script>
+/* =====================================================
+   KONFIGURASI SUPABASE
+   Tabel: survey_pip (lihat SQL di bagian bawah file)
+   ===================================================== */
+const SUPABASE_URL = "https://mjvobqfcoutazqcovtlp.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdm9icWZjb3V0YXpxY292dGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzEwMzYsImV4cCI6MjA4NjE0NzAzNn0.jz6JaC9mMTMhLVhXSh1OCnFWDPZ0Cy2tUnHEmWxAR8o";
+const TABEL = "survey_pip";
+
+/* Berkas & foto disimpan ke folder Google Drive lewat Google Apps Script
+   (kode ada di file surveypip-drive.gs). Tempel URL Web App di bawah ini. */
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzj-6hdH0IrJ4Y91bN3w41tDbQgIrVQBNOnXBLvlIcjJLDRQlEsOigmtdwbGjAn0mms/exec";
+
+/* ---------- Pilihan yang dipakai berulang ---------- */
+const YTT   = ["Ya","Tidak","Tidak tahu"];
+const YT    = ["Ya","Tidak"];
+const YTTI  = ["Ya","Tidak","Tidak ingin menjawab"];
+const STATUS_ORTU = ["Masih hidup","Telah meninggal dunia","Tidak diketahui keberadaannya"];
+const PENDIDIKAN  = ["Tidak sekolah","SD/sederajat","SMP/sederajat","SMA/SMK/sederajat","Diploma/Sarjana atau lebih tinggi"];
+const KERJA_AYAH  = ["Tidak bekerja","Buruh harian lepas","Petani/pekebun","Nelayan","Pedagang/wiraswasta","Karyawan swasta","PNS/TNI/Polri","Pekerja informal","Pensiunan","Lainnya"];
+const KERJA_IBU   = [...KERJA_AYAH,"Ibu rumah tangga"];
+const PENGHASILAN = ["Tidak memiliki penghasilan","Kurang dari Rp500.000","Rp500.000–Rp1.000.000","Rp1.000.001–Rp1.500.000","Rp1.500.001–Rp2.500.000","Rp2.500.001–Rp4.000.000","Lebih dari Rp4.000.000"];
+
+/* ---------- Daftar pertanyaan ----------
+   t: text | number | tel | date | textarea | radio | check
+   opt:true  -> boleh dikosongkan
+   show:{id,v} -> tampil hanya jika jawaban id sama dengan v
+   ---------------------------------------------------- */
+const SECTIONS = [
+{ k:"A", title:"Identitas Siswa", q:[
+  {id:"A1", q:"Nama lengkap siswa", t:"text"},
+  {id:"A2", q:"NISN (Nomor Induk Siswa Nasional)", t:"tel", ph:"Nomor NISN"},
+  {id:"A3", q:"NIS (Nomor Induk Siswa)", t:"text", opt:true},
+  {id:"A4", q:"Jenis kelamin", t:"radio", o:["Laki-laki","Perempuan"]},
+  {id:"A5", q:"Tempat, tanggal lahir", t:"text", ph:"Contoh: Bandung, 12 Mei 2009"},
+  {id:"A6", q:"Kelas saat ini", t:"text", ph:"Contoh: X TKJ 1"},
+  {id:"A7", q:"Alamat tempat tinggal lengkap", t:"textarea"},
+  {id:"A8", q:"Nomor telepon/WhatsApp yang dapat dihubungi", t:"tel", ph:"08xxxxxxxxxx", phone:true},
+  {id:"A9", q:"Status tempat tinggal siswa", t:"radio", o:["Tinggal bersama kedua orang tua","Tinggal bersama ayah","Tinggal bersama ibu","Tinggal bersama wali/keluarga lain","Tinggal di asrama/panti","Lainnya"]},
+  {id:"A10", q:"Apakah siswa memiliki Kartu Indonesia Pintar (KIP)?", t:"radio", o:YTT},
+  {id:"A11", q:"Apakah siswa terdaftar dalam Program Keluarga Harapan (PKH) atau bantuan sosial lainnya?", t:"radio", o:YTT},
+  {id:"A12", q:"Apakah siswa memiliki dokumen atau bukti pendukung kondisi ekonomi keluarga?", t:"radio", hint:"Contoh: Surat Keterangan Tidak Mampu (SKTM) dari kelurahan/desa, Kartu Keluarga Sejahtera (KKS), kartu PKH, bukti terdaftar di DTKS/DTSEN, surat keterangan penghasilan orang tua, surat keterangan PHK, akta kematian orang tua, atau slip gaji.", o:["Ya","Tidak","Sedang dalam proses pengurusan"]},
+]},
+{ k:"B", title:"Identitas Orang Tua/Wali", q:[
+  {id:"B1", q:"Nama lengkap ayah", t:"text"},
+  {id:"B2", q:"Status ayah", t:"radio", o:STATUS_ORTU},
+  {id:"B3", q:"Nama lengkap ibu", t:"text"},
+  {id:"B4", q:"Status ibu", t:"radio", o:STATUS_ORTU},
+  {id:"B5", q:"Nama lengkap wali (jika siswa tinggal bersama wali)", t:"text", opt:true},
+  {id:"B6", q:"Hubungan wali dengan siswa", t:"text", opt:true, ph:"Contoh: Paman, Nenek"},
+  {id:"B7", q:"Pendidikan terakhir ayah", t:"radio", o:PENDIDIKAN},
+  {id:"B8", q:"Pendidikan terakhir ibu", t:"radio", o:PENDIDIKAN},
+  {id:"B9", q:"Jumlah anggota keluarga yang tinggal dalam satu rumah", t:"number", min:1, ph:"Jumlah orang"},
+  {id:"B10", q:"Jumlah anak/tanggungan yang masih menjadi beban ekonomi keluarga", t:"number", min:0, ph:"Jumlah orang"},
+  {id:"B11", q:"Apakah ayah dan ibu tinggal bersama dalam satu rumah?", t:"radio", o:["Ya","Tidak, bercerai","Tidak, bekerja di luar daerah","Lainnya"]},
+  {id:"B12", q:"Apakah siswa tinggal bersama orang tua/wali yang bertanggung jawab atas biaya pendidikannya?", t:"radio", o:YT},
+]},
+{ k:"C", title:"Kondisi Pekerjaan Orang Tua/Wali", q:[
+  {id:"C1", q:"Pekerjaan utama ayah saat ini", t:"radio", o:KERJA_AYAH, grid:true},
+  {id:"C2", q:"Pekerjaan utama ibu saat ini", t:"radio", o:KERJA_IBU, grid:true},
+  {id:"C3", q:"Pekerjaan wali saat ini (jika ada)", t:"text", opt:true},
+  {id:"C4", q:"Apakah pekerjaan utama orang tua/wali bersifat tetap atau tidak tetap?", t:"radio", o:["Tetap","Tidak tetap","Musiman","Tidak bekerja"]},
+  {id:"C5", q:"Apakah orang tua/wali saat ini sedang mengalami kehilangan pekerjaan atau pengurangan penghasilan?", t:"radio", o:YT},
+  {id:"C6", q:"Jelaskan kondisi tersebut secara singkat", t:"textarea", show:{id:"C5",v:"Ya"}},
+  {id:"C7", q:"Apakah orang tua/wali memiliki pekerjaan sampingan?", t:"radio", o:YT},
+  {id:"C8", q:"Sebutkan pekerjaan sampingan tersebut", t:"text", show:{id:"C7",v:"Ya"}},
+  {id:"C9", q:"Apakah orang tua/wali memiliki keterbatasan fisik atau kondisi lain yang memengaruhi kemampuan bekerja?", t:"radio", o:YTTI},
+  {id:"C10", q:"Apakah ada anggota keluarga lain yang menjadi pencari nafkah utama?", t:"radio", o:YT},
+  {id:"C11", q:"Sebutkan hubungan dengan siswa dan jenis pekerjaannya", t:"text", show:{id:"C10",v:"Ya"}, ph:"Contoh: Kakak, karyawan toko"},
+]},
+{ k:"D", title:"Penghasilan dan Kondisi Ekonomi Keluarga", q:[
+  {id:"D1", q:"Berapa rata-rata penghasilan ayah per bulan?", t:"radio", o:PENGHASILAN},
+  {id:"D2", q:"Berapa rata-rata penghasilan ibu per bulan?", t:"radio", o:PENGHASILAN},
+  {id:"D3", q:"Berapa rata-rata penghasilan wali per bulan? (jika ada)", t:"radio", o:PENGHASILAN, opt:true},
+  {id:"D4", q:"Berapa total penghasilan seluruh anggota keluarga yang bekerja dalam satu bulan?", t:"radio", o:["Tidak memiliki penghasilan tetap","Kurang dari Rp1.000.000","Rp1.000.000–Rp2.000.000","Rp2.000.001–Rp3.000.000","Rp3.000.001–Rp5.000.000","Lebih dari Rp5.000.000"]},
+  {id:"D5", q:"Apakah penghasilan keluarga mencukupi kebutuhan pokok sehari-hari?", t:"radio", o:["Selalu mencukupi","Kadang-kadang mencukupi","Sering tidak mencukupi","Tidak mencukupi"]},
+  {id:"D6", q:"Apakah penghasilan keluarga mencukupi kebutuhan pendidikan siswa?", t:"radio", o:["Ya, mencukupi","Cukup dengan kesulitan","Tidak mencukupi"]},
+  {id:"D7", q:"Apakah keluarga memiliki tanggungan biaya pengobatan anggota keluarga?", t:"radio", o:YT},
+  {id:"D8", q:"Apakah keluarga memiliki tanggungan utang yang cukup membebani pengeluaran bulanan?", t:"radio", o:YTTI},
+  {id:"D9", q:"Bagaimana kondisi ekonomi keluarga secara keseluruhan menurut Anda?", t:"radio", o:["Sangat terbatas","Terbatas","Cukup","Relatif mampu"]},
+  {id:"D10", q:"Apakah siswa pernah mengalami kendala memenuhi kebutuhan sekolah karena keterbatasan biaya?", t:"radio", o:YT},
+  {id:"D11", q:"Kendala apa yang pernah dialami?", t:"check", show:{id:"D10",v:"Ya"}, hint:"Boleh pilih lebih dari satu.", o:["Kesulitan membeli seragam atau sepatu","Kesulitan membeli buku dan alat tulis","Kesulitan membayar transportasi ke sekolah","Kesulitan memenuhi kebutuhan praktik atau pembelajaran","Berisiko tidak melanjutkan sekolah","Lainnya"]},
+]},
+{ k:"E", title:"Kondisi Tempat Tinggal dan Tanggungan Keluarga", q:[
+  {id:"E1", q:"Status tempat tinggal keluarga", t:"radio", o:["Milik sendiri","Menumpang dengan keluarga","Kontrak/sewa","Rumah dinas","Lainnya"]},
+  {id:"E2", q:"Kondisi tempat tinggal", t:"radio", o:["Layak","Kurang layak","Tidak layak"]},
+  {id:"E3", q:"Apakah keluarga memiliki anggota keluarga yang berkebutuhan khusus atau membutuhkan perawatan jangka panjang?", t:"radio", o:YT},
+  {id:"E4", q:"Apakah siswa berasal dari keluarga yatim/piatu/yatim piatu?", t:"radio", o:["Yatim","Piatu","Yatim piatu","Bukan"]},
+  {id:"E5", q:"Apakah siswa berasal dari keluarga yang mengalami kondisi khusus, seperti bencana, kehilangan pencari nafkah, atau keadaan darurat ekonomi?", t:"radio", o:YT},
+  {id:"E6", q:"Jelaskan secara singkat kondisi yang dialami", t:"textarea", show:{id:"E5",v:"Ya"}},
+]},
+{ k:"F", title:"Upload Berkas dan Foto", q:[
+  {id:"F1", q:"Dokumen pendukung kondisi ekonomi keluarga", t:"file", kind:"doc", opt:true, slug:"dokumen", label:"dokumen pendukung",
+   accept:"application/pdf,image/jpeg,image/png", hint:"Boleh dikosongkan jika belum ada. Format PDF, JPG, atau PNG, maksimal 5 MB."},
+  {id:"F2", q:"Foto rumah tampak samping", t:"file", kind:"photo", slug:"rumah-samping", label:"foto rumah tampak samping", accept:"image/*"},
+  {id:"F3", q:"Foto rumah tampak belakang", t:"file", kind:"photo", slug:"rumah-belakang", label:"foto rumah tampak belakang", accept:"image/*"},
+  {id:"F4", q:"Foto rumah tampak depan", t:"file", kind:"photo", slug:"rumah-depan", label:"foto rumah tampak depan", accept:"image/*"},
+  {id:"F5", q:"Foto rumah tampak dalam", t:"file", kind:"photo", slug:"rumah-dalam", label:"foto rumah tampak dalam", accept:"image/*"},
+]},
+{ k:"G", title:"Pernyataan dan Konfirmasi", q:[
+  {id:"G1", q:"Apakah seluruh informasi yang Anda isi dalam formulir ini benar sesuai kondisi sebenarnya?", t:"radio", o:YT},
+  {id:"G2", q:"Apakah Anda bersedia jika pihak sekolah melakukan verifikasi data sesuai ketentuan yang berlaku?", t:"radio", o:YT},
+  {id:"G3", q:"Catatan tambahan mengenai kondisi ekonomi keluarga yang perlu diketahui pihak sekolah", t:"textarea", opt:true},
+  {statement:true},
+  {id:"G4", q:"Nama orang tua/wali", t:"text"},
+  {id:"G5", q:"Tanggal pengisian", t:"date"},
+]},
+];
+
+/* ---------- Render ---------- */
+const $ = s => document.querySelector(s);
+const form = $("#form");
+let cur = 0;
+const visited = new Set([0]);
+const files = {};      // id -> {blob,name,type,ext}
+const uploaded = {};   // id -> URL publik setelah terunggah
+let folderUnggah = null;   // diisi "Nama - NISN" saat tombol Kirim jawaban ditekan
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const allQ = SECTIONS.flatMap(s => s.q.filter(x => x.id));
+
+function renderField(f){
+  const no = f.id;
+  const req = f.opt ? "" : '<span class="req" aria-hidden="true">*</span>';
+  let inner = "";
+  if (f.t === "radio" || f.t === "check"){
+    const type = f.t === "radio" ? "radio" : "checkbox";
+    inner = `<div class="opts${f.grid?" grid":""}" role="${f.t==="radio"?"radiogroup":"group"}">` +
+      f.o.map(o => `<label class="opt"><input type="${type}" name="${f.id}" value="${esc(o)}"><span>${esc(o)}</span></label>`).join("") + "</div>";
+  } else if (f.t === "file"){
+    inner = `<div class="file" data-file="${f.id}">
+      <input type="file" class="file-in" name="${f.id}" id="f_${f.id}" accept="${f.accept}">
+      <label class="file-btn" for="f_${f.id}"><span class="file-plus" aria-hidden="true">+</span><span>${f.kind==="photo" ? "Ambil atau pilih foto" : "Pilih berkas"}</span></label>
+      <div class="file-prev" hidden>
+        <div class="file-thumb"><img alt=""><span class="file-pdf">PDF</span></div>
+        <div class="file-meta"><b class="fn"></b><span class="fs"></span><span class="fst"></span></div>
+        <button type="button" class="file-del">Hapus</button>
+      </div>
+    </div>`;
+  } else if (f.t === "textarea"){
+    inner = `<textarea name="${f.id}" id="f_${f.id}"></textarea>`;
+  } else {
+    const extra = [
+      f.ph ? `placeholder="${esc(f.ph)}"` : "",
+      f.min !== undefined ? `min="${f.min}"` : "",
+      (f.t==="tel") ? 'inputmode="numeric"' : "",
+      (f.t==="number") ? 'inputmode="numeric"' : "",
+    ].join(" ");
+    inner = `<input type="${f.t}" name="${f.id}" id="f_${f.id}" ${extra} autocomplete="off">`;
+  }
+  return `<div class="q${f.show?" hide":""}" data-id="${f.id}">
+    <label class="lbl" ${f.t==="radio"||f.t==="check"?"":`for="f_${f.id}"`}><span class="no">${no}</span><span>${esc(f.q)}${req}</span></label>
+    ${f.hint ? `<div class="hint">${esc(f.hint)}</div>` : ""}
+    ${inner}
+    <div class="msg">Mohon lengkapi pertanyaan ini.</div>
+  </div>`;
+}
+
+form.innerHTML = SECTIONS.map((s,i) =>
+  `<section class="sec${i===0?" on":""}" data-i="${i}">
+     <h2>${s.k}. ${esc(s.title)}</h2>
+     ${s.q.map(f => f.statement
+        ? `<div class="statement"><b>Pernyataan</b><br>Saya menyatakan bahwa data yang diberikan dalam formulir ini benar dan dapat digunakan oleh pihak sekolah untuk keperluan pendataan, verifikasi, dan penjaringan usulan calon penerima Program Indonesia Pintar (PIP) sesuai ketentuan yang berlaku.</div>`
+        : renderField(f)).join("")}
+   </section>`).join("");
+
+$("#f_G5").value = new Date().toISOString().slice(0,10);
+
+$("#steps").innerHTML = SECTIONS.map((s,i) =>
+  `<button type="button" data-go="${i}" aria-label="Bagian ${s.k}: ${esc(s.title)}">${s.k}</button>`).join("");
+
+/* ---------- Nilai & visibilitas ---------- */
+function getVal(id){
+  const els = form.querySelectorAll(`[name="${id}"]`);
+  if (!els.length) return "";
+  const t = els[0].type;
+  if (t === "radio") { const c = form.querySelector(`[name="${id}"]:checked`); return c ? c.value : ""; }
+  if (t === "file") return files[id] ? files[id].name : "";
+  if (t === "checkbox") return [...form.querySelectorAll(`[name="${id}"]:checked`)].map(c => c.value);
+  return els[0].value.trim();
+}
+function isVisible(f){ return !f.show || getVal(f.show.id) === f.show.v; }
+function refreshConditions(){
+  allQ.forEach(f => {
+    if (!f.show) return;
+    const box = form.querySelector(`.q[data-id="${f.id}"]`);
+    box.classList.toggle("hide", !isVisible(f));
+  });
+}
+form.addEventListener("change", e => {
+  refreshConditions();
+  const box = e.target.closest(".q");
+  if (box) box.classList.remove("err");
+});
+form.addEventListener("input", e => {
+  const box = e.target.closest(".q");
+  if (box) box.classList.remove("err");
+});
+// Angka saja untuk NISN & telepon
+form.addEventListener("input", e => {
+  const el = e.target;
+  if (el.name === "A2" || el.name === "A8") el.value = el.value.replace(/\D/g, "");
+});
+
+/* ---------- Validasi ---------- */
+function isEmpty(v){ return Array.isArray(v) ? v.length === 0 : v === ""; }
+function validateSection(i){
+  let firstBad = null;
+  SECTIONS[i].q.forEach(f => {
+    if (!f.id) return;
+    const box = form.querySelector(`.q[data-id="${f.id}"]`);
+    let bad = false, text = f.t === "file" ? "Mohon unggah berkas ini." : "Mohon lengkapi pertanyaan ini.";
+    if (isVisible(f)){
+      const v = getVal(f.id);
+      if (!f.opt && isEmpty(v)) bad = true;
+      else if (f.phone && v && !/^(\+?62|0)\d{8,13}$/.test(v)){ bad = true; text = "Nomor telepon belum benar. Contoh: 081234567890."; }
+      else if (f.t === "number" && v !== "" && Number(v) < (f.min ?? 0)){ bad = true; text = `Isi dengan angka minimal ${f.min ?? 0}.`; }
+    }
+    box.classList.toggle("err", bad);
+    if (bad){ box.querySelector(".msg").textContent = text; if (!firstBad) firstBad = box; }
+  });
+  if (firstBad){ firstBad.scrollIntoView({behavior:"smooth", block:"center"}); }
+  return !firstBad;
+}
+
+/* ---------- Navigasi ---------- */
+function go(i){
+  cur = i; visited.add(i);
+  document.querySelectorAll("section.sec").forEach((s,idx) => s.classList.toggle("on", idx === i));
+  document.querySelectorAll("#steps button").forEach((b,idx) => {
+    b.classList.toggle("on", idx === i);
+    b.classList.toggle("done", idx < i);
+  });
+  $("#stepName").textContent = `Bagian ${SECTIONS[i].k} dari ${SECTIONS.length} — ${SECTIONS[i].title}`;
+  $("#btnPrev").classList.toggle("hidden", i === 0);
+  $("#btnNext").textContent = i === SECTIONS.length - 1 ? "Kirim jawaban" : "Lanjut";
+  $("#notice").style.display = i === 0 ? "" : "none";
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+$("#btnPrev").onclick = () => go(cur - 1);
+$("#btnNext").onclick = () => {
+  if (cur < SECTIONS.length - 1) go(cur + 1); else submit();
+};
+$("#steps").addEventListener("click", e => {
+  const b = e.target.closest("button[data-go]"); if (!b) return;
+  go(+b.dataset.go);
+});
+
+
+/* ---------- Upload berkas & foto ---------- */
+const MAX_BYTES = 5 * 1024 * 1024;
+const fmtSize = b => b < 1048576 ? Math.max(1, Math.round(b/1024)) + " KB" : (b/1048576).toFixed(1) + " MB";
+
+async function compressImage(file){
+  try{
+    const bmp = await createImageBitmap(file);
+    const sc = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+    const c = document.createElement("canvas");
+    c.width = Math.round(bmp.width * sc); c.height = Math.round(bmp.height * sc);
+    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+    const blob = await new Promise(r => c.toBlob(r, "image/jpeg", 0.82));
+    return blob || file;
+  }catch(_){ return file; }
+}
+function clearFile(id){
+  const box = form.querySelector(`.file[data-file="${id}"]`);
+  const prev = box.querySelector(".file-prev"), img = prev.querySelector("img");
+  if (img.src.startsWith("blob:")) URL.revokeObjectURL(img.src);
+  img.removeAttribute("src");
+  prev.hidden = true; box.querySelector(".file-in").value = "";
+  prev.querySelector(".fst").textContent = "";
+  delete files[id]; delete uploaded[id];
+}
+async function setFile(f, file){
+  const isImg = file.type.startsWith("image/");
+  const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+  if (f.kind === "photo" && !isImg){ toast("Pilih berkas berupa foto (JPG/PNG).", true); clearFile(f.id); return; }
+  if (f.kind === "doc" && !isImg && !isPdf){ toast("Format harus PDF, JPG, atau PNG.", true); clearFile(f.id); return; }
+  const blob = isImg ? await compressImage(file) : file;
+  if (blob.size > MAX_BYTES){ toast("Ukuran berkas melebihi 5 MB.", true); clearFile(f.id); return; }
+  const compressed = isImg && blob !== file;
+  const ext = isPdf ? "pdf" : (compressed ? "jpg" : (file.type === "image/png" ? "png" : "jpg"));
+  const base = file.name.replace(/\.[^.]+$/, "");
+  files[f.id] = { blob, name: base + "." + ext, type: isPdf ? "application/pdf" : (compressed ? "image/jpeg" : file.type || "image/jpeg"), ext };
+  delete uploaded[f.id];
+  const box = form.querySelector(`.file[data-file="${f.id}"]`);
+  const prev = box.querySelector(".file-prev"), img = prev.querySelector("img"), pdf = prev.querySelector(".file-pdf");
+  if (img.src.startsWith("blob:")) URL.revokeObjectURL(img.src);
+  if (isPdf){ img.hidden = true; pdf.hidden = false; }
+  else { img.hidden = false; pdf.hidden = true; img.src = URL.createObjectURL(blob); }
+  prev.querySelector(".fn").textContent = files[f.id].name;
+  prev.querySelector(".fs").textContent = fmtSize(blob.size);
+  prev.hidden = false;
+  const q = box.closest(".q"); q.classList.remove("err");
+  setStatus(f.id, "ready", "Siap. Akan diunggah ke Google Drive saat Kirim jawaban.");
+}
+form.addEventListener("change", e => {
+  const el = e.target;
+  if (el.type !== "file") return;
+  const f = allQ.find(x => x.id === el.name);
+  if (el.files[0]) setFile(f, el.files[0]); else clearFile(f.id);
+});
+form.addEventListener("click", e => {
+  const b = e.target.closest(".file-del"); if (!b) return;
+  clearFile(b.closest(".file").dataset.file);
+});
+const toBase64 = blob => new Promise((ok, no) => {
+  const r = new FileReader();
+  r.onload = () => ok(String(r.result).split(",")[1]);
+  r.onerror = () => no(new Error("Berkas tidak bisa dibaca."));
+  r.readAsDataURL(blob);
+});
+function setStatus(id, state, text){
+  const box = form.querySelector(`.file[data-file="${id}"]`);
+  const st = box.querySelector(".fst");
+  st.textContent = text; st.className = "fst " + state;
+  if (files[id]) files[id].state = state;
+}
+async function uploadOne(f){
+  const it = files[f.id]; if (!it) return false;
+  setStatus(f.id, "busy", "Mengunggah ke Google Drive…");
+  try{
+    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.startsWith("ISI_")) throw new Error("URL Apps Script belum diisi.");
+    let res;
+    try{
+      res = await fetch(APPS_SCRIPT_URL, {
+        method:"POST",
+        headers:{ "Content-Type":"text/plain;charset=utf-8" },   // text/plain agar tidak kena preflight CORS
+        body: JSON.stringify({
+          folderName: folderUnggah,
+          fileName: `${f.id}-${f.slug}.${it.ext}`,
+          mimeType: it.type,
+          data: await toBase64(it.blob)
+        })
+      });
+    }catch(_){ throw new Error("Tidak bisa terhubung ke Apps Script."); }
+    let j;
+    try{ j = await res.json(); }catch(_){ throw new Error("Respons Apps Script tidak valid (cek akses deployment)."); }
+    if (!j || !j.ok) throw new Error((j && j.error) ? String(j.error).slice(0,120) : "Gagal menyimpan ke Drive.");
+    if (files[f.id] !== it) return false;   // berkas sudah diganti/dihapus saat mengunggah
+    uploaded[f.id] = j.url;
+    setStatus(f.id, "ok", "Tersimpan di Google Drive ✓");
+    return true;
+  }catch(e){
+    if (files[f.id] === it){ delete uploaded[f.id]; setStatus(f.id, "bad", "Gagal: " + e.message + " Tekan Kirim jawaban untuk mencoba lagi."); }
+    return false;
+  }
+}
+async function unggahSemua(){
+  if (!folderUnggah){
+    const nama = String(getVal("A1")).replace(/[\\\/:*?"<>|]/g, " ").trim() || "tanpa-nama";
+    const nisn = String(getVal("A2")).replace(/\D/g, "") || "tanpa-nisn";
+    folderUnggah = `${nama} - ${nisn}`;
+  }
+  for (const f of allQ.filter(x => x.t === "file")){
+    if (files[f.id] && !uploaded[f.id]){
+      if (!(await uploadOne(f))) throw new Error(`Gagal mengunggah ${f.label}. Tekan Kirim jawaban untuk mencoba lagi.`);
+    }
+  }
+}
+
+/* ---------- Kirim ke Supabase ---------- */
+function toast(msg, bad){
+  const t = $("#toast"); t.textContent = msg; t.classList.toggle("bad", !!bad); t.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 3600);
+}
+async function submit(){
+  // validasi ulang seluruh bagian
+  for (let i = 0; i < SECTIONS.length; i++){
+    if (!validateSection(i)){ go(i); validateSection(i); toast(`Ada isian yang belum lengkap di bagian ${SECTIONS[i].k}.`, true); return; }
+  }
+  if (getVal("G1") === "Tidak"){
+    if (!confirm("Anda memilih bahwa informasi yang diisi belum benar. Tetap kirim jawaban?")) return;
+  }
+  if (Object.values(files).some(x => x.state === "busy")){ toast("Tunggu sampai unggahan selesai.", true); return; }
+  const btn = $("#btnNext"); btn.disabled = true; btn.textContent = "Mengunggah berkas…";
+  try{
+    if (!SUPABASE_KEY || SUPABASE_KEY.startsWith("ISI_")) throw new Error("Anon key Supabase belum diisi di surveypip.html.");
+    await unggahSemua();
+    btn.textContent = "Mengirim…";
+    const jawaban = {};
+    allQ.forEach(f => {
+      if (!isVisible(f)) return;
+      jawaban[f.id] = f.t === "file" ? (uploaded[f.id] || "") : getVal(f.id);
+    });
+    const payload = {
+      nama_siswa: jawaban.A1, nisn: jawaban.A2, nis: jawaban.A3, kelas: jawaban.A6,
+      nama_ortu: jawaban.G4, tanggal_isi: jawaban.G5,
+      link_dokumen: jawaban.F1 || null,
+      link_foto_samping: jawaban.F2 || null,
+      link_foto_belakang: jawaban.F3 || null,
+      link_foto_depan: jawaban.F4 || null,
+      link_foto_dalam: jawaban.F5 || null,
+      jawaban
+    };
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABEL}`, {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "apikey":SUPABASE_KEY,
+        "Authorization":"Bearer " + SUPABASE_KEY,
+        "Prefer":"return=minimal"
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok){
+      const err = await res.text();
+      throw new Error(res.status === 409 ? "Data siswa dengan NISN ini sudah pernah dikirim." : "Gagal menyimpan: " + err);
+    }
+    showDone(payload.nama_siswa);
+  }catch(e){
+    toast(e.message, true);
+    btn.disabled = false; btn.textContent = "Kirim jawaban";
+  }
+}
+function showDone(nama){
+  form.style.display = "none"; $("#navRow").style.display = "none"; $("#notice").style.display = "none";
+  $("#steps").style.display = "none"; $("#stepName").textContent = "Selesai";
+  const d = $("#doneBox"); d.style.display = "block";
+  d.innerHTML = `<div class="done-box">
+    <div class="ic" aria-hidden="true">✓</div>
+    <h2>Jawaban terkirim</h2>
+    <p>Terima kasih. Data survei untuk <b>${esc(nama)}</b> sudah tersimpan dan akan diverifikasi oleh pihak sekolah.</p>
+    <button class="btn main" style="margin:0 auto" onclick="location.reload()">Isi untuk siswa lain</button>
+  </div>`;
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+/* =====================================================
+   Mode publik, Cetak, Riwayat, Share Link
+   ===================================================== */
+const MODE_PUBLIK = new URLSearchParams(location.search).get("mode") === "publik";
+if (MODE_PUBLIK) document.body.classList.add("publik");
+
+const LINK_COL = { F1:"link_dokumen", F2:"link_foto_samping", F3:"link_foto_belakang", F4:"link_foto_depan", F5:"link_foto_dalam" };
+const PERNYATAAN = "Saya menyatakan bahwa data yang diberikan dalam formulir ini benar dan dapat digunakan oleh pihak sekolah untuk keperluan pendataan, verifikasi, dan penjaringan usulan calon penerima Program Indonesia Pintar (PIP) sesuai ketentuan yang berlaku.";
+const PETUNJUK = "Mohon isi formulir ini dengan data yang benar dan sesuai kondisi keluarga saat ini. Data akan digunakan sebagai bahan pertimbangan sekolah dalam proses penjaringan usulan calon penerima PIP. Pengisian formulir tidak menjamin siswa otomatis mendapatkan bantuan PIP.";
+const isUrl = v => /^https?:\/\//i.test(String(v || ""));
+function fmtTanggal(v){
+  if (!v) return "";
+  const d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(v) ? v + "T00:00:00" : v);
+  return isNaN(d) ? String(v) : d.toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" });
+}
+const lcFirst = t => t.charAt(0).toLowerCase() + t.slice(1);
+
+/* ---------- Cetak formulir ---------- */
+function collectAnswers(){
+  const a = {};
+  allQ.forEach(f => {
+    if (!isVisible(f)) { a[f.id] = f.t === "check" ? [] : ""; return; }
+    a[f.id] = f.t === "file" ? (uploaded[f.id] || (files[f.id] ? "Dipilih: " + files[f.id].name : "")) : getVal(f.id);
+  });
+  return a;
+}
+function buildPrint(a){
+  const body = SECTIONS.map(s => {
+    const items = s.q.map(f => {
+      if (f.statement) return `<div class="pv-note"><b>Pernyataan</b><br>${esc(PERNYATAAN)}</div>`;
+      const label = (f.show ? "Jika ya, " + lcFirst(f.q) : f.q);
+      const head = `<div class="pq-q">${esc(f.id.slice(1))}. ${esc(label)}</div>`;
+      const v = a[f.id];
+      let ans;
+      if (f.t === "radio" || f.t === "check"){
+        const sel = Array.isArray(v) ? v : [v];
+        ans = `<div class="pq-o">` + f.o.map(o => `<span class="o"><span class="cb${sel.includes(o) ? " on" : ""}"></span>${esc(o)}</span>`).join("") + `</div>`;
+      } else if (f.t === "file"){
+        ans = isUrl(v)
+          ? `<div class="pq-line">Terlampir <span class="pq-url">(${esc(v)})</span></div>`
+          : `<div class="pq-line">${esc(v || "")}</div>`;
+      } else if (f.t === "date"){
+        ans = `<div class="pq-line">${esc(fmtTanggal(v))}</div>`;
+      } else {
+        ans = `<div class="pq-line">${esc(v || "")}</div>`;
+      }
+      return `<div class="pq">${head}${ans}</div>`;
+    }).join("");
+    return `<h2>${esc(s.k)}. ${esc(s.title)}</h2>${items}`;
+  }).join("");
+  return `<div class="pv">
+    <h1>FORMULIR SURVEI PENJARINGAN USULAN PIP SISWA</h1>
+    <div class="pv-sub">Program Indonesia Pintar (PIP)</div>
+    <div class="pv-note"><b>Petunjuk pengisian:</b> ${esc(PETUNJUK)}</div>
+    ${body}
+    <div class="ttd"><div>Orang tua/wali,</div><div class="ttd-box"></div><div>( ${esc(a.G4 || "................................")} )</div></div>
+  </div>`;
+}
+function printFormulir(a){
+  $("#printArea").innerHTML = buildPrint(a);
+  setTimeout(() => window.print(), 80);
+}
+$("#btnCetak").onclick = () => printFormulir(collectAnswers());
+
+/* ---------- Share Link (halaman publik tanpa Beranda) ---------- */
+$("#btnShare").onclick = () => {
+  const u = new URL(location.href); u.search = ""; u.hash = ""; u.searchParams.set("mode", "publik");
+  const link = u.toString();
+  try{ if (navigator.clipboard) navigator.clipboard.writeText(link).catch(() => {}); }catch(_){}
+  const w = window.open(link, "_blank");
+  if (w) { try{ w.opener = null; }catch(_){} toast("Link survei publik dibuka dan disalin."); }
+  else toast("Pop-up diblokir browser. Link survei publik sudah disalin.", true);
+};
+
+/* ---------- Riwayat Survey ---------- */
+let rwData = [], rwCur = null;
+const rwFmtDate = r => r.tanggal_isi ? fmtTanggal(r.tanggal_isi) : (r.created_at ? fmtTanggal(r.created_at) : "-");
+
+function rwAnswers(r){
+  const a = Object.assign({}, (r && typeof r.jawaban === "object" && r.jawaban) || {});
+  Object.entries(LINK_COL).forEach(([id, col]) => { if (r[col]) a[id] = r[col]; });
+  return a;
+}
+function rwShowList(){
+  rwCur = null;
+  $("#rwTitle").textContent = "Riwayat Survey";
+  $("#rwTools").hidden = false; $("#rwFoot").hidden = true;
+  rwRenderList();
+}
+function rwRenderList(){
+  const q = $("#rwSearch").value.trim().toLowerCase();
+  const rows = rwData.filter(r => !q || [r.nama_siswa, r.nisn, r.kelas, r.nama_ortu].some(x => String(x || "").toLowerCase().includes(q)));
+  const body = $("#rwBody");
+  if (!rwData.length){ body.innerHTML = `<div class="rw-msg">Belum ada data survei yang masuk.</div>`; return; }
+  if (!rows.length){ body.innerHTML = `<div class="rw-msg">Tidak ada data yang cocok dengan pencarian.</div>`; return; }
+  body.innerHTML = `<div class="rw-count">${rows.length} data survei</div>` + rows.map(r =>
+    `<button type="button" class="rw-row" data-id="${esc(r.id)}">
+       <span class="rw-main"><b>${esc(r.nama_siswa || "-")}</b><small>NISN ${esc(r.nisn || "-")}, kelas ${esc(r.kelas || "-")}</small></span>
+       <span class="rw-date">${esc(rwFmtDate(r))}</span>
+     </button>`).join("");
+}
+async function loadRiwayat(){
+  const body = $("#rwBody");
+  body.innerHTML = `<div class="rw-msg">Memuat data survei…</div>`;
+  try{
+    if (!SUPABASE_KEY || SUPABASE_KEY.startsWith("ISI_")) throw new Error("Anon key Supabase belum diisi di surveypip.html.");
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABEL}?select=*&order=created_at.desc&limit=1000`, {
+      headers:{ "apikey":SUPABASE_KEY, "Authorization":"Bearer " + SUPABASE_KEY }
+    });
+    if (!res.ok) throw new Error("Gagal memuat data survei (kode " + res.status + ").");
+    rwData = await res.json();
+    if (rwCur) rwShowDetail(rwCur.id); else rwRenderList();
+  }catch(e){
+    body.innerHTML = `<div class="rw-msg bad">${esc(e.message)}</div><button type="button" class="btn ghost" style="display:block;margin:0 auto;max-width:200px" onclick="loadRiwayat()">Coba lagi</button>`;
+  }
+}
+function rwShowDetail(id){
+  const r = rwData.find(x => String(x.id) === String(id)); if (!r) return rwShowList();
+  rwCur = r;
+  const a = rwAnswers(r);
+  $("#rwTitle").textContent = r.nama_siswa || "Detail survei";
+  $("#rwTools").hidden = true; $("#rwFoot").hidden = false;
+  const meta = r.created_at ? `<div class="dmeta">Dikirim pada ${esc(new Date(r.created_at).toLocaleString("id-ID", { dateStyle:"long", timeStyle:"short" }))}</div>` : "";
+  const sections = SECTIONS.map(s => {
+    const rows = s.q.filter(f => f.id && (f.id in a)).map(f => {
+      const v = a[f.id];
+      let out;
+      if (f.t === "file") out = isUrl(v) ? `<a href="${esc(v)}" target="_blank" rel="noopener noreferrer">Buka berkas</a>` : "Belum ada berkas";
+      else if (f.t === "date") out = esc(fmtTanggal(v) || "-");
+      else if (Array.isArray(v)) out = esc(v.length ? v.join(", ") : "-");
+      else out = esc(v === "" || v == null ? "-" : v);
+      return `<div class="dl"><div class="dt">${esc(f.id)}. ${esc(f.q)}</div><div class="dd">${out}</div></div>`;
+    }).join("");
+    return rows ? `<div class="dsec">${esc(s.k)}. ${esc(s.title)}</div>${rows}` : "";
+  }).join("");
+  const body = $("#rwBody"); body.innerHTML = meta + sections; body.scrollTop = 0;
+}
+function openRiwayat(){
+  if (MODE_PUBLIK) return;
+  $("#riwayatModal").hidden = false; document.body.style.overflow = "hidden";
+  rwCur = null; $("#rwSearch").value = ""; rwShowList();
+  loadRiwayat();
+  $("#rwClose").focus();
+}
+function closeRiwayat(){
+  $("#riwayatModal").hidden = true; document.body.style.overflow = "";
+  $("#btnRiwayat").focus();
+}
+$("#btnRiwayat").onclick = openRiwayat;
+$("#rwClose").onclick = closeRiwayat;
+$("#riwayatModal").addEventListener("click", e => { if (e.target.id === "riwayatModal") closeRiwayat(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#riwayatModal").hidden) closeRiwayat(); });
+$("#rwSearch").addEventListener("input", rwRenderList);
+$("#rwBody").addEventListener("click", e => {
+  const row = e.target.closest(".rw-row"); if (row) rwShowDetail(row.dataset.id);
+});
+$("#rwToList").onclick = rwShowList;
+$("#rwPrint").onclick = () => { if (rwCur) printFormulir(rwAnswers(rwCur)); };
+
+go(0);
+
+/* =====================================================
+   SQL Supabase: lihat file surveypip.sql (tabel survey_pip + policy ALL).
+   Berkas & foto diunggah ke Google Drive saat tombol Kirim jawaban ditekan;
+   tautannya disimpan di kolom link_dokumen, link_foto_samping,
+   link_foto_belakang, link_foto_depan, link_foto_dalam.
+   ===================================================== */
+</script>
+</body>
+</html>
