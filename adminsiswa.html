@@ -567,27 +567,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Item 7: Sumbangan Pendidikan Komite Sekolah -->
-                <div class="accordion-item">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span><i class="fas fa-hand-holding-dollar" style="color: #06b6d4; margin-right: 10px; width: 20px; text-align: center;"></i> Sumbangan Pendidikan Komite Sekolah</span>
-                        <i class="fas fa-chevron-down accordion-icon"></i>
-                    </div>
-                    <div class="accordion-content">
-                        <div class="accordion-body">
-                            <div id="sumbanganLoadingInfo" class="sumbangan-info">
-                                <i class="fas fa-spinner fa-spin"></i> Memuat data tahun pelajaran...
-                            </div>
-
-                            <!-- Tab Navigasi Tahun Pelajaran (diisi otomatis sesuai jumlah tahun) -->
-                            <div class="tab-nav" id="sumbanganTabNav" style="display:none;"></div>
-
-                            <!-- Isi Tab per Tahun Pelajaran (diisi otomatis) -->
-                            <div id="sumbanganTabContent"></div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -671,7 +650,6 @@
                 loadKasusSiswa(session.nama_siswa);
                 loadPembinaanWali(session.nama_siswa);
                 loadPklSiswa(session.nama_siswa, session.nisn);
-                loadSumbanganKomite(session.nama_siswa, session.nisn);
             } else {
                 // Jika tidak ada sesi, redirect ke login
                 window.location.href = 'index.html';
@@ -1267,4 +1245,4 @@
         }
     </script>
 </body>
-</html>                           b 
+</html>                           b
