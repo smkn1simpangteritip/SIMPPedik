@@ -124,56 +124,11 @@
             }
         }
 
-        /* Accordion Styles */
-        .accordion {
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        .accordion-item {
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .accordion-item:last-child {
-            border-bottom: none;
-        }
-        .accordion-header {
-            background-color: #fff;
-            padding: 15px 20px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 600;
-            color: #333;
-            transition: background-color 0.2s;
-        }
-        .accordion-header:hover {
-            background-color: #f8fafc;
-        }
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-            background-color: #1e2330;
-        }
-        .accordion-body {
-            padding: 20px;
-            border-top: 1px solid #2d3548;
-            color: #cbd5e1;
-        }
-        .accordion-icon {
-            transition: transform 0.3s ease;
-            color: #9ca3af;
-        }
-        .accordion-item.active .accordion-icon {
-            transform: rotate(180deg);
-        }
-
-        /* Tab Styles (di dalam accordion PKL) */
+        /* Tab Styles (di dalam modal PKL / Sumbangan) */
         .tab-nav {
             display: flex;
             gap: 4px;
-            border-bottom: 2px solid #2d3548;
+            border-bottom: 2px solid #e5e7eb;
             margin-bottom: 15px;
             overflow-x: auto;
             scrollbar-width: none;
@@ -187,52 +142,49 @@
             cursor: pointer;
             font-weight: 600;
             font-size: 0.88rem;
-            color: #94a3b8;
+            color: #64748b;
             border-bottom: 3px solid transparent;
             margin-bottom: -2px;
+            white-space: nowrap;
             transition: all 0.2s;
         }
         .tab-btn:hover {
-            color: #e2e8f0;
-            background-color: #2d3548;
+            color: #1e293b;
+            background-color: #f1f5f9;
         }
         .tab-btn.active {
-            color: #06b6d4;
+            color: #0891b2;
             border-bottom-color: #06b6d4;
-            background-color: #0f2030;
+            background-color: #ecfeff;
         }
         .tab-btn.pkl-tab.active {
             color: #fff;
             background-color: var(--navbar-bg);
             border-bottom-color: #b91c1c;
         }
-        .tab-pane {
-            display: none;
-        }
-        .tab-pane.active {
-            display: block;
-        }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
 
         /* Table Styles */
-        .table-responsive { overflow-x: auto; margin-top: 10px; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .custom-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .custom-table th, .custom-table td { padding: 12px 15px; text-align: left; border: 1px solid #2d3548; }
-        .custom-table th { background-color: #E6F2DD; color: #1a1a1a; font-weight: 600; }
-        .custom-table td { color: #cbd5e1; }
-        .custom-table tr:hover td { background-color: #253047; }
+        .custom-table th, .custom-table td { padding: 12px 15px; text-align: left; border: 1px solid #e5e7eb; }
+        .custom-table th { background-color: #E6F2DD; color: #1a1a1a; font-weight: 600; white-space: nowrap; }
+        .custom-table td { color: #374151; }
+        .custom-table tr:hover td { background-color: #f8fafc; }
         .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; }
 
         /* Badge Status Pembayaran Sumbangan Komite */
         .badge-lunas-sk {
             display: inline-flex; align-items: center; gap: 4px;
-            background: rgba(16,185,129,0.15); color: #34d399;
+            background: rgba(16,185,129,0.15); color: #047857;
             padding: 3px 10px; border-radius: 10px;
             font-size: 0.78rem; font-weight: 600;
             white-space: nowrap;
         }
         .badge-belum-sk {
             display: inline-flex; align-items: center; gap: 4px;
-            background: rgba(245,158,11,0.15); color: #fbbf24;
+            background: rgba(245,158,11,0.15); color: #b45309;
             padding: 3px 10px; border-radius: 10px;
             font-size: 0.78rem; font-weight: 600;
             white-space: nowrap;
@@ -241,46 +193,420 @@
         /* Info & Summary Riwayat Sumbangan Komite */
         .sumbangan-info {
             font-size: 0.82rem;
-            color: #cbd5e1;
+            color: #475569;
             margin-bottom: 14px;
             padding: 8px 12px;
-            background: #0f2030;
+            background: #ecfeff;
             border-radius: 6px;
             border-left: 3px solid #06b6d4;
         }
-        .sumbangan-info strong { color: #e2e8f0; }
+        .sumbangan-info strong { color: #0f172a; }
         .sumbangan-summary {
             display: flex;
             justify-content: flex-end;
             gap: 18px;
             margin-top: 10px;
             font-size: 0.85rem;
-            color: #cbd5e1;
+            color: #475569;
             flex-wrap: wrap;
         }
-        .sumbangan-summary strong { color: #06b6d4; }
-        .sumbangan-summary strong.sisa-sumbangan { color: #ef4444; }
+        .sumbangan-summary strong { color: #0891b2; }
+        .sumbangan-summary strong.sisa-sumbangan { color: #dc2626; }
 
         /* Scroll horizontal tabel Sumbangan Komite di mode smartphone */
-        .sumbangan-table-wrap {
-            -webkit-overflow-scrolling: touch;
+        .sumbangan-table-wrap { -webkit-overflow-scrolling: touch; }
+        @media (max-width: 768px) {
+            .sumbangan-table { min-width: 480px; font-size: 0.78rem; }
+            .sumbangan-table th,
+            .sumbangan-table td { white-space: nowrap; padding: 8px 10px; }
+            .badge-lunas-sk,
+            .badge-belum-sk { font-size: 0.72rem; padding: 2px 8px; }
+        }
+
+        /* --- Menu Grid Styles --- */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 16px;
+            padding: 10px 0;
+        }
+
+        .menu-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            text-decoration: none;
+            gap: 8px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .icon-box {
+            width: 64px;
+            height: 64px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.6rem;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.25s ease;
+        }
+
+        .menu-card:hover .icon-box {
+            transform: translateY(-5px) scale(1.07);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+            filter: brightness(1.1);
+        }
+
+        /* Palet warna gradient per tombol */
+        .ic-blue     { background: linear-gradient(135deg, #2980b9, #6dd5fa); }
+        .ic-emerald  { background: linear-gradient(135deg, #0ba360, #3cba92); }
+        .ic-amber    { background: linear-gradient(135deg, #f7971e, #ffd200); }
+        .ic-orange   { background: linear-gradient(135deg, #f46b45, #eea849); }
+        .ic-purple   { background: linear-gradient(135deg, #8e2de2, #4a00e0); }
+        .ic-violet   { background: linear-gradient(135deg, #a18cd1, #fbc2eb); }
+        .ic-indigo   { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .ic-rose     { background: linear-gradient(135deg, #ff416c, #ff4b2b); }
+        .ic-cyan     { background: linear-gradient(135deg, #00b4db, #0083b0); }
+        .ic-teal     { background: linear-gradient(135deg, #11998e, #38ef7d); }
+        .ic-slate    { background: linear-gradient(135deg, #485563, #29323c); }
+        .ic-danger   { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+
+        .menu-card span {
+            font-size: 0.72rem;
+            color: #444;
+            text-align: center;
+            line-height: 1.3;
+            width: 84px;
+            word-wrap: break-word;
+            font-weight: 600;
+            height: 2.6em; /* Kunci: tinggi tetap 2 baris, semua label sejajar */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-card:hover span {
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand span {
+                font-size: 1rem;
+            }
+
+            .menu-grid {
+                grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+                gap: 12px;
+            }
+
+            .icon-box {
+                width: 52px;
+                height: 52px;
+                font-size: 1.3rem;
+                border-radius: 10px;
+            }
+
+            .menu-card span {
+                font-size: 0.65rem;
+                width: 68px;
+                height: 2.6em;
+            }
+        }
+
+
+        
+        /* --- Modal Catatan Perkembangan (gaya sama dengan modal Admin Guru) --- */
+        @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .menu-modal-overlay {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+        .menu-modal-overlay.active { display: flex; }
+        .menu-modal {
+            background: white;
+            width: 94%;
+            max-width: 980px;
+            max-height: 88vh;
+            max-height: 88dvh;
+            display: flex;
+            flex-direction: column;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s ease;
+            overflow: hidden;
+        }
+        .menu-modal-header {
+            flex: 0 0 auto;
+            padding: 18px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            color: white;
+        }
+        .menu-modal-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .menu-modal-close {
+            flex: none;
+            background: rgba(255,255,255,0.25);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .menu-modal-close:hover { background: rgba(255,255,255,0.4); }
+        .menu-modal-body {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding: 18px 20px 22px;
+            color: #333;
         }
         @media (max-width: 768px) {
-            .sumbangan-table {
-                min-width: 480px;
-                font-size: 0.78rem;
-            }
-            .sumbangan-table th,
-            .sumbangan-table td {
-                white-space: nowrap;
-                padding: 8px 10px;
-            }
-            .badge-lunas-sk,
-            .badge-belum-sk {
-                font-size: 0.72rem;
-                padding: 2px 8px;
-            }
+            .menu-modal { width: 96%; max-height: 90vh; max-height: 90dvh; border-radius: 14px; }
+            .menu-modal-header { padding: 14px 16px; }
+            .menu-modal-header h3 { font-size: 1rem; }
+            .menu-modal-body { padding: 14px 12px 18px; }
+            .custom-table { font-size: 0.82rem; }
+            .custom-table th, .custom-table td { padding: 9px 10px; }
+            .custom-table td { white-space: nowrap; }
+            .btn-logout { display: none; }
+            .menu-sheet-title span { padding: 0 40px; text-align: center; font-size: 0.98rem; line-height: 1.25; }
         }
+
+        /* --- Mobile: Sticky Footer Bar + Slide-up Menu --- */
+        .mobile-bottom-bar, .menu-sheet, .menu-sheet-backdrop { display: none; }
+
+        @media (max-width: 768px) {
+            .menu-dashboard-card { display: none; }
+
+            .main-content {
+                padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+            }
+
+            .mobile-bottom-bar {
+                display: flex;
+                position: fixed;
+                left: 0; right: 0; bottom: 0;
+                z-index: 1003;
+                gap: 10px;
+                padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+                background: #ffffff;
+                border-top: 1px solid #eee;
+                box-shadow: 0 -4px 16px rgba(0,0,0,0.08);
+            }
+            .mobile-bottom-bar .bar-btn {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                height: 46px;
+                border: none;
+                border-radius: 12px;
+                font-family: inherit;
+                font-size: 0.95rem;
+                font-weight: 700;
+                text-decoration: none;
+                cursor: pointer;
+                -webkit-tap-highlight-color: transparent;
+                transition: transform 0.15s ease, filter 0.15s ease;
+            }
+            .mobile-bottom-bar .bar-btn:active { transform: scale(0.97); }
+            /* Default: putih. Hover/tekan: Menu hijau, Logout merah */
+            .mobile-bottom-bar .bar-btn {
+                background: #ffffff;
+                color: #444;
+                border: 1.5px solid #e2e5ea;
+                transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+            }
+            .mobile-bottom-bar .bar-btn-menu:active,
+            .mobile-bottom-bar .bar-btn-menu:focus-visible {
+                background: #1A8754; border-color: #1A8754; color: #fff;
+            }
+            .mobile-bottom-bar .bar-btn-logout:active,
+            .mobile-bottom-bar .bar-btn-logout:focus-visible {
+                background: #dc2626; border-color: #dc2626; color: #fff;
+            }
+            @media (hover: hover) {
+                .mobile-bottom-bar .bar-btn-menu:hover {
+                    background: #1A8754; border-color: #1A8754; color: #fff;
+                }
+                .mobile-bottom-bar .bar-btn-logout:hover {
+                    background: #dc2626; border-color: #dc2626; color: #fff;
+                }
+            }
+
+            .menu-sheet-backdrop {
+                display: block;
+                position: fixed;
+                inset: 0;
+                z-index: 1600;
+                background: rgba(0,0,0,0.32);
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.35s ease, visibility 0s linear 0.35s;
+            }
+            .menu-sheet-backdrop.open {
+                opacity: 1;
+                visibility: visible;
+                transition: opacity 0.35s ease, visibility 0s;
+            }
+
+            .menu-sheet {
+                display: flex;
+                flex-direction: column;
+                position: fixed;
+                left: 0; right: 0; bottom: 0;
+                z-index: 1601;
+                max-height: 78vh;
+                font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                /* Gaya iOS: kaca buram (frosted glass) abu terang */
+                background: rgba(242, 242, 247, 0.78);
+                -webkit-backdrop-filter: saturate(180%) blur(28px);
+                backdrop-filter: saturate(180%) blur(28px);
+                border-radius: 26px 26px 0 0;
+                border-top: 0.5px solid rgba(255, 255, 255, 0.7);
+                box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.18);
+                transform: translateY(100%);
+                visibility: hidden;
+                transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1), visibility 0s linear 0.45s;
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+            }
+            .menu-sheet.open {
+                transform: translateY(0);
+                visibility: visible;
+                transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1), visibility 0s;
+            }
+            @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+                .menu-sheet { background: #f2f2f7; }
+            }
+            .menu-sheet.dragging { transition: none; }
+
+            .menu-sheet-head {
+                flex: 0 0 auto;
+                padding: 8px 16px 6px;
+                touch-action: none;
+            }
+            .menu-sheet-handle {
+                width: 36px; height: 5px;
+                border-radius: 3px;
+                background: rgba(60, 60, 67, 0.3);
+                margin: 0 auto 12px;
+            }
+            .menu-sheet-title {
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 30px;
+                font-size: 1.06rem;
+                font-weight: 600;
+                letter-spacing: -0.2px;
+                color: #1c1c1e;
+            }
+            .menu-sheet-close {
+                position: absolute;
+                right: 0; top: 50%;
+                transform: translateY(-50%);
+                width: 30px; height: 30px;
+                display: flex; align-items: center; justify-content: center;
+                border: none;
+                border-radius: 50%;
+                background: rgba(120, 120, 128, 0.16);
+                color: rgba(60, 60, 67, 0.6);
+                font-size: 1.2rem;
+                line-height: 1;
+                cursor: pointer;
+                -webkit-tap-highlight-color: transparent;
+            }
+            .menu-sheet-close:active { background: rgba(120, 120, 128, 0.3); }
+            .menu-sheet-body {
+                flex: 1 1 auto;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                padding: 8px 16px 22px;
+            }
+            .menu-sheet-body .menu-grid {
+                padding: 18px 10px 8px;
+                background: rgba(255, 255, 255, 0.72);
+                border-radius: 18px;
+            }
+            .menu-sheet-body .menu-card span { color: #1c1c1e; font-weight: 500; }
+            .menu-sheet-body .icon-box {
+                border-radius: 14px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            }
+            .menu-sheet-body .menu-card:active .icon-box { transform: scale(0.92); filter: brightness(0.92); }
+            /* Log Out sudah ada di footer sticky, jadi disembunyikan dari sheet */
+            .menu-sheet-body .logout-card { display: none; }
+        }
+    
+        /* --- Modal Kode Ujian --- */
+        .menu-modal.menu-modal-sm { max-width: 420px; }
+        .ujian-hint { color: #64748b; font-size: 0.9rem; margin-bottom: 14px; text-align: center; }
+        .kode-input {
+            width: 100%;
+            height: 54px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            text-align: center;
+            font-family: inherit;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: #1e293b;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .kode-input::placeholder { font-size: 0.9rem; font-weight: 600; letter-spacing: 0.08em; color: #aab3c0; }
+        .kode-input:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.2); }
+        .kode-input.err { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,0.12); }
+        .ujian-msg { display: none; margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.88rem; line-height: 1.4; background: #fef2f2; color: #b91c1c; border-left: 4px solid #dc2626; }
+        .ujian-msg.on { display: block; }
+        .ujian-msg.warn { background: #fffbeb; color: #92400e; border-left-color: #f59e0b; }
+        .ujian-info { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: #eef2ff; border-left: 4px solid #667eea; font-size: 0.9rem; color: #334155; }
+        .ujian-info h4 { margin: 0 0 6px; font-size: 1rem; color: #1e293b; }
+        .ujian-info div { margin-top: 3px; }
+        .btn-ujian {
+            width: 100%; height: 46px; margin-top: 14px; border: none; border-radius: 12px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-family: inherit; font-size: 0.95rem; font-weight: 700; color: #fff;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transition: transform 0.15s ease, filter 0.15s ease;
+        }
+        .btn-ujian:hover { filter: brightness(1.08); }
+        .btn-ujian:active { transform: scale(0.98); }
+        .btn-ujian:disabled { opacity: 0.6; cursor: wait; }
+        .btn-ujian.btn-mulai { background: linear-gradient(135deg, #0ba360, #3cba92); }
     </style>
 </head>
 <body>
@@ -291,7 +617,7 @@
             <img src="" alt="Logo Sekolah" style="display: none;">
             <span></span>
         </a>
-        <a href="#" class="btn-logout" id="logoutBtn">Logout</a>
+        <a href="#" class="btn-logout js-logout" id="logoutBtn">Logout</a>
     </nav>
 
     <!-- Main Content Area -->
@@ -324,19 +650,58 @@
             </div>
         </div>
 
-        <!-- Container Catatan Perkembangan Sekolah Ku -->
-        <div class="dashboard-card">
+        <!-- Container Menu Catatan Perkembangan (di smartphone, grid ini dipindah ke Slide-up Menu) -->
+        <div class="dashboard-card menu-dashboard-card" id="menuGridHome">
             <h2 style="margin-bottom: 20px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">Catatan Perkembangan Sekolah Ku</h2>
             
-            <div class="accordion">
-                <!-- Item 1: Riwayat Piket Umum -->
-                <div class="accordion-item">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span><i class="fas fa-broom" style="color: #f59e0b; margin-right: 10px; width: 20px; text-align: center;"></i> Riwayat Piket Umum</span>
-                        <i class="fas fa-chevron-down accordion-icon"></i>
-                    </div>
-                    <div class="accordion-content">
-                        <div class="accordion-body">
+            <div class="menu-grid">
+                <a href="#" class="menu-card" data-modal="modalUjian">
+                    <div class="icon-box ic-indigo"><i class="fas fa-file-pen"></i></div>
+                    <span>Ujian</span>
+                </a>
+                <a href="#" class="menu-card" data-modal="modalPiket">
+                    <div class="icon-box ic-amber"><i class="fas fa-broom"></i></div>
+                    <span>Riwayat Piket Umum</span>
+                </a>
+                <a href="#" class="menu-card" data-modal="modalKehadiran">
+                    <div class="icon-box ic-emerald"><i class="fas fa-calendar-check"></i></div>
+                    <span>Data Kehadiran</span>
+                </a>
+                <a href="#" class="menu-card" data-modal="modalNilai">
+                    <div class="icon-box ic-blue"><i class="fas fa-chart-line"></i></div>
+                    <span>Nilai Akademisku</span>
+                </a>
+                <a href="#" class="menu-card" data-modal="modalKasus">
+                    <div class="icon-box ic-rose"><i class="fas fa-exclamation-triangle"></i></div>
+                    <span>Kasus Pembelajaran</span>
+                </a>
+                <a href="#" class="menu-card" data-modal="modalPembinaan">
+                    <div class="icon-box ic-purple"><i class="fas fa-user-tie"></i></div>
+                    <span>Pembinaan Guru Wali</span>
+                </a>
+                <a href="#" class="menu-card" data-modal="modalPkl">
+                    <div class="icon-box ic-cyan"><i class="fas fa-briefcase"></i></div>
+                    <span>Praktik Kerja Lapangan</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="main-footer">
+            <p>&copy; 2024 SMK Negeri 1 Simpang Teritip. All rights reserved.</p>
+            <p>Dikembangkan oleh Tim IT Sekolah.</p>
+        </footer>
+    </main>
+
+
+    <!-- ===== Modal Catatan Perkembangan (satu modal per menu) ===== -->
+    <div id="modalPiket" class="menu-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalPiketTitle">
+        <div class="menu-modal">
+            <div class="menu-modal-header ic-amber">
+                <h3 id="modalPiketTitle"><i class="fas fa-broom"></i> Riwayat Piket Umum</h3>
+                <button type="button" class="menu-modal-close" data-close-modal aria-label="Tutup">&times;</button>
+            </div>
+            <div class="menu-modal-body">
                             <div class="table-responsive">
                                 <table class="custom-table" id="piketTable">
                                     <thead>
@@ -352,18 +717,18 @@
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
-                    </div>
-                </div>
+                        
+            </div>
+        </div>
+    </div>
 
-                <!-- Item 2: Data Kehadiran -->
-                <div class="accordion-item">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span><i class="fas fa-calendar-check" style="color: #10b981; margin-right: 10px; width: 20px; text-align: center;"></i> Data Kehadiran</span>
-                        <i class="fas fa-chevron-down accordion-icon"></i>
-                    </div>
-                    <div class="accordion-content">
-                        <div class="accordion-body">
+    <div id="modalKehadiran" class="menu-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalKehadiranTitle">
+        <div class="menu-modal">
+            <div class="menu-modal-header ic-emerald">
+                <h3 id="modalKehadiranTitle"><i class="fas fa-calendar-check"></i> Data Kehadiran</h3>
+                <button type="button" class="menu-modal-close" data-close-modal aria-label="Tutup">&times;</button>
+            </div>
+            <div class="menu-modal-body">
                             <div class="table-responsive">
                                 <table class="custom-table" id="absensiTable">
                                     <thead>
@@ -379,18 +744,18 @@
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
-                    </div>
-                </div>
+                        
+            </div>
+        </div>
+    </div>
 
-                <!-- Item 3: Nilai Akademisku -->
-                <div class="accordion-item">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span><i class="fas fa-chart-line" style="color: #3b82f6; margin-right: 10px; width: 20px; text-align: center;"></i> Nilai Akademisku</span>
-                        <i class="fas fa-chevron-down accordion-icon"></i>
-                    </div>
-                    <div class="accordion-content">
-                        <div class="accordion-body">
+    <div id="modalNilai" class="menu-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalNilaiTitle">
+        <div class="menu-modal">
+            <div class="menu-modal-header ic-blue">
+                <h3 id="modalNilaiTitle"><i class="fas fa-chart-line"></i> Nilai Akademisku</h3>
+                <button type="button" class="menu-modal-close" data-close-modal aria-label="Tutup">&times;</button>
+            </div>
+            <div class="menu-modal-body">
                             <div class="table-responsive">
                                 <table class="custom-table" id="nilaiTable">
                                     <thead>
@@ -417,18 +782,18 @@
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
-                    </div>
-                </div>
+                        
+            </div>
+        </div>
+    </div>
 
-                <!-- Item 4: Riwayat Kasus Pembelajaran -->
-                <div class="accordion-item">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span><i class="fas fa-exclamation-triangle" style="color: #ef4444; margin-right: 10px; width: 20px; text-align: center;"></i> Riwayat Kasus Pembelajaran</span>
-                        <i class="fas fa-chevron-down accordion-icon"></i>
-                    </div>
-                    <div class="accordion-content">
-                        <div class="accordion-body">
+    <div id="modalKasus" class="menu-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalKasusTitle">
+        <div class="menu-modal">
+            <div class="menu-modal-header ic-rose">
+                <h3 id="modalKasusTitle"><i class="fas fa-exclamation-triangle"></i> Riwayat Kasus Pembelajaran</h3>
+                <button type="button" class="menu-modal-close" data-close-modal aria-label="Tutup">&times;</button>
+            </div>
+            <div class="menu-modal-body">
                             <div class="table-responsive">
                                 <table class="custom-table" id="kasusTable">
                                     <thead>
@@ -445,18 +810,18 @@
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
-                    </div>
-                </div>
+                        
+            </div>
+        </div>
+    </div>
 
-                <!-- Item 5: Riwayat Pembinaan Guru Wali -->
-                <div class="accordion-item">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span><i class="fas fa-user-tie" style="color: #8b5cf6; margin-right: 10px; width: 20px; text-align: center;"></i> Riwayat Pembinaan Guru Wali</span>
-                        <i class="fas fa-chevron-down accordion-icon"></i>
-                    </div>
-                    <div class="accordion-content">
-                        <div class="accordion-body">
+    <div id="modalPembinaan" class="menu-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalPembinaanTitle">
+        <div class="menu-modal">
+            <div class="menu-modal-header ic-purple">
+                <h3 id="modalPembinaanTitle"><i class="fas fa-user-tie"></i> Riwayat Pembinaan Guru Wali</h3>
+                <button type="button" class="menu-modal-close" data-close-modal aria-label="Tutup">&times;</button>
+            </div>
+            <div class="menu-modal-body">
                             <div class="table-responsive">
                                 <table class="custom-table" id="pembinaanTable">
                                     <thead>
@@ -473,19 +838,18 @@
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
-                    </div>
-                </div>
+                        
+            </div>
+        </div>
+    </div>
 
-                <!-- Item 6: Praktik Kerja Lapangan (PKL) -->
-                <div class="accordion-item">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span><i class="fas fa-briefcase" style="color: #06b6d4; margin-right: 10px; width: 20px; text-align: center;"></i> Praktik Kerja Lapangan (PKL)</span>
-                        <i class="fas fa-chevron-down accordion-icon"></i>
-                    </div>
-                    <div class="accordion-content">
-                        <div class="accordion-body">
-
+    <div id="modalPkl" class="menu-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalPklTitle">
+        <div class="menu-modal">
+            <div class="menu-modal-header ic-cyan">
+                <h3 id="modalPklTitle"><i class="fas fa-briefcase"></i> Praktik Kerja Lapangan (PKL)</h3>
+                <button type="button" class="menu-modal-close" data-close-modal aria-label="Tutup">&times;</button>
+            </div>
+            <div class="menu-modal-body">
                             <!-- Tab Navigation -->
                             <div class="tab-nav">
                                 <button class="tab-btn pkl-tab active" onclick="switchPklTab(this, 'pklAbsensiTab')">
@@ -564,18 +928,27 @@
                                 </div>
                             </div>
 
-                        </div>
-                    </div>
-                </div>
+                        
             </div>
         </div>
+    </div>
 
-        <!-- Footer -->
-        <footer class="main-footer">
-            <p>&copy; 2024 SMK Negeri 1 Simpang Teritip. All rights reserved.</p>
-            <p>Dikembangkan oleh Tim IT Sekolah.</p>
-        </footer>
-    </main>
+    <!-- ===== Modal Masukkan Kode Ujian ===== -->
+    <div id="modalUjian" class="menu-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalUjianTitle">
+        <div class="menu-modal menu-modal-sm">
+            <div class="menu-modal-header ic-indigo">
+                <h3 id="modalUjianTitle"><i class="fas fa-file-pen"></i> Masukkan Kode Ujian</h3>
+                <button type="button" class="menu-modal-close" data-close-modal aria-label="Tutup">&times;</button>
+            </div>
+            <div class="menu-modal-body">
+                <p class="ujian-hint">Masukkan kode ujian yang diberikan oleh guru, lalu tekan Lanjutkan.</p>
+                <input type="text" id="inputKodeUjian" class="kode-input" maxlength="10" placeholder="KODE UJIAN"
+                       autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text" aria-label="Kode ujian">
+                <div id="ujianMsg" class="ujian-msg" role="alert" aria-live="polite"></div>
+                <button type="button" class="btn-ujian" id="btnCekKode"><i class="fas fa-arrow-right"></i> Lanjutkan</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // --- Supabase Integration for Navbar ---
@@ -643,7 +1016,7 @@
                 document.getElementById('profileAyah').textContent = session.nama_ayah || '-';
                 document.getElementById('profileIbu').textContent = session.nama_ibu || '-';
 
-                // Load Data Accordion
+                // Load Data untuk semua menu (ditampilkan di modal)
                 loadRiwayatPiket(session.nama_siswa);
                 loadAbsensiSiswa(session.nama_siswa);
                 loadNilaiSiswa(session.nama_siswa);
@@ -657,37 +1030,121 @@
         });
 
         // --- Logout Logic ---
-        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+        document.querySelectorAll('.js-logout').forEach(btn => btn.addEventListener('click', (e) => {
             e.preventDefault();
             if(confirm('Apakah Anda yakin ingin keluar?')) {
                 sessionStorage.removeItem('siswa_session');
                 window.location.href = 'index.html';
             }
+        }));
+
+        // --- Modal Menu Logic ---
+        // Klik kartu menu (di dashboard maupun di slide-up menu) membuka modal data yang sesuai.
+        function openMenuModal(id) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+            modal.classList.add('active');
+            const body = modal.querySelector('.menu-modal-body');
+            if (body) body.scrollTop = 0;
+            if (id === 'modalUjian') resetModalUjian();
+        }
+        function closeMenuModals() {
+            document.querySelectorAll('.menu-modal-overlay.active').forEach(m => m.classList.remove('active'));
+        }
+        document.addEventListener('click', (e) => {
+            const card = e.target.closest('[data-modal]');
+            if (card) { e.preventDefault(); openMenuModal(card.dataset.modal); return; }
+            if (e.target.closest('[data-close-modal]')) { closeMenuModals(); return; }
+            if (e.target.classList.contains('menu-modal-overlay')) closeMenuModals();
         });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenuModals(); });
 
-        // --- Accordion Logic ---
-        function toggleAccordion(header) {
-            const item = header.parentElement;
-            const content = item.querySelector('.accordion-content');
-            const isActive = item.classList.contains('active');
+        // --- Ujian: Masukkan Kode Ujian ---
+        // Halaman tempat siswa mengerjakan ujian. Kode dikirim lewat ?kode=XXXXXX
+        const HALAMAN_UJIAN = 'ujiansiswa.html';
+        let ujianTerpilih = null;
 
-            // Tutup semua accordion lain
-            document.querySelectorAll('.accordion-item').forEach(otherItem => {
-                if (otherItem !== item) {
-                    otherItem.classList.remove('active');
-                    otherItem.querySelector('.accordion-content').style.maxHeight = null;
+        function tglJamUjian(iso) {
+            const d = new Date(iso);
+            if (isNaN(d)) return '-';
+            return d.toLocaleString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\./g, ':') + ' WIB';
+        }
+        function escUjian(t) {
+            return String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+        function tampilPesanUjian(msg, warn) {
+            const el = document.getElementById('ujianMsg');
+            el.textContent = msg || '';
+            el.classList.toggle('on', !!msg);
+            el.classList.toggle('warn', !!warn);
+            document.getElementById('inputKodeUjian').classList.toggle('err', !!msg && !warn);
+        }
+        function resetModalUjian() {
+            ujianTerpilih = null;
+            const input = document.getElementById('inputKodeUjian');
+            input.value = '';
+            input.disabled = false;
+            tampilPesanUjian('');
+            document.getElementById('btnCekKode').style.display = 'flex';
+            document.getElementById('btnCekKode').disabled = false;
+            setTimeout(() => input.focus(), 60);
+        }
+
+        async function cekKodeUjian() {
+            const input = document.getElementById('inputKodeUjian');
+            const btn = document.getElementById('btnCekKode');
+            const kode = input.value.trim().toUpperCase();
+            input.value = kode;
+            ujianTerpilih = null;
+            if (!kode) { tampilPesanUjian('Kode ujian belum diisi.'); input.focus(); return; }
+            if (typeof supabaseClient === 'undefined' || !supabaseClient) { tampilPesanUjian('Koneksi ke server belum siap. Muat ulang halaman lalu coba lagi.'); return; }
+
+            tampilPesanUjian('');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memeriksa...';
+            try {
+                const { data, error } = await supabaseClient
+                    .from('ujian')
+                    .select('id,judul,mapel,kelas,durasi_menit,mulai,selesai,status,jumlah_soal,kode_ujian')
+                    .eq('kode_ujian', kode)
+                    .limit(1);
+                if (error) throw error;
+                const u = data && data[0];
+                if (!u) { tampilPesanUjian('Kode ujian tidak ditemukan. Periksa kembali kode dari gurumu.'); return; }
+                if (u.status !== 'terbit') { tampilPesanUjian('Ujian ini belum diaktifkan oleh guru.', true); return; }
+
+                // Cocokkan kelas hanya jika data kelas siswa tersedia di sesi login
+                const session = JSON.parse(sessionStorage.getItem('siswa_session') || 'null') || {};
+                const kelasSiswa = String(session.kelas || '').trim().toLowerCase();
+                const kelasUjian = (u.kelas || []).map(k => String(k).trim().toLowerCase());
+                if (kelasSiswa && kelasUjian.length && !kelasUjian.includes(kelasSiswa)) {
+                    tampilPesanUjian('Ujian ini tidak ditujukan untuk kelasmu.'); return;
                 }
-            });
 
-            // Toggle accordion yang diklik
-            if (isActive) {
-                item.classList.remove('active');
-                content.style.maxHeight = null;
-            } else {
-                item.classList.add('active');
-                content.style.maxHeight = content.scrollHeight + "px";
+                const sekarang = new Date();
+                if (u.mulai && sekarang < new Date(u.mulai)) { tampilPesanUjian('Ujian belum dibuka. Dibuka pada ' + tglJamUjian(u.mulai) + '.', true); return; }
+                if (u.selesai && sekarang > new Date(u.selesai)) { tampilPesanUjian('Ujian sudah ditutup pada ' + tglJamUjian(u.selesai) + '.'); return; }
+
+                ujianTerpilih = u;
+                input.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Membuka ujian...';
+                window.location.href = HALAMAN_UJIAN + '?kode=' + encodeURIComponent(u.kode_ujian);
+            } catch (err) {
+                console.error('Error cek kode ujian:', err);
+                tampilPesanUjian('Gagal memeriksa kode: ' + (err.message || 'terjadi kesalahan.'));
+            } finally {
+                if (!ujianTerpilih) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-arrow-right"></i> Lanjutkan';
+                }
             }
         }
+        document.getElementById('btnCekKode').addEventListener('click', cekKodeUjian);
+        document.getElementById('inputKodeUjian').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); cekKodeUjian(); } });
+        document.getElementById('inputKodeUjian').addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            tampilPesanUjian('');
+        });
 
         // --- Load Riwayat Piket ---
         async function loadRiwayatPiket(namaSiswa) {
@@ -915,20 +1372,13 @@
 
         // --- Tab Switch Logic (PKL) ---
         function switchPklTab(btn, paneId) {
-            const tabContainer = btn.closest('.accordion-body');
+            const tabContainer = btn.closest('.menu-modal-body');
 
             tabContainer.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             tabContainer.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
 
             btn.classList.add('active');
             tabContainer.querySelector('#' + paneId).classList.add('active');
-
-            // Sesuaikan ulang tinggi accordion karena konten tab berubah
-            const accItem = btn.closest('.accordion-item');
-            const accContent = accItem.querySelector('.accordion-content');
-            if (accItem.classList.contains('active')) {
-                accContent.style.maxHeight = accContent.scrollHeight + "px";
-            }
         }
 
         // --- Load Data PKL Siswa (3 Tab) ---
@@ -1228,21 +1678,107 @@
 
         // --- Tab Switch Logic (Sumbangan Komite) ---
         function switchSumbanganTab(btn, paneId) {
-            const tabContainer = btn.closest('.accordion-body');
+            const tabContainer = btn.closest('.menu-modal-body');
 
             tabContainer.querySelectorAll('.sk-tab').forEach(b => b.classList.remove('active'));
             tabContainer.querySelectorAll('#sumbanganTabContent .tab-pane').forEach(p => p.classList.remove('active'));
 
             btn.classList.add('active');
             tabContainer.querySelector('#' + paneId).classList.add('active');
-
-            // Sesuaikan ulang tinggi accordion karena konten tab berubah
-            const accItem = btn.closest('.accordion-item');
-            const accContent = accItem.querySelector('.accordion-content');
-            if (accItem.classList.contains('active')) {
-                accContent.style.maxHeight = accContent.scrollHeight + "px";
-            }
         }
     </script>
+    <!-- Footer Sticky (khusus smartphone) -->
+    <div class="mobile-bottom-bar">
+        <button type="button" class="bar-btn bar-btn-menu" id="btnOpenMenuSheet" aria-haspopup="dialog" aria-controls="menuSheet">
+            <i class="fas fa-th-large"></i> Menu
+        </button>
+        <a href="#" class="bar-btn bar-btn-logout js-logout" id="logoutBtnMobile">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+
+    <!-- Slide-up Menu (khusus smartphone) -->
+    <div class="menu-sheet-backdrop" id="menuSheetBackdrop"></div>
+    <div class="menu-sheet" id="menuSheet" role="dialog" aria-modal="true" aria-labelledby="menuSheetTitle" aria-hidden="true">
+        <div class="menu-sheet-head" id="menuSheetHead">
+            <div class="menu-sheet-handle"></div>
+            <div class="menu-sheet-title">
+                <span id="menuSheetTitle">Catatan Perkembangan Sekolah Ku</span>
+                <button type="button" class="menu-sheet-close" id="btnCloseMenuSheet" aria-label="Tutup menu">&times;</button>
+            </div>
+        </div>
+        <div class="menu-sheet-body" id="menuSheetBody"></div>
+    </div>
+
+    <script>
+        // Slide-up Menu: di layar <= 768px, grid menu asli dipindahkan ke dalam sheet
+        // (bukan disalin) sehingga semua event listener dan modal yang ada tetap berfungsi.
+        (function () {
+            const mq = window.matchMedia('(max-width: 768px)');
+            const grid = document.querySelector('.menu-grid');
+            const home = document.getElementById('menuGridHome');
+            const sheet = document.getElementById('menuSheet');
+            const sheetBody = document.getElementById('menuSheetBody');
+            const sheetHead = document.getElementById('menuSheetHead');
+            const backdrop = document.getElementById('menuSheetBackdrop');
+            const btnOpen = document.getElementById('btnOpenMenuSheet');
+            const btnClose = document.getElementById('btnCloseMenuSheet');
+            if (!grid || !home || !sheet) return;
+
+            function openSheet() {
+                sheet.style.transform = '';
+                sheet.classList.add('open');
+                backdrop.classList.add('open');
+                sheet.setAttribute('aria-hidden', 'false');
+            }
+            function closeSheet() {
+                sheet.style.transform = '';
+                sheet.classList.remove('open');
+                backdrop.classList.remove('open');
+                sheet.setAttribute('aria-hidden', 'true');
+            }
+            function placeGrid() {
+                if (mq.matches) {
+                    sheetBody.appendChild(grid);
+                } else {
+                    home.appendChild(grid);
+                    closeSheet();
+                }
+            }
+
+            btnOpen.addEventListener('click', openSheet);
+            btnClose.addEventListener('click', closeSheet);
+            backdrop.addEventListener('click', closeSheet);
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
+
+            // Tutup sheet setelah salah satu menu dipilih (modal data langsung terbuka)
+            sheetBody.addEventListener('click', (e) => {
+                if (e.target.closest('.menu-card')) closeSheet();
+            });
+
+            // Geser ke bawah pada bagian atas sheet untuk menutup
+            let startY = null, dy = 0;
+            sheetHead.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY; dy = 0;
+                sheet.classList.add('dragging');
+            }, { passive: true });
+            sheetHead.addEventListener('touchmove', (e) => {
+                if (startY === null) return;
+                dy = Math.max(0, e.touches[0].clientY - startY);
+                sheet.style.transform = 'translateY(' + dy + 'px)';
+            }, { passive: true });
+            sheetHead.addEventListener('touchend', () => {
+                if (startY === null) return;
+                sheet.classList.remove('dragging');
+                startY = null;
+                if (dy > 90) closeSheet(); else sheet.style.transform = '';
+            });
+
+            placeGrid();
+            if (mq.addEventListener) mq.addEventListener('change', placeGrid);
+            else mq.addListener(placeGrid);
+        })();
+    </script>
+
 </body>
 </html>                           b
