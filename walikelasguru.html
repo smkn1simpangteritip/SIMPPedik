@@ -387,6 +387,13 @@
             padding-bottom: 20px;
         }
         .accordion-icon { transition: transform 0.3s ease; }
+        .kk-tabs { display: flex; gap: 6px; border-bottom: 1px solid #374151; margin-bottom: 18px; flex-wrap: wrap; }
+        .kk-tab { background: none; border: none; border-bottom: 3px solid transparent; color: #9ca3af; padding: 10px 16px; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: color 0.2s, border-color 0.2s; margin-bottom: -1px; }
+        .kk-tab:hover { color: #e5e7eb; }
+        .kk-tab.active[data-tab="kasus"] { color: #ef4444; border-bottom-color: #ef4444; }
+        .kk-tab.active[data-tab="pembinaan"] { color: #a78bfa; border-bottom-color: #8b5cf6; }
+        .kk-panel { display: none; }
+        .kk-panel.active { display: block; }
         .accordion-item.active .accordion-icon { transform: rotate(180deg); }
 
         .btn-sm-export {
@@ -421,6 +428,25 @@
         .form-group input:focus { outline: none; border-color: var(--primary-color); }
         .form-group input[readonly] { background-color: #111827; cursor: not-allowed; }
 
+        #pembinaanWaliModal .form-group select,
+        #pembinaanWaliModal .form-group textarea { width: 100%; padding: 10px; background: #374151; border: 1px solid #4b5563; border-radius: 6px; font-size: 0.95rem; color: #fff; font-family: inherit; transition: border-color 0.3s; }
+        #pembinaanWaliModal .form-group textarea { min-height: 110px; resize: vertical; }
+        #pembinaanWaliModal .form-group select:focus,
+        #pembinaanWaliModal .form-group textarea:focus { outline: none; border-color: var(--primary-color); }
+        #pembinaanWaliModal .siswa-box { border: 1px solid #4b5563; border-radius: 6px; background: #111827; }
+        #pembinaanWaliModal .siswa-tools { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 8px 10px; border-bottom: 1px solid #374151; }
+        #pembinaanWaliModal .siswa-tools input[type="text"] { width: 55%; min-width: 140px; padding: 6px 8px; font-size: 0.85rem; }
+        #pembinaanWaliModal .siswa-list { max-height: 190px; overflow-y: auto; padding: 4px 0; }
+        #pembinaanWaliModal .siswa-item { display: flex; align-items: center; gap: 10px; padding: 6px 12px; margin: 0; cursor: pointer; font-size: 0.9rem; color: #e5e7eb; }
+        #pembinaanWaliModal .siswa-item:hover { background: #1f2937; }
+        #pembinaanWaliModal .siswa-item input[type="checkbox"],
+        #pembinaanWaliModal .siswa-tools input[type="checkbox"] { width: auto; padding: 0; accent-color: #8b5cf6; cursor: pointer; }
+        #pembinaanWaliModal .siswa-count { font-size: 0.8rem; color: #a78bfa; font-weight: 600; margin-top: 6px; }
+        #pembinaanWaliModal .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        #pembinaanWaliModal .foto-preview { display: none; margin-top: 10px; }
+        #pembinaanWaliModal .foto-preview.show { display: block; }
+        #pembinaanWaliModal .foto-preview img { max-width: 100%; max-height: 200px; border-radius: 6px; border: 1px solid #4b5563; }
+        @media (max-width: 520px) { #pembinaanWaliModal .form-row { grid-template-columns: 1fr; } }
         .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
         .statusBtn { padding: 6px 14px; border: 1px solid #4b5563; border-radius: 6px; background-color: #374151; color: #d1d5db; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s; }
         .statusBtn:hover { border-color: #9ca3af; }
@@ -833,6 +859,11 @@
                 </div>
                 
                 <div class="accordion-content">
+                    <div class="kk-tabs" id="kkTabs">
+                        <button type="button" class="kk-tab active" data-tab="kasus"><i class="fas fa-exclamation-triangle"></i> Kasus Kelas</button>
+                        <button type="button" class="kk-tab" data-tab="pembinaan"><i class="fas fa-user-tie"></i> Pembinaan Walikelas</button>
+                    </div>
+                    <div class="kk-panel active" id="panelKasus">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                          <div style="display: flex; gap: 10px;">
                             <button id="exportKasusPdfBtn" class="btn-export"><i class="fas fa-file-pdf"></i> Export PDF</button>
@@ -858,6 +889,39 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                    </div>
+
+                    <div class="kk-panel" id="panelPembinaanWalas">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button id="btnPembinaanWalikelas" class="btn-export" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);"><i class="fas fa-plus"></i> Pembinaan Walikelas</button>
+                                <button id="exportPembinaanWalasPdfBtn" class="btn-export"><i class="fas fa-file-pdf"></i> Export PDF</button>
+                            </div>
+                            <div>
+                                <input type="text" id="searchPembinaanWalasInput" placeholder="Cari Nama Siswa / Tempat..." style="padding: 8px; border: 1px solid #374151; border-radius: 4px; width: 250px; background-color: #111827; color: white;">
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="custom-table" id="pembinaanWalasTable">
+                                <thead>
+                                    <tr>
+                                        <th style="background-color: #8b5cf6; color: white;">No</th>
+                                        <th style="background-color: #8b5cf6; color: white;">ID Pembinaan</th>
+                                        <th style="background-color: #8b5cf6; color: white;">Tanggal</th>
+                                        <th style="background-color: #8b5cf6; color: white;">Tempat</th>
+                                        <th style="background-color: #8b5cf6; color: white;">Nama Siswa</th>
+                                        <th style="background-color: #8b5cf6; color: white;">Kelas</th>
+                                        <th style="background-color: #8b5cf6; color: white;">Deskripsi Pembinaan</th>
+                                        <th style="background-color: #8b5cf6; color: white;">Guru Wali</th>
+                                        <th style="background-color: #8b5cf6; color: white;">Photo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="9" style="text-align: center;">Memuat data pembinaan walikelas...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1135,7 +1199,62 @@
         </div>
     </div>
 
-    <script>
+        <div id="pembinaanWaliModal" class="modal">
+        <div class="modal-content" style="text-align: left;">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-tie" style="color: #8b5cf6; margin-right: 8px;"></i>Input Pembinaan Walikelas</h3>
+                <span class="close-modal" id="pembinaanWaliClose">&times;</span>
+            </div>
+            <form id="pembinaanWaliForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pwId">ID Pembinaan</label>
+                        <input type="text" id="pwId" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="pwTanggal">Tanggal</label>
+                        <input type="date" id="pwTanggal" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="pwTempat">Tempat</label>
+                    <input type="text" id="pwTempat" placeholder="Contoh: Ruang BK / Ruang Kelas" required>
+                </div>
+                <div class="form-group">
+                    <label for="pwKelas">Kelas</label>
+                    <input type="text" id="pwKelas" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Nama Siswa <span style="color:#9ca3af; font-weight:400;">(bisa pilih lebih dari satu)</span></label>
+                    <div class="siswa-box">
+                        <div class="siswa-tools">
+                            <input type="text" id="pwCariSiswa" placeholder="Cari nama siswa...">
+                            <label style="display:flex; align-items:center; gap:6px; margin:0; cursor:pointer; font-size:0.85rem;"><input type="checkbox" id="pwPilihSemua"> Pilih semua</label>
+                        </div>
+                        <div class="siswa-list" id="pwSiswaList">
+                            <div style="padding:10px 12px; color:#9ca3af;">Memuat siswa...</div>
+                        </div>
+                    </div>
+                    <div class="siswa-count" id="pwSiswaCount">0 siswa dipilih</div>
+                </div>
+                <div class="form-group">
+                    <label for="pwDeskripsi">Deskripsi Pembinaan</label>
+                    <textarea id="pwDeskripsi" placeholder="Tuliskan uraian pembinaan yang dilakukan..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="pwFoto">Photo Kegiatan</label>
+                    <input type="file" id="pwFoto" accept="image/*">
+                    <div class="foto-preview" id="pwFotoPreview"><img id="pwFotoImg" alt="Pratinjau foto kegiatan"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="pembinaanWaliBatal">Batal</button>
+                    <button type="submit" class="btn btn-primary" id="pembinaanWaliSimpan">Simpan Pembinaan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script>
         const supabaseUrl = 'https://mjvobqfcoutazqcovtlp.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdm9icWZjb3V0YXpxY292dGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzEwMzYsImV4cCI6MjA4NjE0NzAzNn0.jz6JaC9mMTMhLVhXSh1OCnFWDPZ0Cy2tUnHEmWxAR8o';
 
@@ -1211,6 +1330,7 @@
                         loadNilaiKelas(waliData.kelas);
                         loadKasusKelas(waliData.kelas);
                         loadPembinaanKelas(waliData.kelas);
+                        loadPembinaanWalas(waliData.kelas);
                         loadMapelOptions(waliData.kelas);
                         loadLedgerKelas(waliData.kelas);
 
@@ -1568,6 +1688,246 @@
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">Gagal memuat data: ${err.message}</td></tr>`;
             }
         }
+
+        // ---------- Tab Kasus Kelas / Pembinaan Walikelas ----------
+
+        document.getElementById('kkTabs').addEventListener('click', (e) => {
+
+            const tab = e.target.closest('.kk-tab');
+
+            if (!tab) return;
+
+            document.querySelectorAll('#kkTabs .kk-tab').forEach(t => t.classList.toggle('active', t === tab));
+
+            document.getElementById('panelKasus').classList.toggle('active', tab.dataset.tab === 'kasus');
+
+            document.getElementById('panelPembinaanWalas').classList.toggle('active', tab.dataset.tab === 'pembinaan');
+
+        });
+
+
+
+        // ---------- Data Pembinaan Walikelas (tabel pembinaanwalas) ----------
+
+        let dataPembinaanWalas = [];
+
+
+
+        function escPW(v) {
+
+            return String(v == null ? '' : v)
+
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+        }
+
+
+
+        async function loadPembinaanWalas(kelas) {
+
+            const tbody = document.querySelector('#pembinaanWalasTable tbody');
+
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Memuat data pembinaan walikelas...</td></tr>';
+
+            try {
+
+                const { data, error } = await supabaseClient
+
+                    .from('pembinaanwalas')
+
+                    .select('*')
+
+                    .eq('kelas', kelas)
+
+                    .order('tanggal', { ascending: false })
+
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+
+
+                dataPembinaanWalas = data || [];
+
+                tbody.innerHTML = '';
+
+                if (dataPembinaanWalas.length === 0) {
+
+                    tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Belum ada data pembinaan walikelas.</td></tr>';
+
+                    return;
+
+                }
+
+                dataPembinaanWalas.forEach((item, index) => {
+
+                    const adaLink = item.photo && /^https?:\/\//i.test(item.photo);
+
+                    const photoHtml = adaLink
+
+                        ? `<a href="${escPW(item.photo)}" target="_blank" rel="noopener" style="color: #3b82f6; text-decoration: none;"><i class="fas fa-image"></i> Lihat</a>`
+
+                        : '-';
+
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+
+                        <td style="text-align: center;">${index + 1}</td>
+
+                        <td>${escPW(item.id_pembinaan)}</td>
+
+                        <td>${escPW(item.tanggal || '-')}</td>
+
+                        <td>${escPW(item.tempat || '-')}</td>
+
+                        <td>${escPW(item.nama_siswa)}</td>
+
+                        <td>${escPW(item.kelas || '-')}</td>
+
+                        <td>${escPW(item.kasus || '-')}</td>
+
+                        <td>${escPW(item.guru_wali || '-')}</td>
+
+                        <td style="text-align: center;">${photoHtml}</td>
+
+                    `;
+
+                    tbody.appendChild(row);
+
+                });
+
+            } catch (err) {
+
+                console.error('Error loading pembinaan walikelas:', err);
+
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: red;">Gagal memuat data: ${escPW(err.message)}</td></tr>`;
+
+            }
+
+        }
+
+
+
+        document.getElementById('searchPembinaanWalasInput').addEventListener('input', function (e) {
+
+            const term = e.target.value.toLowerCase().trim();
+
+            document.querySelectorAll('#pembinaanWalasTable tbody tr').forEach(row => {
+
+                const cells = row.getElementsByTagName('td');
+
+                if (cells.length < 9) return;
+
+                const teks = (cells[3].textContent + ' ' + cells[4].textContent).toLowerCase();
+
+                row.style.display = teks.includes(term) ? '' : 'none';
+
+            });
+
+        });
+
+
+
+        document.getElementById('exportPembinaanWalasPdfBtn').addEventListener('click', async () => {
+
+            if (!dataPembinaanWalas.length) { alert('Belum ada data pembinaan walikelas untuk diexport.'); return; }
+
+            const { jsPDF } = window.jspdf;
+
+            const doc = new jsPDF({ orientation: 'landscape' });
+
+            const pageWidth = doc.internal.pageSize.getWidth();
+
+            let yPos = 20;
+
+
+
+            if (schoolData.kop_sekolah) {
+
+                try {
+
+                    const response = await fetch(schoolData.kop_sekolah);
+
+                    const blob = await response.blob();
+
+                    const base64data = await new Promise((resolve) => {
+
+                        const reader = new FileReader();
+
+                        reader.onloadend = () => resolve(reader.result);
+
+                        reader.readAsDataURL(blob);
+
+                    });
+
+                    const imgProps = doc.getImageProperties(base64data);
+
+                    const pdfWidth = pageWidth - 20;
+
+                    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                    doc.addImage(base64data, 'PNG', 10, 10, pdfWidth, imgHeight);
+
+                    yPos = 10 + imgHeight + 10;
+
+                } catch (err) {
+
+                    console.error('Gagal memuat KOP Sekolah:', err);
+
+                }
+
+            }
+
+
+
+            const kelas = document.getElementById('kelasTitle').textContent || 'Kelas';
+
+            doc.setFontSize(18);
+
+            doc.text(`Laporan Pembinaan Walikelas - Kelas ${kelas}`, pageWidth / 2, yPos, { align: 'center' });
+
+            yPos += 8;
+
+            const schoolName = schoolData.nama_sekolah || document.querySelector('.navbar-brand span').textContent || '';
+
+            doc.setFontSize(12);
+
+            doc.setTextColor(100);
+
+            doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
+
+            yPos += 10;
+
+
+
+            doc.autoTable({
+
+                head: [['No', 'ID Pembinaan', 'Tanggal', 'Tempat', 'Nama Siswa', 'Deskripsi Pembinaan', 'Guru Wali']],
+
+                body: dataPembinaanWalas.map((d, i) => [i + 1, d.id_pembinaan || '', d.tanggal || '', d.tempat || '', d.nama_siswa || '', d.kasus || '', d.guru_wali || '']),
+
+                startY: yPos,
+
+                theme: 'grid',
+
+                headStyles: { fillColor: [139, 92, 246] },
+
+                styles: { fontSize: 9, cellPadding: 3 },
+
+                columnStyles: { 0: { halign: 'center', cellWidth: 12 }, 5: { cellWidth: 80 } }
+
+            });
+
+
+
+            doc.save(`Laporan_Pembinaan_Walikelas_${kelas}.pdf`);
+
+        });
+
+
 
         async function loadPembinaanKelas(kelas) {
             const tbody = document.querySelector('#pembinaanTable tbody');
@@ -3842,6 +4202,234 @@
                 }
             });
         }
+    
+        // ---------- Pembinaan Walikelas (modal input) ----------
+        (function () {
+            const modalEl = document.getElementById('pembinaanWaliModal');
+            const formEl = document.getElementById('pembinaanWaliForm');
+            const btnOpen = document.getElementById('btnPembinaanWalikelas');
+            const listSiswa = document.getElementById('pwSiswaList');
+            const cariSiswa = document.getElementById('pwCariSiswa');
+            const pilihSemua = document.getElementById('pwPilihSemua');
+            const countSiswa = document.getElementById('pwSiswaCount');
+            const fotoInput = document.getElementById('pwFoto');
+            const fotoPreview = document.getElementById('pwFotoPreview');
+            const fotoImg = document.getElementById('pwFotoImg');
+            // URL Web App Google Apps Script (lihat petunjuk deploy), hasil "Deploy > Web app"
+            const GAS_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbzCYZmlffnmCPuNWR_lVF7TpiooVwS24m47TX67nSwchoed6sM5ON0PdPxp0XyhbPz3Rw/exec';
+
+            // Perkecil foto (maks 1600px, JPEG) agar upload cepat dan hemat ruang Drive
+            function perkecilGambar(file, maks = 1600, kualitas = 0.85) {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    const url = URL.createObjectURL(file);
+                    img.onload = () => {
+                        let { width: w, height: h } = img;
+                        const skala = Math.min(1, maks / Math.max(w, h));
+                        w = Math.round(w * skala); h = Math.round(h * skala);
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w; canvas.height = h;
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        URL.revokeObjectURL(url);
+                        resolve(canvas.toDataURL('image/jpeg', kualitas));
+                    };
+                    img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+                    img.src = url;
+                });
+            }
+
+            function bacaSebagaiDataUrl(file) {
+                return new Promise((resolve, reject) => {
+                    const r = new FileReader();
+                    r.onload = () => resolve(r.result);
+                    r.onerror = () => reject(new Error('Gagal membaca file foto.'));
+                    r.readAsDataURL(file);
+                });
+            }
+
+            async function uploadFotoKeDrive(file, namaDasar) {
+                if (!GAS_UPLOAD_URL || GAS_UPLOAD_URL.startsWith('GANTI_')) {
+                    throw new Error('URL Google Apps Script belum diisi (GAS_UPLOAD_URL).');
+                }
+                let dataUrl = await perkecilGambar(file);
+                let mimeType = 'image/jpeg';
+                let ext = 'jpg';
+                if (!dataUrl) {
+                    dataUrl = await bacaSebagaiDataUrl(file);
+                    mimeType = file.type || 'image/jpeg';
+                    ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+                }
+                const res = await fetch(GAS_UPLOAD_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        filename: namaDasar + '.' + ext,
+                        mimeType: mimeType,
+                        data: dataUrl.split(',')[1]
+                    })
+                });
+                const hasil = await res.json();
+                if (!hasil.ok) throw new Error(hasil.error || 'Upload ke Google Drive gagal.');
+                return hasil.url;
+            }
+            let daftarSiswa = [];
+            let fotoUrl = null;
+
+            function tutup() { modalEl.classList.remove('active'); }
+
+            function buatId() {
+                const d = new Date();
+                const p = n => String(n).padStart(2, '0');
+                const acak = Math.random().toString(36).slice(2, 6).toUpperCase();
+                return 'PBW-' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-' + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds()) + '-' + acak;
+            }
+
+            function hariIni() {
+                const t = new Date();
+                return new Date(t.getTime() - t.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+            }
+
+            async function muatSiswa(kelas) {
+                listSiswa.innerHTML = '<div style="padding:10px 12px; color:#9ca3af;">Memuat siswa...</div>';
+                try {
+                    const { data, error } = await absensiClient
+                        .from('mappingsiswa')
+                        .select('nama_siswa, nisn')
+                        .eq('kelas', kelas)
+                        .order('nama_siswa', { ascending: true });
+                    if (error) throw error;
+                    daftarSiswa = data || [];
+                    listSiswa.innerHTML = '';
+                    if (daftarSiswa.length === 0) {
+                        listSiswa.innerHTML = '<div style="padding:10px 12px; color:#9ca3af;">Tidak ada siswa di kelas ini.</div>';
+                    }
+                    daftarSiswa.forEach(s => {
+                        const lbl = document.createElement('label');
+                        lbl.className = 'siswa-item';
+                        const cb = document.createElement('input');
+                        cb.type = 'checkbox';
+                        cb.value = s.nama_siswa;
+                        const span = document.createElement('span');
+                        span.textContent = s.nama_siswa;
+                        lbl.appendChild(cb);
+                        lbl.appendChild(span);
+                        listSiswa.appendChild(lbl);
+                    });
+                    perbaruiJumlah();
+                } catch (err) {
+                    console.error('Error memuat siswa:', err);
+                    listSiswa.innerHTML = '<div style="padding:10px 12px; color:#ef4444;">Gagal memuat siswa</div>';
+                }
+            }
+
+            function itemTampak() {
+                return Array.from(listSiswa.querySelectorAll('.siswa-item')).filter(el => el.style.display !== 'none');
+            }
+
+            function perbaruiJumlah() {
+                const n = listSiswa.querySelectorAll('input[type="checkbox"]:checked').length;
+                countSiswa.textContent = n + ' siswa dipilih';
+                const tampak = itemTampak().map(el => el.querySelector('input'));
+                pilihSemua.checked = tampak.length > 0 && tampak.every(cb => cb.checked);
+            }
+
+            listSiswa.addEventListener('change', perbaruiJumlah);
+            pilihSemua.addEventListener('change', () => {
+                itemTampak().forEach(el => { el.querySelector('input').checked = pilihSemua.checked; });
+                perbaruiJumlah();
+            });
+            cariSiswa.addEventListener('input', () => {
+                const k = cariSiswa.value.toLowerCase().trim();
+                listSiswa.querySelectorAll('.siswa-item').forEach(el => {
+                    el.style.display = el.textContent.toLowerCase().includes(k) ? '' : 'none';
+                });
+                perbaruiJumlah();
+            });
+
+            btnOpen.addEventListener('click', async () => {
+                const kelas = (document.getElementById('bioKelas').textContent || '').trim();
+                if (!kelas || kelas === '-') {
+                    alert('Data kelas belum dimuat.');
+                    return;
+                }
+                formEl.reset();
+                cariSiswa.value = '';
+                fotoPreview.classList.remove('show');
+                fotoImg.removeAttribute('src');
+                document.getElementById('pwId').value = buatId();
+                document.getElementById('pwTanggal').value = hariIni();
+                document.getElementById('pwKelas').value = kelas;
+                modalEl.classList.add('active');
+                await muatSiswa(kelas);
+            });
+
+            document.getElementById('pembinaanWaliClose').addEventListener('click', tutup);
+            document.getElementById('pembinaanWaliBatal').addEventListener('click', tutup);
+
+            fotoInput.addEventListener('change', () => {
+                if (fotoUrl) { URL.revokeObjectURL(fotoUrl); fotoUrl = null; }
+                const f = fotoInput.files && fotoInput.files[0];
+                if (!f) { fotoPreview.classList.remove('show'); return; }
+                fotoUrl = URL.createObjectURL(f);
+                fotoImg.src = fotoUrl;
+                fotoPreview.classList.add('show');
+            });
+
+            formEl.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('pembinaanWaliSimpan');
+                const teksAsli = btn.textContent;
+                const session = JSON.parse(sessionStorage.getItem('guru_session') || 'null');
+                const kelas = document.getElementById('pwKelas').value;
+                const terpilih = Array.from(listSiswa.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+                if (terpilih.length === 0) { alert('Pilih minimal satu siswa.'); return; }
+
+                btn.disabled = true;
+                btn.textContent = 'Menyimpan...';
+                try {
+                    const id = document.getElementById('pwId').value;
+                    let photoPublik = null;
+                    const file = fotoInput.files && fotoInput.files[0];
+                    if (file) {
+                        btn.textContent = 'Mengunggah foto...';
+                        photoPublik = await uploadFotoKeDrive(file, id);
+                        btn.textContent = 'Menyimpan...';
+                    }
+
+                    const tanggal = document.getElementById('pwTanggal').value;
+                    const tempat = document.getElementById('pwTempat').value.trim();
+                    const deskripsi = document.getElementById('pwDeskripsi').value.trim();
+                    const baris = terpilih.map((nama, i) => {
+                        const siswa = daftarSiswa.find(s => s.nama_siswa === nama);
+                        return {
+                            id_pembinaan: terpilih.length > 1 ? id + '-' + String(i + 1).padStart(2, '0') : id,
+                            tanggal: tanggal,
+                            tempat: tempat,
+                            nama_siswa: nama,
+                            nisn: siswa ? siswa.nisn : null,
+                            kelas: kelas,
+                            kasus: deskripsi,
+                            guru_wali: session ? session.nama : null,
+                            photo: photoPublik
+                        };
+                    });
+
+                    const { error } = await supabaseClient
+                        .from('pembinaanwalas')
+                        .insert(baris);
+                    if (error) throw error;
+
+                    alert('Data pembinaan untuk ' + terpilih.length + ' siswa berhasil disimpan.');
+                    tutup();
+                    loadPembinaanWalas(kelas);
+                } catch (err) {
+                    console.error('Error simpan pembinaan:', err);
+                    alert('Gagal menyimpan: ' + err.message);
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = teksAsli;
+                }
+            });
+        })();
     </script>
 </body>
 </html>
