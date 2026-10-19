@@ -157,6 +157,8 @@
         .kelas-tab .tab-badge.done { background: #d1fae5; color: #047857; }
         .kelas-tab.active .tab-badge { background: rgba(255,255,255,0.9); }
         tr.status-belum td { background-color: #fef2f2; }
+        tr.status-tersimpan td { background-color: #f0fdf4; }
+        .badge-tersimpan { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 10px; background: #d1fae5; color: #047857; font-size: 0.72rem; font-weight: 600; }
         .jurnal-hint { font-size: 0.85rem; color: #777; margin-bottom: 10px; }
         .btn-danger { background-color: #ef4444; }
         .btn-warning { background-color: #f59e0b; }
@@ -1326,13 +1328,28 @@
                         return;
                     }
 
+                    // Ambil jurnal yang sudah diinput hari ini (agar statusnya ditampilkan)
+                    const tanggalHariIni = now.toISOString().split('T')[0];
+                    const { data: sudahInput, error: errSudah } = await supabaseClient
+                        .from('jurnalpiket')
+                        .select('id_piket, id_petugas, status')
+                        .eq('tanggal', tanggalHariIni);
+                    if (errSudah) throw errSudah;
+                    const jurnalMap = {};
+                    (sudahInput || []).forEach(j => { jurnalMap[j.id_petugas] = j; });
+
                     data.forEach((item, index) => {
                         const row = document.createElement('tr');
                         row.dataset.kelas = item.kelas || '-';
                         // Generate ID Jurnal Unik: JRN-[YYYYMMDD]-[NISN]
                         const dateCode = now.toISOString().slice(0,10).replace(/-/g, '');
                         const random3 = Math.floor(100 + Math.random() * 900);
-                        const journalId = `JRN-${dateCode}-${item.nisn || index}.${random3}`;
+                        const saved = jurnalMap[item.id_piket];
+                        const journalId = saved ? saved.id_piket : `JRN-${dateCode}-${item.nisn || index}.${random3}`;
+                        if (saved) {
+                            row.dataset.saved = '1';
+                            row.classList.add('status-tersimpan');
+                        }
                         
                         row.innerHTML = `
                             <td><input type="text" name="id_piket[]" value="${journalId}" readonly style="width:100%; border:none; background:transparent; font-size:0.9rem;"></td>
@@ -1343,12 +1360,13 @@
                             <td>${item.area} <input type="hidden" name="area[]" value="${item.area}"></td>
                             <td>
                                 <div style="display:flex; gap:15px;">
-                                    <label style="font-weight:normal; cursor:pointer; display:flex; align-items:center; gap:5px;"><input type="radio" name="status_${index}" value="Ya"> Ya</label>
-                                    <label style="font-weight:normal; cursor:pointer; display:flex; align-items:center; gap:5px;"><input type="radio" name="status_${index}" value="Tidak"> Tidak</label>
+                                    <label style="font-weight:normal; cursor:pointer; display:flex; align-items:center; gap:5px;"><input type="radio" name="status_${index}" value="Ya" ${saved && saved.status === 'Ya' ? 'checked' : ''} ${saved ? 'disabled' : ''}> Ya</label>
+                                    <label style="font-weight:normal; cursor:pointer; display:flex; align-items:center; gap:5px;"><input type="radio" name="status_${index}" value="Tidak" ${saved && saved.status === 'Tidak' ? 'checked' : ''} ${saved ? 'disabled' : ''}> Tidak</label>
+                                    ${saved ? '<span class="badge-tersimpan"><i class="fas fa-check"></i> Tersimpan</span>' : ''}
                                 </div>
                             </td>
                             <td>
-                                <button type="button" class="btn btn-danger" style="padding:4px 8px; font-size:0.8rem;" onclick="removeJurnalRow(this)"><i class="fas fa-trash"></i></button>
+                                <button type="button" class="btn btn-danger" onclick="removeJurnalRow(this)" ${saved ? 'disabled style="padding:4px 8px; font-size:0.8rem; opacity:0.4; cursor:not-allowed;"' : 'style="padding:4px 8px; font-size:0.8rem;"'}><i class="fas fa-trash"></i></button>
                             </td>
                         `;
                         row.addEventListener('change', (e) => {
@@ -1384,7 +1402,7 @@
 
             if (activeKelasTab !== 'Semua' && !kelasList.includes(activeKelasTab)) activeKelasTab = 'Semua';
 
-            const belumCount = (list) => list.filter(r => !r.querySelector('input[type="radio"]:checked')).length;
+            const belumCount = (list) => list.filter(r => !r.dataset.saved && !r.querySelector('input[type="radio"]:checked')).length;
 
             const tabs = ['Semua', ...kelasList];
             jurnalKelasTabs.innerHTML = '';
@@ -1438,7 +1456,12 @@
                     const rows = getJurnalRows();
 
                     // Validasi: semua siswa wajib dipilih Ya / Tidak
-                    const belumDiisi = rows.filter(r => !r.querySelector('input[type="radio"]:checked'));
+                    const rowsBaru = rows.filter(r => !r.dataset.saved);
+                    if (rowsBaru.length === 0) {
+                        alert('Semua petugas piket hari ini sudah diinput.');
+                        return;
+                    }
+                    const belumDiisi = rowsBaru.filter(r => !r.querySelector('input[type="radio"]:checked'));
                     rows.forEach(r => r.classList.remove('status-belum'));
                     if (belumDiisi.length > 0) {
                         belumDiisi.forEach(r => r.classList.add('status-belum'));
@@ -1454,7 +1477,7 @@
                     const now = new Date();
                     const tanggal = now.toISOString().split('T')[0]; // YYYY-MM-DD
 
-                    rows.forEach((row, index) => {
+                    rowsBaru.forEach((row, index) => {
                         const idPiket = row.querySelector('input[name="id_piket[]"]').value;
                         const idPetugas = row.querySelector('input[name="id_petugas[]"]').value;
                         const namaSiswa = row.querySelector('input[name="nama_siswa[]"]').value;
