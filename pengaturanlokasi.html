@@ -273,7 +273,7 @@ function doPost(e) {
 <span class="dock-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5L12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg></span>
 </a>
 </nav>
-<footer>Pengaturan tersimpan di peramban perangkat ini (kunci <code>pkks_loc</code>).</footer>
+<footer>Pengaturan tersimpan di database Supabase (tabel <code>lokasisimpan</code>) dan disalin ke peramban ini.</footer>
 <div id="toast" role="status"></div>
 
 <script>
@@ -284,7 +284,7 @@ const ICON={
  wt:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9"/></svg>'
 };
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2600)};
+const toast=(t,ms)=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),ms||2600)};
 const iF=$('#iF'),iS=$('#iS'),iT=$('#iT');
 
 function folderId(v){
@@ -294,6 +294,20 @@ function folderId(v){
  return /^[\w-]{20,}$/.test(v)?v:'';
 }
 const scriptOk=v=>/^https:\/\/script\.google\.com\/.+\/exec\/?$/.test((v||'').trim());
+
+
+// ===== Database Supabase: tabel lokasisimpan (satu baris, id = 1) =====
+const SB='https://jnbhjmmmyqbcxaojbdlb.supabase.co/rest/v1/lokasisimpan',SBK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpuYmhqbW1teXFiY3hhb2piZGxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNDcwMzMsImV4cCI6MjEwNzcyMzAzM30.KP1-LCQJ9MJlxFbQlqLfAtqLiv3uybRdbJ2AVLb9phw';
+const sbh=x=>Object.assign({apikey:SBK,Authorization:'Bearer '+SBK},x||{});
+const dbMsg=e=>e instanceof TypeError?'tidak dapat menghubungi Supabase.':e.message;
+async function sbErr(r){
+ let d=null;try{d=await r.json()}catch(e){}
+ const m=(d&&(d.message||d.hint))||('HTTP '+r.status);
+ return /does not exist|relation|PGRST205|schema cache/i.test(m)?'Tabel lokasisimpan belum dibuat di Supabase. Jalankan file supabase_lokasisimpan.sql.':/row-level security|permission denied|42501/i.test(m)?'Akses ditolak (RLS). Jalankan ulang bagian kebijakan pada file SQL.':m;
+}
+async function dbLoad(){const r=await fetch(SB+'?id=eq.1&select=*',{headers:sbh()});if(!r.ok)throw new Error(await sbErr(r));const d=await r.json();return d[0]||null}
+async function dbSave(o){const r=await fetch(SB+'?on_conflict=id',{method:'POST',headers:sbh({'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify({id:1,link_folder:o.folderLink,id_folder:o.folderId,url_script:o.scriptUrl,token:o.token||null,updated_at:new Date().toISOString()})});if(!r.ok)throw new Error(await sbErr(r))}
+async function dbDel(){const r=await fetch(SB+'?id=eq.1',{method:'DELETE',headers:sbh()});if(!r.ok)throw new Error(await sbErr(r))}
 
 function load(){try{return JSON.parse(localStorage.getItem(K)||'null')}catch(e){return null}}
 function store(o){try{localStorage.setItem(K,JSON.stringify(o));return true}catch(e){return false}}
@@ -333,10 +347,15 @@ function valid(){
 iF.addEventListener('input',()=>{checkF();hideRes()});
 iS.addEventListener('input',()=>{checkS();hideRes()});
 $('#eye').onclick=()=>{const s=iT.type==='password';iT.type=s?'text':'password';$('#eye').textContent=s?'Sembunyikan':'Tampilkan'};
-$('#bSave').onclick=()=>{
+
+$('#bSave').onclick=async()=>{
  if(!valid())return;
  const o={folderLink:iF.value.trim(),folderId:folderId(iF.value),scriptUrl:iS.value.trim().replace(/\/$/,''),token:iT.value,savedAt:Date.now()};
- if(store(o)){badge(true);toast('Pengaturan disimpan.')}else toast('Gagal menyimpan. Penyimpanan peramban penuh atau diblokir.');
+ const b=$('#bSave'),lb=b.querySelector('span');b.disabled=true;lb.textContent='Menyimpan…';
+ const local=store(o);
+ try{await dbSave(o);badge(true);toast('Pengaturan disimpan ke database.')}
+ catch(e){badge(local);toast((local?'Tersimpan di perangkat ini, tetapi gagal ke database: ':'Gagal menyimpan: ')+dbMsg(e),5000)}
+ finally{b.disabled=false;lb.textContent='Simpan pengaturan'}
 };
 
 $('#bTest').onclick=async()=>{
@@ -360,10 +379,11 @@ $('#bTest').onclick=async()=>{
  }finally{clearTimeout(tm);b.disabled=false;lb.textContent='Uji koneksi'}
 };
 
-$('#bReset').onclick=()=>{
- if(!confirm('Hapus pengaturan lokasi simpan dari perangkat ini?'))return;
+$('#bReset').onclick=async()=>{
+ if(!confirm('Hapus pengaturan lokasi simpan dari perangkat ini dan dari database?'))return;
  try{localStorage.removeItem(K)}catch(e){}
- iF.value=iS.value=iT.value='';checkF();checkS();hideRes();badge(false);toast('Pengaturan dihapus.');
+ iF.value=iS.value=iT.value='';checkF();checkS();hideRes();badge(false);
+ try{await dbDel();toast('Pengaturan dihapus.')}catch(e){toast('Dihapus dari perangkat ini, tetapi gagal dari database: '+dbMsg(e),5000)}
 };
 $('#bOpen').addEventListener('click',e=>{if(e.currentTarget.getAttribute('aria-disabled')==='true')e.preventDefault()});
 
@@ -376,10 +396,17 @@ $('#bCopy').onclick=async()=>{
  toast('Kode disalin.');
 };
 
+function fill(s){iF.value=s.folderLink||'';iS.value=s.scriptUrl||'';iT.value=s.token||'';badge(true);checkF();checkS()}
 const s0=load();
-if(s0){iF.value=s0.folderLink||'';iS.value=s0.scriptUrl||'';iT.value=s0.token||'';badge(true)}
+if(s0){fill(s0)}
 else{iF.value='https://drive.google.com/drive/folders/1mI78gt8xf027FwAy3LjO_fAzaliJ2fHg?usp=sharing';iS.value='https://script.google.com/macros/s/AKfycbxTSUk3yw4JhNoX9Uq4dIkI0VwpdJvPijPBbNgAjD6S-Z7FsCBe4zohRSH-Tt9NOjLR/exec'}
 checkF();checkS();
+// ambil pengaturan terbaru dari database (dipakai semua perangkat)
+dbLoad().then(r=>{
+ if(!r)return;
+ const o={folderLink:r.link_folder||'',folderId:r.id_folder||'',scriptUrl:r.url_script||'',token:r.token||'',savedAt:Date.parse(r.updated_at)||Date.now()};
+ store(o);fill(o);
+}).catch(e=>toast('Belum dapat membaca database: '+dbMsg(e),5000));
 </script>
 </body>
 </html>
