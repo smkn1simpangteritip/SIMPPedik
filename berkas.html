@@ -281,6 +281,11 @@ li .sy.wt{background:var(--prt);color:var(--pr);animation:syb 1s ease-in-out inf
 .orph li{flex-wrap:wrap}
 .orph .oas{flex:1 1 170px;max-width:260px}
 .orph li .btn{flex:none;height:34px;padding:0 12px}
+/* dropdown status & menu unggah selalu tampil di atas item lain */
+.slot:has(.ddb[aria-expanded=true]),.slot:has(.upb[aria-expanded=true]){z-index:60}
+.slot:has(.ddm:not([hidden])),.slot:has(.upm:not([hidden])){z-index:60}
+.ddm,.upm{z-index:70}
+.ib.rmb{color:var(--er)}.ib.rmb:hover,.ib.rmb:focus-visible{background:var(--ert);border-color:color-mix(in srgb,var(--er) 35%,transparent)}
 </style>
 </head>
 <body>
@@ -318,28 +323,29 @@ const T=[
 const UP=`<div class="up"><button type="button" class="btn upb" aria-haspopup="true" aria-expanded="false">+ Unggah <svg class="chv" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5-5 5 5"/></svg></button><div class="upm" hidden><button type="button" class="ib v big" data-u="file" data-tip="Pilih berkas" aria-label="Pilih berkas PDF dari perangkat">%PDF%</button><button type="button" class="ib d big" data-u="cam" data-tip="Kamera" aria-label="Ambil foto dengan kamera">%CAM%</button></div><input type="file" multiple hidden data-f="file"><input type="file" accept="image/*" capture="environment" hidden data-f="cam"></div>`
 .replace('%PDF%','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h8l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M14 2v5h5"/><text x="11.5" y="18" font-size="6.2" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle" font-family="system-ui,sans-serif">PDF</text></svg>').replace('%CAM%','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.8"/></svg>');
 const MAX=25*1024*1024,$=s=>document.querySelector(s);
-let F={},M={},cur=0;
-try{M=JSON.parse(localStorage.getItem('pkks_meta2')||'{}')}catch(e){}
-M.c=M.c||{};M.s=M.s||{};M.mp=M.mp||{};M.id=M.id||1;
-const saveM=()=>{try{localStorage.setItem('pkks_meta2',JSON.stringify(M))}catch(e){}};
+let F={},M={c:{},s:{},mp:{}},cur=0;
+// M.c (item tambahan) & M.s (status Ada/Tidak Ada) = data BERSAMA, disimpan di Supabase (berkas_item, berkas_status).
+// M.mp (mata pelajaran yang sedang dipilih untuk unggah) hanya pilihan lokal per perangkat.
+try{const o=JSON.parse(localStorage.getItem('pkks_mp')||'{}')||{};M.mp=o.mp||{};['kepsek','nip','sekolah'].forEach(k=>{if(o[k]!=null)M[k]=o[k]})}catch(e){}
+const saveM=()=>{try{localStorage.setItem('pkks_mp',JSON.stringify({mp:M.mp,kepsek:M.kepsek,nip:M.nip,sekolah:M.sekolah}))}catch(e){}};
 const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2600)};
 const sz=b=>b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(1)+' MB';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // slot list per tab: [{k,label,custom}]
 const MPL=['Prota dan Promes Mata Pelajaran','TP dan ATP Mata Pelajaran','Modul Pembelajaran','Buku Nilai','Ulangan Harian','Penilaian Jurnal','Penilaian Pengamatan','Penilaian Penugasan','Penilaian Portofolio','Penilaian Proyek','Laporan Kemajuan Hasil Belajar','Laporan Penilaian Formatif'];
-const slots=t=>[...T[t].items.map((l,j)=>({k:`${t}.p${j}`,label:l,mp:t===0&&MPL.includes(l)})),...(M.c[t]||[]).map(c=>({k:`${t}.c${c.id}`,label:c.l,custom:c.id}))];
+const slots=t=>[...T[t].items.map((l,j)=>({k:`${t}.p${j}`,label:l,mp:t===0&&MPL.includes(l)})).filter(x=>M.s[x.k]!=='hapus'),...(M.c[t]||[]).map(c=>({k:`${t}.c${c.id}`,label:c.l,custom:c.id}))];
 // IndexedDB
 let db;
 const open=()=>new Promise((res,rej)=>{const r=indexedDB.open('pkks_berkas',1);r.onupgradeneeded=()=>r.result.createObjectStore('f',{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
 const tx=(m,fn)=>new Promise((res,rej)=>{const t=db.transaction('f',m),s=t.objectStore('f'),q=fn(s);t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error)});
 // render
 const tabs=$('#tabs'),panels=$('#panels');
-function slotHTML(s,n){return `<div class="slot" data-k="${s.k}"><div class="sh"><span class="no">${n}</span><span class="t">${esc(s.label)}</span><span class="warn" role="img" aria-label="Berkas tidak ada" title="Berkas tidak ada">!</span><span class="cnt"></span>${s.custom?`<button class="rm" data-a="rm" data-k="${s.k}" data-id="${s.custom}">Hapus item</button>`:''}<div class="dd"><button type="button" class="ddb" aria-haspopup="listbox" aria-expanded="false" aria-label="Status berkas"><span class="dot"></span><span class="ddl">Pilih status</span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg></button><div class="ddm" role="listbox" hidden><button type="button" role="option" data-v="ada"><span class="ic">✓</span>Ada</button><button type="button" role="option" data-v="tidak"><span class="ic">✕</span>Tidak Ada</button><hr><button type="button" role="option" data-v=""><span class="ic">–</span>Kosongkan pilihan</button></div></div>${UP}</div>${s.mp?mpRow():''}<ul></ul></div>`}
+function slotHTML(s,n){return `<div class="slot" data-k="${s.k}"><div class="sh"><span class="no">${n}</span><span class="t">${esc(s.label)}</span><span class="warn" role="img" aria-label="Berkas tidak ada" title="Berkas tidak ada">!</span><span class="cnt"></span><button type="button" class="ib rmb" data-a="rm" data-k="${s.k}" data-id="${s.custom||''}" data-tip="Hapus item" aria-label="Hapus item berkas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button><div class="dd"><button type="button" class="ddb" aria-haspopup="listbox" aria-expanded="false" aria-label="Status berkas"><span class="dot"></span><span class="ddl">Pilih status</span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg></button><div class="ddm" role="listbox" hidden><button type="button" role="option" data-v="ada"><span class="ic">✓</span>Ada</button><button type="button" role="option" data-v="tidak"><span class="ic">✕</span>Tidak Ada</button><hr><button type="button" role="option" data-v=""><span class="ic">–</span>Kosongkan pilihan</button></div></div>${UP}</div>${s.mp?mpRow():''}<ul></ul></div>`}
 function build(){
  tabs.innerHTML=T.map((t,i)=>`<button class="tab" role="tab" id="tb${i}" data-t="${i}" aria-selected="${i==cur}">${esc(t.n)} <i id="tc${i}">0/0</i></button>`).join('');
  panels.innerHTML=T.map((t,i)=>{
   const s=slots(i);
-  return `<section class="panel" role="tabpanel" id="p${i}" ${i==cur?'':'hidden'}><div class="ph"><h2>${esc(t.n)}</h2><span>${t.items.length?'Unggah berkas untuk setiap item di bawah ini.':'Daftar berkas untuk tab ini belum ditentukan.'}</span></div>${t.items.length?'':'<div class="empty">Tab ini belum memiliki daftar berkas bawaan. Gunakan tombol “+ Tambah item berkas” untuk membuat item sesuai kebutuhan.</div>'}<div class="sum" id="sum${i}"><div><small>Total Dokumen</small><b data-s="tot">0</b></div><div class="a"><small>Total Ada</small><b data-s="ada">0</b></div><div class="t"><small>Total Tidak Ada</small><b data-s="tdk">0</b></div><div class="p"><small>Persentase Ketercapaian</small><b data-s="pct">0%</b><div class="track"><div class="fill" data-s="bar"></div></div></div></div><div id="sl${i}">${s.map((x,n)=>slotHTML(x,n+1)).join('')}</div><button class="btn" data-a="add" data-t="${i}">+ Tambah item berkas</button></section>`}).join('');
+  return `<section class="panel" role="tabpanel" id="p${i}" ${i==cur?'':'hidden'}><div class="ph"><h2>${esc(t.n)}</h2><span>${t.items.length?'Unggah berkas untuk setiap item di bawah ini.':'Daftar berkas untuk tab ini belum ditentukan.'}</span></div>${t.items.length?'':'<div class="empty">Tab ini belum memiliki daftar berkas bawaan. Gunakan tombol “+ Tambah item berkas” untuk membuat item sesuai kebutuhan.</div>'}<div class="sum" id="sum${i}"><div><small>Total Dokumen</small><b data-s="tot">0</b></div><div class="a"><small>Total Ada</small><b data-s="ada">0</b></div><div class="t"><small>Total Tidak Ada</small><b data-s="tdk">0</b></div><div class="p"><small>Persentase Ketercapaian</small><b data-s="pct">0%</b><div class="track"><div class="fill" data-s="bar"></div></div></div></div><div id="sl${i}">${s.map((x,n)=>slotHTML(x,n+1)).join('')}</div><button class="btn" data-a="add" data-t="${i}">+ Tambah item berkas</button>${(()=>{const n=t.items.filter((_,j)=>M.s[`${i}.p${j}`]==='hapus').length;return n?`<button class="btn" style="margin-left:8px" data-a="restore" data-t="${i}">Pulihkan ${n} item bawaan yang dihapus</button>`:''})()}</section>`}).join('');
  T.forEach((_,i)=>slots(i).forEach(s=>draw(s.k)));
 }
 function draw(k){
@@ -374,6 +380,51 @@ const sy=f=>f.sync==='ok'?`<a class="sy ok" href="${esc((f.drive&&f.drive.url)||
 const RETRY=id=>`<button type="button" class="ib v" data-a="r" data-id="${id}" data-tip="Kirim ulang" aria-label="Kirim ulang ke Google Drive"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V5"/><path d="M7 9l5-5 5 5"/><path d="M5 20h14"/></svg></button>`;
 const SB_URL='https://jnbhjmmmyqbcxaojbdlb.supabase.co/rest/v1',SB_TABLE='berkas_drive',
 SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpuYmhqbW1teXFiY3hhb2piZGxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNDcwMzMsImV4cCI6MjEwNzcyMzAzM30.KP1-LCQJ9MJlxFbQlqLfAtqLiv3uybRdbJ2AVLb9phw';
+
+// ===== Data bersama (item tambahan & status) di Supabase: tabel berkas_item & berkas_status =====
+const SBH=x=>Object.assign({apikey:SB_KEY,Authorization:'Bearer '+SB_KEY},x||{});
+const SBJ=pref=>SBH({'Content-Type':'application/json',Prefer:pref});
+const errMsg=e=>e instanceof TypeError?'tidak dapat menghubungi Supabase.':e.message;
+async function sb(path,opt){
+ const r=await fetch(SB_URL+'/'+path,opt);
+ if(!r.ok){let d=null;try{d=await r.json()}catch(e){}const m=(d&&(d.message||d.hint))||('HTTP '+r.status);
+  throw new Error(/PGRST205|does not exist|schema cache/i.test(m)?'Tabel berkas_item/berkas_status belum dibuat di Supabase. Jalankan file supabase_berkas_item.sql.':/row-level security|permission denied|42501/i.test(m)?'Akses ditolak (RLS). Jalankan ulang file supabase_berkas_item.sql.':m)}
+ if(r.status===204)return null;
+ try{return await r.json()}catch(e){return null}
+}
+let metaSig='';
+// muat daftar item tambahan + status dari database; true bila ada perubahan
+async function loadMeta(){
+ const [it,st]=await Promise.all([
+  sb('berkas_item?select=id,tab,label&order=id.asc&limit=2000',{headers:SBH()}),
+  sb('berkas_status?select=slot_key,status&limit=5000',{headers:SBH()})]);
+ const c={},s={};
+ (it||[]).forEach(x=>{const t=T.findIndex(y=>y.n===x.tab);if(t<0)return;(c[t]=c[t]||[]).push({id:x.id,l:x.label})});
+ (st||[]).forEach(x=>{if(x.status)s[x.slot_key]=x.status});
+ const sig=JSON.stringify([c,s]),ch=sig!==metaSig;metaSig=sig;M.c=c;M.s=s;return ch;
+}
+// simpan status satu item (menghapus baris bila kosong)
+async function pushSlot(k){
+ try{
+  if(!M.s[k])await sb('berkas_status?slot_key=eq.'+encodeURIComponent(k),{method:'DELETE',headers:SBH()});
+  else await sb('berkas_status?on_conflict=slot_key',{method:'POST',headers:SBJ('resolution=merge-duplicates,return=minimal'),body:JSON.stringify({slot_key:k,status:M.s[k],updated_at:new Date().toISOString()})});
+ }catch(e){toast('Gagal menyimpan status ke database: '+errMsg(e),5000)}
+}
+// buat item tambahan (abaikan bila nama yang sama sudah ada di tab itu)
+const createItems=rows=>sb('berkas_item?on_conflict=tab,label',{method:'POST',headers:SBJ('resolution=ignore-duplicates,return=minimal'),body:JSON.stringify(rows)});
+// pindahkan data lokal lama (localStorage pkks_meta2) ke database, sekali saja per peramban
+async function migrateLocal(){
+ let o=null;try{o=JSON.parse(localStorage.getItem('pkks_meta2')||'null')}catch(e){}
+ if(!o||localStorage.getItem('pkks_mig3'))return;
+ const old=[];Object.keys(o.c||{}).forEach(t=>(o.c[t]||[]).forEach(c=>{if(T[t])old.push({tab:T[t].n,label:c.l,k:t+'.c'+c.id,t})}));
+ if(old.length)await createItems(old.map(x=>({tab:x.tab,label:x.label})));
+ await loadMeta();
+ const nk=k=>{const m=/^(\d+)\.c(\d+)$/.exec(k);if(!m)return k;const x=old.find(y=>y.k===k),it=x&&(M.c[x.t]||[]).find(c=>c.l===x.label);return it?m[1]+'.c'+it.id:null};
+ const add=[];for(const k in (o.s||{})){const n=nk(k);if(n&&!M.s[n]&&(o.s[k]==='ada'||o.s[k]==='tidak'))add.push({slot_key:n,status:o.s[k]})}
+ if(add.length)await sb('berkas_status?on_conflict=slot_key',{method:'POST',headers:SBJ('resolution=ignore-duplicates,return=minimal'),body:JSON.stringify(add)});
+ for(const k in (o.mp||{})){const n=nk(k);if(n&&!M.mp[n])M.mp[n]=o.mp[k]}
+ saveM();localStorage.setItem('pkks_mig3','1');
+}
 // catat nama berkas + link Drive ke tabel Supabase; mengembalikan id baris
 // Lokasi simpan dibaca dari tabel lokasisimpan (diatur di pengaturanlokasi.html), lalu disalin ke peramban
 async function loadLoc(){
@@ -400,8 +451,9 @@ function renderOrph(a){
  el.innerHTML=`<div class="slot orph"><div class="sh"><span class="no">${a.length}</span><span class="t">Berkas di database yang belum terhubung ke item</span></div><p class="oh">Berkas ini sudah tersimpan di Google Drive dan tercatat di database, tetapi item berkasnya belum diketahui. Pilih item yang sesuai lalu klik Tautkan agar tampil di tab-nya.</p><ul>${a.map(w=>{const can=!w.tab||!w.item;return `<li>${ftag(w.nama_berkas)}<span class="n" title="${esc(w.nama_berkas)}">${esc(w.nama_berkas)}</span>${w.mapel?`<span class="mpc" title="Mata Pelajaran">${esc(w.mapel)}</span>`:''}<a class="sy ok" href="${esc(w.link_berkas)}" target="_blank" rel="noopener" title="Buka di Google Drive">✓ Di Drive</a>${can?`<select class="oas" aria-label="Tautkan ke item">${optsFor(w.mapel)}</select><button type="button" class="btn" data-oa="${w.id}">Tautkan</button>`:`<span class="z">${esc(w.tab)} › ${esc(w.item)}</span>`}</li>`}).join('')}</ul></div>`;
 }
 // Tampilkan berkas yang sudah tercatat di database Supabase (tabel berkas_drive) pada item yang sesuai
-async function loadRemote(){
+async function loadRemote(retry){
  try{
+  if(await loadMeta())build();
   const r=await fetch(SB_URL+'/'+SB_TABLE+'?select=id,nama_berkas,link_berkas,mapel,tab,item,created_at&order=created_at.asc&limit=1000',{headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}});
   if(!r.ok){let d=null;try{d=await r.json()}catch(e){}const m=(d&&(d.message||d.hint))||('HTTP '+r.status);throw new Error(/column .*(tab|item)|42703|PGRST204/i.test(m)?'Kolom tab/item belum ada di tabel '+SB_TABLE+'. Jalankan ulang file SQL terbaru di Supabase.':m)}
   const rows=await r.json();
@@ -415,9 +467,15 @@ async function loadRemote(){
    (F[sl.k]=F[sl.k]||[]).push({id:'db-'+w.id,slot:sl.k,name:w.nama_berkas,size:null,mapel:w.mapel||'',at:Date.parse(w.created_at)||0,sync:'ok',drive:{url:w.link_berkas},dbId:String(w.id),remote:1});
    touched.add(sl.k);
   });
-  let ch=false;touched.forEach(k=>{if(M.s[k]=='tidak'){delete M.s[k];ch=true}});if(ch)saveM();
+  // berkas di database dengan item tambahan yang belum terdaftar -> daftarkan otomatis agar tampil di semua akun
+  const heal=orph.filter(w=>w.tab&&w.item&&T.some(x=>x.n===w.tab));
+  if(heal.length&&!retry){
+   const seen=new Set(),body=[];heal.forEach(w=>{const q=w.tab+'\u0000'+w.item;if(!seen.has(q)){seen.add(q);body.push({tab:w.tab,label:w.item})}});
+   await createItems(body);await loadMeta();build();return loadRemote(true);
+  }
+  touched.forEach(k=>{if(M.s[k]=='tidak'){delete M.s[k];pushSlot(k)}});
   Object.keys(F).forEach(draw);prog();syncBar();renderOrph(orph);
- }catch(e){toast('Belum dapat memuat berkas dari database: '+(e instanceof TypeError?'tidak dapat menghubungi Supabase.':e.message),5000)}
+ }catch(e){toast('Belum dapat memuat data dari database: '+errMsg(e),5000)}
 }
 async function saveDb(r){
  let res,d;
@@ -469,7 +527,7 @@ async function add(k,files){
  for(const f of files){
   if(f.size>MAX){toast(`"${f.name}" melebihi 25 MB`);continue}
   const r={id:crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random()+'',slot:k,name:f.name,size:f.size,type:f.type,blob:f,at:Date.now(),mapel:mv,sync:'pending'};
-  try{await tx('readwrite',s=>s.put(r));(F[k]=F[k]||[]).push(r);M.s[k]='ada';saveM()}catch(e){toast('Gagal menyimpan "'+f.name+'" (penyimpanan penuh?)');continue}
+  try{await tx('readwrite',s=>s.put(r));(F[k]=F[k]||[]).push(r);M.s[k]='ada';pushSlot(k)}catch(e){toast('Gagal menyimpan "'+f.name+'" (penyimpanan penuh?)');continue}
   draw(k);
   if(await sync(r))ok++;else{bad++;le=r.err||le}
  }
@@ -599,7 +657,7 @@ panels.addEventListener('click',e=>{
  const o=e.target.closest('.ddm button');if(!o)return;
  const k=o.closest('.slot').dataset.k,v=o.dataset.v;closeDD();
  if(v=='tidak'&&(F[k]||[]).length){toast('Hapus berkas yang sudah diunggah terlebih dahulu.');return}
- if(v)M.s[k]=v;else delete M.s[k];saveM();draw(k);
+ if(v)M.s[k]=v;else delete M.s[k];pushSlot(k);draw(k);
 });
 document.addEventListener('click',e=>{if(!e.target.closest('.dd,.up'))closeDD()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#ao').hidden)closeAdd();else if(!$('#co').hidden)closeCam();else if(!$('#mo').hidden)closeM();else closeDD()}});
@@ -612,11 +670,17 @@ let at=0,af=null;
 const ain=$('#ain'),aw=$('#aowrap'),aerr=$('#aerr');
 function openAdd(t){at=t;af=document.activeElement;$('#aotab').textContent=T[t].n;ain.value='';$('#acnt').textContent='0/100';aerr.textContent='';aw.classList.remove('err');$('#ao').hidden=false;document.body.style.overflow='hidden';setTimeout(()=>ain.focus(),60)}
 function closeAdd(){$('#ao').hidden=true;document.body.style.overflow='';if(af&&af.focus)af.focus()}
-function submitAdd(){
+async function submitAdd(){
  const l=ain.value.trim();
  if(!l){aerr.textContent='Nama item wajib diisi.';aw.classList.add('err');aw.classList.remove('shake');void aw.offsetWidth;aw.classList.add('shake');ain.focus();return}
  if(slots(at).some(x=>x.label.toLowerCase()===l.toLowerCase())){aerr.textContent='Item dengan nama ini sudah ada di tab ini.';aw.classList.add('err');ain.focus();return}
- (M.c[at]=M.c[at]||[]).push({id:M.id++,l});saveM();build();closeAdd();toast('Item berkas ditambahkan.');
+ if(submitAdd.b)return;submitAdd.b=1;$('#aoOk').disabled=true;
+ try{
+  await createItems([{tab:T[at].n,label:l}]);
+  await loadMeta();build();closeAdd();toast('Item berkas ditambahkan dan tersimpan di database.');
+  loadRemote();
+ }catch(e){aerr.textContent='Gagal menyimpan item: '+errMsg(e);aw.classList.add('err')}
+ finally{submitAdd.b=0;$('#aoOk').disabled=false}
 }
 ain.addEventListener('input',()=>{$('#acnt').textContent=ain.value.length+'/100';aerr.textContent='';aw.classList.remove('err')});
 ain.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();submitAdd()}});
@@ -626,7 +690,28 @@ panels.addEventListener('click',async e=>{
  const a=e.target.closest('[data-a]');if(!a)return;e.preventDefault();
  const act=a.dataset.a;
  if(act==='add'){openAdd(+a.dataset.t);return}
- if(act==='rm'){const k=a.dataset.k,t=+k.split('.')[0],n=(F[k]||[]).length;if(!confirm('Hapus item ini'+(n?` beserta ${n} berkas di dalamnya`:'')+'?'))return;for(const f of F[k]||[])await tx('readwrite',s=>s.delete(f.id));delete F[k];delete M.s[k];M.c[t]=M.c[t].filter(c=>c.id!=a.dataset.id);saveM();build();return}
+ if(act==='restore'){
+  const t=+a.dataset.t,ks=T[t].items.map((_,j)=>`${t}.p${j}`).filter(k=>M.s[k]==='hapus');
+  if(!ks.length)return;
+  try{await sb('berkas_status?slot_key=in.('+ks.join(',')+')',{method:'DELETE',headers:SBH()});await loadMeta();build();toast(ks.length+' item bawaan dipulihkan.')}
+  catch(err){toast('Gagal memulihkan item: '+errMsg(err),5000)}
+  return}
+ if(act==='rm'){
+  const k=a.dataset.k,t=+k.split('.')[0],cid=a.dataset.id,all=F[k]||[],rem=all.filter(f=>f.remote||f.dbId).length,loc=all.length-rem,lb=((slots(t).find(x=>x.k===k))||{}).label||'';
+  if(rem){toast('Item "'+lb+'" tidak dapat dihapus karena sudah berisi '+rem+' berkas yang tercatat di database.',5000);return}
+  if(!confirm('Hapus item "'+lb+'"'+(loc?` beserta ${loc} berkas yang belum terkirim di perangkat ini`:'')+'?\n\nItem akan terhapus untuk semua pengguna.'))return;
+  try{
+   if(cid){
+    await sb('berkas_item?id=eq.'+encodeURIComponent(cid),{method:'DELETE',headers:SBH()});
+    await sb('berkas_status?slot_key=eq.'+encodeURIComponent(k),{method:'DELETE',headers:SBH()});
+   }else{
+    await sb('berkas_status?on_conflict=slot_key',{method:'POST',headers:SBJ('resolution=merge-duplicates,return=minimal'),body:JSON.stringify({slot_key:k,status:'hapus',updated_at:new Date().toISOString()})});
+   }
+  }catch(err){toast('Gagal menghapus item: '+errMsg(err)+(/check|violates/i.test(errMsg(err))?' Jalankan ulang file supabase_berkas_lengkap.sql.':''),6000);return}
+  for(const f of all)await tx('readwrite',s=>s.delete(f.id));
+  delete F[k];delete M.mp[k];saveM();
+  if(cid){delete M.s[k];M.c[t]=(M.c[t]||[]).filter(c=>c.id!=cid)}else M.s[k]='hapus';
+  build();toast('Item "'+lb+'" dihapus.');return}
  const id=a.dataset.id;let r;for(const k in F){r=F[k].find(x=>x.id===id);if(r)break}
  if(act==='r'){if(r&&!r.busy)sync(r).then(o=>toast(o?'Berkas tersimpan di Google Drive dan database':'Gagal: '+(r.err||'')));return}
  if(act==='x'){if(!confirm('Hapus berkas "'+r.name+'"?'+(r.drive?'\n\nBerkas di Google Drive dan data di database tidak ikut terhapus.':'')))return;await tx('readwrite',s=>s.delete(id));const k=a.dataset.k;F[k]=F[k].filter(x=>x.id!==id);draw(k);syncBar();return}
@@ -636,6 +721,8 @@ panels.addEventListener('click',async e=>{
 try{cur=+sessionStorage.getItem('pkks_tab')||0;if(cur>=T.length)cur=0}catch(e){}
 build();loadMapel();loadLoc();
 (async()=>{
+ try{await migrateLocal()}catch(e){}
+ try{await loadMeta();build();loadMapel()}catch(e){toast('Belum dapat memuat daftar item dari database: '+errMsg(e),6000)}
  try{db=await open();const all=await tx('readonly',s=>s.getAll());(all||[]).sort((a,b)=>a.at-b.at).forEach(r=>{if(r.sync==='pending'){r.sync='err';r.err='Pengiriman terputus'}else if(r.sync==='ok'&&!r.dbId){r.sync='err';r.err='Sudah di Google Drive, belum tercatat di database'}(F[r.slot]=F[r.slot]||[]).push(r)});Object.keys(F).forEach(draw);prog();syncBar()}
  catch(e){toast('Penyimpanan peramban tidak tersedia; berkas tidak akan tersimpan.')}
  syncBar();
