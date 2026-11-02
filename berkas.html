@@ -353,6 +353,7 @@ const open=()=>new Promise((res,rej)=>{const r=indexedDB.open('pkks_berkas',1);r
 const tx=(m,fn)=>new Promise((res,rej)=>{const t=db.transaction('f',m),s=t.objectStore('f'),q=fn(s);t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error)});
 // render
 const tabs=$('#tabs'),panels=$('#panels');
+const XBTN=(f,k)=>`<button type="button" class="ib x" data-a="x" data-id="${f.id}" data-k="${k}" data-tip="Hapus" aria-label="Hapus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></svg></button>`;
 function slotHTML(s,n){return `<div class="slot" data-k="${s.k}"><div class="sh"><span class="no">${n}</span><span class="t">${esc(s.label)}</span><span class="warn" role="img" aria-label="Berkas tidak ada" title="Berkas tidak ada">!</span><span class="cnt"></span>${s.custom?`<button type="button" class="ib edb" data-a="ed" data-k="${s.k}" data-id="${s.custom}" data-tip="Ubah nama item" aria-label="Ubah nama item berkas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>`:''}<button type="button" class="ib rmb" data-a="rm" data-k="${s.k}" data-id="${s.custom||''}" data-tip="Hapus item" aria-label="Hapus item berkas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button><div class="dd"><button type="button" class="ddb" aria-haspopup="listbox" aria-expanded="false" aria-label="Status berkas"><span class="dot"></span><span class="ddl">Pilih status</span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg></button><div class="ddm" role="listbox" hidden><button type="button" role="option" data-v="ada"><span class="ic">✓</span>Ada</button><button type="button" role="option" data-v="tidak"><span class="ic">✕</span>Tidak Ada</button><hr><button type="button" role="option" data-v=""><span class="ic">–</span>Kosongkan pilihan</button></div></div>${UP}</div>${s.mp?mpRow():''}<ul></ul></div>`}
 function build(){
  tabs.innerHTML=T.map((t,i)=>`<button class="tab" role="tab" id="tb${i}" data-t="${i}" aria-selected="${i==cur}">${esc(t.n)} <i id="tc${i}">0/0</i></button>`).join('');
@@ -373,7 +374,7 @@ function draw(k){
  if(ms)sl.querySelector('.mp').title=ms.value?'':'Pilih mata pelajaran dahulu untuk mengunggah';
  sl.classList.toggle('ok',st=='ada'||st=='tidak');sl.classList.toggle('miss',st=='tidak');
  sl.querySelector('.cnt').textContent=a.length?`✓ ${a.length} berkas`:'';
- sl.querySelector('ul').innerHTML=a.map(f=>`<li>${ftag(f.name)}<span class="n" title="${esc(f.name)}">${esc(f.name)}</span>${f.mapel?`<span class="mpc" title="Mata Pelajaran">${esc(f.mapel)}</span>`:''}${f.size!=null?`<span class="z">${sz(f.size)}</span>`:''}${sy(f)}${f.sync==='ok'&&f.drive&&f.drive.url?`<button type="button" class="ib lk" data-a="lk" data-id="${f.id}" data-tip="Tautkan ke item lain" aria-label="Tautkan berkas ke item lain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></button>`:''}${f.remote&&f.tautan?`<button type="button" class="ib x" data-a="ul" data-id="${f.id}" data-k="${k}" data-tip="Lepas tautan" aria-label="Lepas tautan dari item ini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/><path d="M4 4l16 16"/></svg></button>`:''}${f.remote?'':`${f.sync==='ok'||f.sync==='pending'?'':RETRY(f.id)}<button type="button" class="ib v" data-a="v" data-id="${f.id}" data-tip="Preview" aria-label="Preview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button type="button" class="ib d" data-a="d" data-id="${f.id}" data-tip="Unduh" aria-label="Unduh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg></button><button type="button" class="ib x" data-a="x" data-id="${f.id}" data-k="${k}" data-tip="Hapus" aria-label="Hapus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></svg></button>`}</li>`).join('');
+ sl.querySelector('ul').innerHTML=a.map(f=>`<li>${ftag(f.name)}<span class="n" title="${esc(f.name)}">${esc(f.name)}</span>${f.mapel?`<span class="mpc" title="Mata Pelajaran">${esc(f.mapel)}</span>`:''}${f.size!=null?`<span class="z">${sz(f.size)}</span>`:''}${sy(f)}${f.sync==='ok'&&f.drive&&f.drive.url?`<button type="button" class="ib lk" data-a="lk" data-id="${f.id}" data-tip="Tautkan ke item lain" aria-label="Tautkan berkas ke item lain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></button>`:''}${f.remote&&f.tautan?`<button type="button" class="ib x" data-a="ul" data-id="${f.id}" data-k="${k}" data-tip="Lepas tautan" aria-label="Lepas tautan dari item ini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/><path d="M4 4l16 16"/></svg></button>`:''}${f.remote&&!f.tautan?XBTN(f,k):''}${f.remote?'':`${f.sync==='ok'||f.sync==='pending'?'':RETRY(f.id)}<button type="button" class="ib v" data-a="v" data-id="${f.id}" data-tip="Preview" aria-label="Preview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button type="button" class="ib d" data-a="d" data-id="${f.id}" data-tip="Unduh" aria-label="Unduh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg></button>${XBTN(f,k)}`}</li>`).join('');
  prog();
 }
 function prog(){
@@ -502,6 +503,22 @@ async function saveDb(r){
   throw new Error(/PGRST204|column .*(mapel|tab|item)/i.test(m)?'Kolom baru (mapel/tab/item) belum ada di tabel '+SB_TABLE+'. Jalankan ulang file SQL terbaru di Supabase.':/does not exist|relation|PGRST205|schema cache/i.test(m)?'Tabel '+SB_TABLE+' belum dibuat di Supabase. Jalankan file supabase_berkas_drive.sql.':/row-level security|permission denied|42501/i.test(m)?'Akses ditolak (RLS). Jalankan ulang bagian kebijakan pada file SQL.':m);
  }
  return String(d&&d[0]&&d[0].id!=null?d[0].id:'ok');
+}
+// Hapus berkas di Google Drive lewat Apps Script (dipindah ke Sampah Drive)
+async function delDrive(r){
+ let L=getLoc();if(!L){await loadLoc();L=getLoc()}
+ if(!L)throw new Error('Lokasi simpan belum diatur.');
+ const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),60000);
+ try{
+  const res=await fetch(L.scriptUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'delete',folderId:L.folderId,token:L.token||'',fileId:(r.drive&&r.drive.id)||'',url:(r.drive&&r.drive.url)||''}),signal:ctl.signal});
+  const d=await res.json();
+  if(!d.ok)throw new Error(/Nama atau isi file kosong/i.test(d.error||'')?'Script Google Apps Script belum diperbarui. Perbarui lewat Kelola penerapan (lihat Pengaturan Lokasi Simpan).':(d.error||'Ditolak oleh script'));
+  return d;
+ }catch(e){
+  if(e.name==='AbortError')throw new Error('Waktu tunggu habis saat menghapus di Google Drive.');
+  if(e instanceof TypeError||e instanceof SyntaxError)throw new Error('Tidak dapat menghubungi Google Drive. Periksa internet dan URL Web App.');
+  throw e;
+ }finally{clearTimeout(tm)}
 }
 async function sync(r){
  let L=getLoc();
@@ -798,7 +815,35 @@ panels.addEventListener('click',async e=>{
   }catch(err){toast('Gagal melepas tautan: '+errMsg(err),6000)}
   return}
  if(act==='r'){if(r&&!r.busy)sync(r).then(o=>toast(o?'Berkas tersimpan di Google Drive dan database':'Gagal: '+(r.err||'')));return}
- if(act==='x'){if(!confirm('Hapus berkas "'+r.name+'"?'+(r.drive?'\n\nBerkas di Google Drive dan data di database tidak ikut terhapus.':'')))return;await tx('readwrite',s=>s.delete(id));const k=a.dataset.k;F[k]=F[k].filter(x=>x.id!==id);draw(k);syncBar();return}
+ if(act==='x'){
+  if(!r)return;
+  const k=a.dataset.k,url=r.drive&&r.drive.url;
+  if(r.busy){toast('Berkas sedang dikirim, tunggu sebentar.');return}
+  if(!url){
+   if(!confirm('Hapus berkas "'+r.name+'"?\n\nBerkas ini belum terkirim ke Google Drive.'))return;
+   await tx('readwrite',s=>s.delete(id));F[k]=(F[k]||[]).filter(x=>x.id!==id);draw(k);prog();syncBar();return}
+  if(a.disabled)return;a.disabled=true;
+  try{
+   const q=encodeURIComponent(url);
+   const rows=(await sb(SB_TABLE+'?select=id&link_berkas=eq.'+q,{headers:SBH()}))||[];
+   const tt=Math.max(0,rows.length-(r.dbId?1:0));
+   if(!confirm('Hapus berkas "'+r.name+'"?\n\nBerkas akan dihapus dari Google Drive (dipindah ke Sampah Drive) dan dari database.'+(tt?`\n\nPerhatian: berkas ini juga ditautkan ke ${tt} item lain. Semua tautannya ikut terhapus.`:'')))return;
+   toast('Menghapus berkas…');
+   await delDrive(r);
+   try{
+    const d=await sb(SB_TABLE+'?link_berkas=eq.'+q,{method:'DELETE',headers:SBH({Prefer:'return=representation'})});
+    if(rows.length&&(!d||!d.length))throw new Error('Tidak diizinkan menghapus data. Jalankan SQL kebijakan DELETE untuk tabel '+SB_TABLE+'.');
+   }catch(err){toast('Berkas di Google Drive sudah dihapus, tetapi data di database gagal dihapus: '+errMsg(err),7000);return}
+   for(const kk of Object.keys(F)){
+    const del=F[kk].filter(x=>x.drive&&x.drive.url===url);
+    for(const x of del)if(!x.remote)await tx('readwrite',s=>s.delete(x.id));
+    F[kk]=F[kk].filter(x=>!(x.drive&&x.drive.url===url));
+   }
+   Object.keys(F).forEach(draw);prog();syncBar();
+   toast('Berkas "'+r.name+'" dihapus dari Google Drive dan database.');
+  }catch(err){toast('Gagal menghapus: '+errMsg(err),6000)}
+  finally{a.disabled=false}
+  return}
  if(act==='v'){view(r);return}
  dl(r);
 });
