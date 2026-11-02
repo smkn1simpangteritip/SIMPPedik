@@ -164,7 +164,7 @@ body{padding-bottom:96px}
 <li><div><b>Terapkan sebagai aplikasi web</b><p>Klik Terapkan &gt; Penerapan baru &gt; Aplikasi web. Atur <code>Jalankan sebagai: Saya</code> dan <code>Yang memiliki akses: Siapa saja</code>. Izinkan akses Google Drive, lalu salin URL yang berakhiran <code>/exec</code>.</p></div></li>
 <li><div><b>Tempel URL dan uji</b><p>Tempel URL di kolom kedua, klik Uji koneksi. Jika nama folder muncul, klik Simpan pengaturan.</p></div></li>
 </ol>
-<div class="note">Setelah mengubah kode script, buat Penerapan baru agar perubahan berlaku di URL /exec. Folder harus milik akun yang menerapkan script, atau dibagikan ke akun itu sebagai Editor.</div>
+<div class="note">Setelah mengubah kode script, buka Terapkan &gt; Kelola penerapan &gt; ikon pensil &gt; Versi: Versi baru &gt; Terapkan, agar perubahan berlaku di URL /exec yang sama. Folder harus milik akun yang menerapkan script, atau dibagikan ke akun itu sebagai Editor.</div>
 </div>
 </details>
 
@@ -173,9 +173,9 @@ body{padding-bottom:96px}
 <div class="db">
 <div class="codebar"><span>Tempel di editor script (Code.gs)</span><button type="button" class="btn" id="bCopy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg><span>Salin kode</span></button></div>
 <pre class="code" tabindex="0"><code id="gs">/**
- * Upload Berkas ke Google Drive (PKKS)
+ * Upload &amp; Hapus Berkas Google Drive (PKKS)  -- versi 2
  *
- * CARA PASANG
+ * CARA PASANG (pertama kali)
  * 1. Buka https://script.google.com &gt; Proyek baru, hapus isi bawaan, tempel seluruh kode ini.
  * 2. Klik Terapkan (Deploy) &gt; Penerapan baru (New deployment) &gt; jenis "Aplikasi web" (Web app).
  *      - Jalankan sebagai (Execute as)  : Saya (Me)
@@ -183,8 +183,14 @@ body{padding-bottom:96px}
  * 3. Klik Terapkan, izinkan akses Google Drive, lalu salin "URL aplikasi web" (berakhiran /exec).
  * 4. Tempel URL itu di halaman Pengaturan Lokasi Simpan, bersama link folder Google Drive.
  *
- * Setiap kali kode ini diubah, buat Penerapan baru (atau Kelola penerapan &gt; Edit &gt; Versi baru)
- * agar perubahan berlaku di URL /exec.
+ * CARA UPDATE (kode sudah pernah dipasang)
+ * Terapkan (Deploy) &gt; Kelola penerapan (Manage deployments) &gt; ikon pensil (Edit)
+ * &gt; Versi: "Versi baru" &gt; Terapkan. URL /exec tetap sama, tidak perlu mengubah pengaturan.
+ *
+ * FITUR
+ * - Unggah file ke folder Drive (+ subfolder per tab).
+ * - Hapus file: file dipindahkan ke Sampah Drive (bisa dipulihkan 30 hari).
+ *   Hanya file yang berada di dalam folder penyimpanan yang boleh dihapus.
  */
 
 // Kunci rahasia (opsional). Jika diisi, halaman harus mengirim kunci yang sama.
@@ -195,6 +201,8 @@ const FOLDER_ID_DEFAULT = '';
 
 // true = file yang diunggah dibuat "Siapa saja yang memiliki link" (hanya melihat)
 const SHARE_ANYONE = true;
+
+const VERSION = 2;
 
 function out_(obj) {
   return ContentService
@@ -220,24 +228,75 @@ function folder_(id, sub) {
   return folder;
 }
 
+// Ambil ID file dari URL Drive (…/d/ID/view atau …?id=ID)
+function idFromUrl_(url) {
+  var m = String(url || '').match(/\/d\/([-\w]{10,})/) || String(url || '').match(/[?&amp;]id=([-\w]{10,})/);
+  return m ? m[1] : '';
+}
+
+// Apakah file berada di dalam folder root (termasuk subfolder bertingkat)?
+function inside_(file, rootId) {
+  var queue = [file], seen = {}, n = 0;
+  while (queue.length &amp;&amp; n++ &lt; 200) {
+    var cur = queue.shift();
+    var it = cur.getParents();
+    while (it.hasNext()) {
+      var p = it.next(), pid = p.getId();
+      if (pid === rootId) return true;
+      if (!seen[pid]) { seen[pid] = 1; queue.push(p); }
+    }
+  }
+  return false;
+}
+
 // Uji koneksi: ?folderId=...&amp;token=...
 function doGet(e) {
   try {
     var p = (e &amp;&amp; e.parameter) || {};
     auth_(p.token);
     var f = folder_(p.folderId);
-    return out_({ ok: true, folderId: f.getId(), folderName: f.getName(), url: f.getUrl() });
+    return out_({ ok: true, version: VERSION, folderId: f.getId(), folderName: f.getName(), url: f.getUrl() });
   } catch (err) {
     return out_({ ok: false, error: String(err &amp;&amp; err.message || err) });
   }
 }
 
-// Unggah file. Body JSON (dikirim sebagai text/plain):
-// { folderId, token, name, mimeType, data (base64), subfolder (opsional) }
+// Hapus file (pindah ke Sampah). Body: { action:'delete', folderId, token, fileId, url }
+function delete_(d) {
+  var id = d.fileId || idFromUrl_(d.url);
+  if (!id) throw new Error('ID file tidak ditemukan.');
+
+  var root = d.folderId || FOLDER_ID_DEFAULT;
+  if (!root) throw new Error('ID folder kosong.');
+
+  var file;
+  try {
+    file = DriveApp.getFileById(id);
+  } catch (x) {
+    // File sudah tidak ada di Drive: anggap berhasil agar data di database tetap bisa dibersihkan
+    return out_({ ok: true, id: id, deleted: false, note: 'File tidak ditemukan di Drive (mungkin sudah terhapus).' });
+  }
+
+  if (file.isTrashed()) {
+    return out_({ ok: true, id: id, deleted: false, note: 'File sudah ada di Sampah.' });
+  }
+  if (!inside_(file, root)) {
+    throw new Error('Ditolak: file tidak berada di dalam folder penyimpanan.');
+  }
+
+  file.setTrashed(true);
+  return out_({ ok: true, id: id, deleted: true, trashed: true });
+}
+
+// Unggah / hapus file. Body JSON (dikirim sebagai text/plain):
+// Unggah : { folderId, token, name, mimeType, data (base64), subfolder (opsional) }
+// Hapus  : { action:'delete', folderId, token, fileId, url }
 function doPost(e) {
   try {
     var d = JSON.parse(e.postData.contents);
     auth_(d.token);
+
+    if (d.action === 'delete') return delete_(d);
 
     if (!d.name || !d.data) throw new Error('Nama atau isi file kosong.');
 
@@ -262,7 +321,8 @@ function doPost(e) {
   } catch (err) {
     return out_({ ok: false, error: String(err &amp;&amp; err.message || err) });
   }
-}</code></pre>
+}
+</code></pre>
 </div>
 </details>
 
