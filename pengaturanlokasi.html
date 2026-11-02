@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pengaturan Lokasi Simpan – Manajemen Berkas PKKS</title>
+<style>
+:root{--bg:#eef2f9;--bg2:#f6f0fb;--card:#fff;--tx:#26304a;--mu:#6b778f;--bd:#e3e8f2;--pr:#3f6fe0;--prt:#eaf0ff;--ok:#27885f;--okt:#e4f6ee;--er:#cf4b47;--ert:#fdecec;--wr:#b7791f;--wrt:#fff4dc;--hd1:#e6eeff;--hd2:#f1e9fd;--bd2:#c3cde3;--sh:0 1px 3px rgba(40,60,110,.06),0 8px 24px rgba(40,60,110,.08);--sh2:0 2px 6px rgba(40,60,110,.08),0 14px 32px rgba(40,60,110,.13)}
+@media(prefers-color-scheme:dark){:root{--bg:#0f131c;--bg2:#161226;--card:#1a2030;--tx:#e8ecf5;--mu:#9aa5bd;--bd:#2a3347;--pr:#7ea6ff;--prt:#222f4d;--ok:#6fdaa6;--okt:#183428;--er:#ff938c;--ert:#3a2024;--wr:#f0c36d;--wrt:#3a2f17;--hd1:#1b2744;--hd2:#261f42;--bd2:#41506d;--sh:0 1px 3px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.28);--sh2:0 2px 6px rgba(0,0,0,.35),0 14px 32px rgba(0,0,0,.4)}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--tx);background:linear-gradient(160deg,var(--bg) 0%,var(--bg2) 100%) fixed;min-height:100vh;overflow-x:hidden}
+:focus-visible{outline:2px solid var(--pr);outline-offset:2px}
+.w{max-width:760px;margin:0 auto;min-width:0}
+header{background:linear-gradient(135deg,var(--hd1),var(--hd2));padding:22px 16px 34px;border-bottom:1px solid var(--bd)}
+.hero{display:flex;align-items:center;gap:16px}
+.hic{flex:none;width:56px;height:56px;border-radius:18px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--pr),#8a63e0);box-shadow:0 10px 22px color-mix(in srgb,var(--pr) 36%,transparent)}
+.hic svg{width:28px;height:28px}
+h1{font-size:23px;margin:0 0 3px;letter-spacing:-.2px}
+.sub{margin:0;color:var(--mu);font-size:13.5px;max-width:560px}
+main{padding:0 16px 40px}
+.card{background:var(--card);border-radius:20px;box-shadow:var(--sh);border:1px solid var(--bd);margin-top:16px}
+main .card:first-child{margin-top:-18px}
+.ch{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:18px 22px;border-bottom:1px solid var(--bd)}
+.ch h2{margin:0;font-size:16px}
+.badge{flex:none;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 11px;border-radius:999px;background:var(--wrt);color:var(--wr)}
+.badge::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.badge.on{background:var(--okt);color:var(--ok)}
+.cb{padding:20px 22px 22px}
+.f{display:block;margin-bottom:18px}
+.f>span{display:flex;justify-content:space-between;gap:8px;font-size:13px;font-weight:600;margin-bottom:6px}
+.f>span em{font-style:normal;font-weight:400;color:var(--mu);font-size:12px}
+.in{position:relative}
+.in>svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--mu);pointer-events:none;transition:color .2s}
+.in:focus-within>svg{color:var(--pr)}
+input[type=text],input[type=password]{font:inherit;font-weight:400;width:100%;padding:12px 14px 12px 40px;border:1px solid var(--bd);border-radius:14px;background:var(--card);color:var(--tx);box-shadow:0 1px 2px rgba(40,60,110,.05);transition:box-shadow .2s,border-color .2s}
+input:focus{outline:none;border-color:var(--pr);box-shadow:0 0 0 3px var(--prt)}
+.in.bad input{border-color:var(--er)}
+.in.bad input:focus{box-shadow:0 0 0 3px var(--ert)}
+.in.good input{border-color:color-mix(in srgb,var(--ok) 60%,var(--bd))}
+.in .eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);font:inherit;font-size:12px;font-weight:600;color:var(--pr);background:none;border:0;border-radius:999px;padding:6px 10px;cursor:pointer}
+.in .eye:hover{background:var(--prt)}
+.in.pw input{padding-right:84px}
+.hint{min-height:20px;margin-top:6px;padding:0 4px;font-size:12px;color:var(--mu);overflow-wrap:anywhere}
+.hint.ok{color:var(--ok);font-weight:600}.hint.er{color:var(--er);font-weight:600}
+.hint code{font:12px ui-monospace,Menlo,Consolas,monospace;background:var(--okt);padding:1px 6px;border-radius:6px}
+.btn{font:inherit;font-size:14px;font-weight:600;height:44px;padding:0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--card);color:var(--tx);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 1px 3px rgba(40,60,110,.08);transition:transform .15s,box-shadow .15s,border-color .15s,filter .15s;text-decoration:none}
+.btn svg{width:17px;height:17px;flex:none}
+.btn:hover{border-color:var(--pr);box-shadow:var(--sh);transform:translateY(-1px)}
+.btn[disabled]{opacity:.6;cursor:progress;transform:none}
+.btn.pri{color:#fff;border-color:transparent;background:linear-gradient(135deg,var(--pr),#7a5ce0);box-shadow:0 8px 18px color-mix(in srgb,var(--pr) 35%,transparent)}
+.btn.pri:hover{border-color:transparent;filter:brightness(1.06);box-shadow:0 10px 24px color-mix(in srgb,var(--pr) 50%,transparent)}
+.acts{display:flex;gap:12px}
+.acts .btn{flex:1 1 0;min-width:0}
+.sec{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:14px}
+.lk{font:inherit;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:0;border-radius:999px;background:none;color:var(--mu);cursor:pointer;text-decoration:none;transition:background .15s,color .15s}
+.lk svg{width:15px;height:15px}
+.lk:hover{background:var(--prt);color:var(--pr)}
+.lk.dg:hover{background:var(--ert);color:var(--er)}
+.lk[aria-disabled=true]{opacity:.45;pointer-events:none}
+.res{display:none;margin-top:18px;padding:13px 16px;border-radius:14px;font-size:13.5px;gap:10px;align-items:flex-start;overflow-wrap:anywhere}
+.res.on{display:flex;animation:pop .2s ease-out}
+.res svg{flex:none;width:20px;height:20px;margin-top:1px}
+.res.ok{background:var(--okt);color:var(--ok)}
+.res.er{background:var(--ert);color:var(--er)}
+.res.wt{background:var(--prt);color:var(--pr)}
+.res b{display:block;font-size:14px}
+.res span{color:var(--tx);opacity:.85}
+@keyframes pop{from{opacity:0;transform:translateY(-4px) scale(.98)}to{opacity:1;transform:none}}
+details.card>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:16px 22px;font-weight:600;font-size:15px;border-radius:20px}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary .si{flex:none;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:var(--prt);color:var(--pr)}
+details.card>summary .si svg{width:18px;height:18px}
+details.card>summary .t{flex:1;min-width:0}
+details.card>summary .chv{flex:none;width:18px;height:18px;color:var(--mu);transition:transform .2s}
+details.card[open]>summary .chv{transform:rotate(180deg)}
+details.card[open]>summary{border-bottom:1px solid var(--bd);border-radius:20px 20px 0 0}
+.db{padding:18px 22px 22px}
+ol.st{list-style:none;counter-reset:s;margin:0;padding:0;display:grid;gap:14px}
+ol.st li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start}
+ol.st li::before{content:counter(s);width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--pr);background:var(--prt)}
+ol.st b{display:block;font-size:14px}
+ol.st p{margin:2px 0 0;color:var(--mu);font-size:13.5px}
+ol.st code{font:12.5px ui-monospace,Menlo,Consolas,monospace;background:var(--prt);color:var(--pr);padding:1px 6px;border-radius:6px}
+.note{margin-top:16px;padding:12px 14px;border-radius:14px;background:var(--wrt);color:var(--tx);font-size:13px}
+.codebar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.codebar span{font-size:13px;color:var(--mu)}
+.codebar .btn{height:36px;font-size:13px}
+pre.code{margin:0;max-width:100%;max-height:340px;overflow:auto;padding:14px 16px;border-radius:14px;background:#161b2b;color:#dfe6f7;font:12.5px/1.6 ui-monospace,Menlo,Consolas,monospace;tab-size:2}
+pre.code code{font:inherit}
+footer{max-width:760px;margin:0 auto;padding:0 16px 30px;text-align:center;color:var(--mu);font-size:12.5px}
+#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--tx);color:var(--card);padding:10px 18px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90vw;box-shadow:var(--sh2);z-index:50}
+#toast.on{opacity:1}
+@media(max-width:520px){.hero{gap:12px}.hic{width:48px;height:48px;border-radius:15px}h1{font-size:20px}.cb,.db{padding-left:16px;padding-right:16px}.ch,details.card>summary{padding-left:16px;padding-right:16px}.acts{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{.card{box-shadow:none}.btn,#toast,.dock{display:none}}
+/* Dock mengambang ala macOS */
+.dock{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;display:flex;align-items:flex-end;gap:10px;padding:8px 10px;border-radius:24px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.7);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);box-shadow:0 10px 34px rgba(30,45,90,.22),inset 0 1px 0 rgba(255,255,255,.65)}
+@media(prefers-color-scheme:dark){.dock{background:rgba(32,38,56,.55);border-color:rgba(255,255,255,.14);box-shadow:0 10px 34px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.1)}}
+.dock-item{position:relative;display:flex;flex-direction:column;align-items:center;text-decoration:none;color:#fff;transform-origin:bottom center;transition:transform .22s cubic-bezier(.3,1.5,.5,1)}
+.dock-ic{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#6c8cff,#3f6fe0 55%,#7a5ce0);box-shadow:0 4px 12px rgba(63,111,224,.45),inset 0 1px 0 rgba(255,255,255,.45)}
+.dock-ic svg{width:28px;height:28px}
+.dock-item:hover,.dock-item:focus-visible{transform:translateY(-8px) scale(1.28)}
+.dock-item:active{transform:translateY(-4px) scale(1.15)}
+.dock-item::after{content:"";width:4px;height:4px;border-radius:50%;background:var(--tx);opacity:.55;margin-top:4px}
+.dock-tip{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%) scale(.85);padding:4px 11px;border-radius:8px;background:rgba(40,46,64,.85);color:#fff;font-size:12px;font-weight:600;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s}
+.dock-item:hover .dock-tip,.dock-item:focus-visible .dock-tip{opacity:1;transform:translateX(-50%) scale(1)}
+.dock-item:focus-visible{outline:none}
+.dock-item:focus-visible .dock-ic{outline:2px solid var(--pr);outline-offset:3px}
+body{padding-bottom:96px}
+@media(prefers-reduced-motion:reduce){.dock-item,.dock-tip{transition:none}.dock-item:hover,.dock-item:focus-visible{transform:none}}
+</style>
+</head>
+<body>
+<header><div class="w">
+<div class="hero">
+<div class="hic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 16v-5M9.5 13l2.5-2.5 2.5 2.5"/></svg></div>
+<div><h1>Pengaturan Lokasi Simpan</h1><p class="sub">Tentukan folder Google Drive tujuan penyimpanan berkas. Berkas yang diunggah akan masuk ke folder ini lewat Google Apps Script.</p></div>
+</div>
+</div></header>
+
+<main><div class="w">
+
+<section class="card" aria-labelledby="h-set">
+<div class="ch"><h2 id="h-set">Tujuan penyimpanan</h2><span class="badge" id="badge">Belum disimpan</span></div>
+<div class="cb">
+
+<label class="f"><span>Link folder Google Drive</span>
+<div class="in" id="wF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>
+<input type="text" id="iF" placeholder="https://drive.google.com/drive/folders/..." autocomplete="off" spellcheck="false" inputmode="url"></div>
+<div class="hint" id="hF">Tempel link folder yang sudah dibagikan ke “Siapa saja yang memiliki link”.</div></label>
+
+<label class="f"><span>URL Web App Apps Script</span>
+<div class="in" id="wS"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>
+<input type="text" id="iS" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off" spellcheck="false" inputmode="url"></div>
+<div class="hint" id="hS">Salin dari Terapkan &gt; Aplikasi web. Berakhiran /exec.</div></label>
+
+<label class="f"><span>Kunci rahasia <em>opsional</em></span>
+<div class="in pw" id="wT"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+<input type="password" id="iT" placeholder="Sama dengan TOKEN di kode script" autocomplete="off" spellcheck="false"><button type="button" class="eye" id="eye">Tampilkan</button></div>
+<div class="hint">Isi hanya jika kamu mengisi <code>TOKEN</code> di kode script.</div></label>
+
+<div class="acts">
+<button type="button" class="btn" id="bTest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1" fill="currentColor"/></svg><span>Uji koneksi</span></button>
+<button type="button" class="btn pri" id="bSave"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Simpan pengaturan</span></button>
+</div>
+
+<div class="res" id="res" role="status" aria-live="polite"></div>
+
+<div class="sec">
+<a class="lk" id="bOpen" href="#" target="_blank" rel="noopener" aria-disabled="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Buka folder</a>
+<button type="button" class="lk dg" id="bReset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12M9 7V4h6v3"/></svg>Hapus pengaturan</button>
+</div>
+
+</div>
+</section>
+
+<details class="card">
+<summary><span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v.01M11 12h1v4h1"/></svg></span><span class="t">Cara menyiapkan Google Drive dan script</span><svg class="chv" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8l5 5 5-5"/></svg></summary>
+<div class="db">
+<ol class="st">
+<li><div><b>Buat dan bagikan folder</b><p>Di Google Drive, buat folder tujuan. Klik kanan folder &gt; Bagikan &gt; Akses umum &gt; pilih <code>Siapa saja yang memiliki link</code> sebagai Pelihat. Salin link folder dan tempel di kolom pertama.</p></div></li>
+<li><div><b>Pasang kode script</b><p>Buka <code>script.google.com</code>, buat proyek baru, hapus isi bawaan, lalu tempel kode dari bagian “Kode Google Apps Script” di bawah.</p></div></li>
+<li><div><b>Terapkan sebagai aplikasi web</b><p>Klik Terapkan &gt; Penerapan baru &gt; Aplikasi web. Atur <code>Jalankan sebagai: Saya</code> dan <code>Yang memiliki akses: Siapa saja</code>. Izinkan akses Google Drive, lalu salin URL yang berakhiran <code>/exec</code>.</p></div></li>
+<li><div><b>Tempel URL dan uji</b><p>Tempel URL di kolom kedua, klik Uji koneksi. Jika nama folder muncul, klik Simpan pengaturan.</p></div></li>
+</ol>
+<div class="note">Setelah mengubah kode script, buat Penerapan baru agar perubahan berlaku di URL /exec. Folder harus milik akun yang menerapkan script, atau dibagikan ke akun itu sebagai Editor.</div>
+</div>
+</details>
+
+<details class="card">
+<summary><span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg></span><span class="t">Kode Google Apps Script</span><svg class="chv" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8l5 5 5-5"/></svg></summary>
+<div class="db">
+<div class="codebar"><span>Tempel di editor script (Code.gs)</span><button type="button" class="btn" id="bCopy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg><span>Salin kode</span></button></div>
+<pre class="code" tabindex="0"><code id="gs">/**
+ * Upload Berkas ke Google Drive (PKKS)
+ *
+ * CARA PASANG
+ * 1. Buka https://script.google.com &gt; Proyek baru, hapus isi bawaan, tempel seluruh kode ini.
+ * 2. Klik Terapkan (Deploy) &gt; Penerapan baru (New deployment) &gt; jenis "Aplikasi web" (Web app).
+ *      - Jalankan sebagai (Execute as)  : Saya (Me)
+ *      - Yang memiliki akses (Access)   : Siapa saja (Anyone)
+ * 3. Klik Terapkan, izinkan akses Google Drive, lalu salin "URL aplikasi web" (berakhiran /exec).
+ * 4. Tempel URL itu di halaman Pengaturan Lokasi Simpan, bersama link folder Google Drive.
+ *
+ * Setiap kali kode ini diubah, buat Penerapan baru (atau Kelola penerapan &gt; Edit &gt; Versi baru)
+ * agar perubahan berlaku di URL /exec.
+ */
+
+// Kunci rahasia (opsional). Jika diisi, halaman harus mengirim kunci yang sama.
+const TOKEN = '';
+
+// ID folder bawaan (opsional). Dipakai bila halaman tidak mengirim folderId.
+const FOLDER_ID_DEFAULT = '';
+
+// true = file yang diunggah dibuat "Siapa saja yang memiliki link" (hanya melihat)
+const SHARE_ANYONE = true;
+
+function out_(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function auth_(token) {
+  if (TOKEN &amp;&amp; token !== TOKEN) throw new Error('Kunci rahasia tidak cocok.');
+}
+
+function folder_(id, sub) {
+  id = id || FOLDER_ID_DEFAULT;
+  if (!id) throw new Error('ID folder kosong.');
+  var folder = DriveApp.getFolderById(id);
+  if (sub) {
+    sub = String(sub).replace(/[\\\/:*?"&lt;&gt;|]/g, '-').trim().slice(0, 80);
+    if (sub) {
+      var it = folder.getFoldersByName(sub);
+      folder = it.hasNext() ? it.next() : folder.createFolder(sub);
+    }
+  }
+  return folder;
+}
+
+// Uji koneksi: ?folderId=...&amp;token=...
+function doGet(e) {
+  try {
+    var p = (e &amp;&amp; e.parameter) || {};
+    auth_(p.token);
+    var f = folder_(p.folderId);
+    return out_({ ok: true, folderId: f.getId(), folderName: f.getName(), url: f.getUrl() });
+  } catch (err) {
+    return out_({ ok: false, error: String(err &amp;&amp; err.message || err) });
+  }
+}
+
+// Unggah file. Body JSON (dikirim sebagai text/plain):
+// { folderId, token, name, mimeType, data (base64), subfolder (opsional) }
+function doPost(e) {
+  try {
+    var d = JSON.parse(e.postData.contents);
+    auth_(d.token);
+
+    if (!d.name || !d.data) throw new Error('Nama atau isi file kosong.');
+
+    var bytes = Utilities.base64Decode(d.data);
+    var blob = Utilities.newBlob(bytes, d.mimeType || 'application/octet-stream', d.name);
+    var file = folder_(d.folderId, d.subfolder).createFile(blob);
+
+    if (SHARE_ANYONE) {
+      try {
+        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      } catch (x) { /* dibatasi kebijakan domain: abaikan */ }
+    }
+
+    return out_({
+      ok: true,
+      id: file.getId(),
+      name: file.getName(),
+      size: file.getSize(),
+      url: file.getUrl(),
+      downloadUrl: 'https://drive.google.com/uc?export=download&amp;id=' + file.getId()
+    });
+  } catch (err) {
+    return out_({ ok: false, error: String(err &amp;&amp; err.message || err) });
+  }
+}</code></pre>
+</div>
+</details>
+
+</div></main>
+<nav class="dock" aria-label="Navigasi cepat">
+<a class="dock-item" href="dasboradmin.html" aria-label="Beranda">
+<span class="dock-tip">Beranda</span>
+<span class="dock-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5L12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg></span>
+</a>
+</nav>
+<footer>Pengaturan tersimpan di peramban perangkat ini (kunci <code>pkks_loc</code>).</footer>
+<div id="toast" role="status"></div>
+
+<script>
+const K='pkks_loc',$=s=>document.querySelector(s);
+const ICON={
+ ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg>',
+ er:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5M12 16v.01"/></svg>',
+ wt:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9"/></svg>'
+};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2600)};
+const iF=$('#iF'),iS=$('#iS'),iT=$('#iT');
+
+function folderId(v){
+ v=(v||'').trim();if(!v)return '';
+ let m=v.match(/\/folders\/([\w-]{10,})/)||v.match(/[?&]id=([\w-]{10,})/);
+ if(m)return m[1];
+ return /^[\w-]{20,}$/.test(v)?v:'';
+}
+const scriptOk=v=>/^https:\/\/script\.google\.com\/.+\/exec\/?$/.test((v||'').trim());
+
+function load(){try{return JSON.parse(localStorage.getItem(K)||'null')}catch(e){return null}}
+function store(o){try{localStorage.setItem(K,JSON.stringify(o));return true}catch(e){return false}}
+
+function setHint(id,wrap,state,html){
+ const h=$(id),w=$(wrap);h.className='hint'+(state==='ok'?' ok':state==='er'?' er':'');h.innerHTML=html;
+ w.classList.toggle('good',state==='ok');w.classList.toggle('bad',state==='er');
+}
+function checkF(){
+ const v=iF.value.trim(),id=folderId(v);
+ if(!v){setHint('#hF','#wF','','Tempel link folder yang sudah dibagikan ke “Siapa saja yang memiliki link”.')}
+ else if(id){setHint('#hF','#wF','ok','Folder terdeteksi. ID: <code>'+esc(id)+'</code>')}
+ else if(/\/file\/d\//.test(v)){setHint('#hF','#wF','er','Ini link file, bukan folder. Buka folder di Drive, lalu salin link-nya.')}
+ else{setHint('#hF','#wF','er','Link folder tidak dikenali. Contoh: https://drive.google.com/drive/folders/ID_FOLDER')}
+ const o=$('#bOpen');
+ o.setAttribute('aria-disabled',id?'false':'true');o.href=id?'https://drive.google.com/drive/folders/'+id:'#';
+}
+function checkS(){
+ const v=iS.value.trim();
+ if(!v)setHint('#hS','#wS','','Salin dari Terapkan > Aplikasi web. Berakhiran /exec.');
+ else if(scriptOk(v))setHint('#hS','#wS','ok','URL Web App valid.');
+ else setHint('#hS','#wS','er','URL harus diawali https://script.google.com/ dan berakhiran /exec.');
+}
+function badge(saved){const b=$('#badge');b.textContent=saved?'Tersimpan':'Belum disimpan';b.classList.toggle('on',!!saved)}
+function showRes(type,title,msg){
+ const r=$('#res');r.className='res on '+type;
+ r.innerHTML=ICON[type]+'<div><b>'+esc(title)+'</b>'+(msg?'<span>'+esc(msg)+'</span>':'')+'</div>';
+}
+function hideRes(){$('#res').className='res'}
+
+function valid(){
+ if(!folderId(iF.value)){checkF();if(!iF.value.trim())setHint('#hF','#wF','er','Link folder wajib diisi.');iF.focus();return false}
+ if(!scriptOk(iS.value)){checkS();if(!iS.value.trim())setHint('#hS','#wS','er','URL Web App wajib diisi.');iS.focus();return false}
+ return true;
+}
+
+iF.addEventListener('input',()=>{checkF();hideRes()});
+iS.addEventListener('input',()=>{checkS();hideRes()});
+$('#eye').onclick=()=>{const s=iT.type==='password';iT.type=s?'text':'password';$('#eye').textContent=s?'Sembunyikan':'Tampilkan'};
+
+$('#bSave').onclick=()=>{
+ if(!valid())return;
+ const o={folderLink:iF.value.trim(),folderId:folderId(iF.value),scriptUrl:iS.value.trim().replace(/\/$/,''),token:iT.value,savedAt:Date.now()};
+ if(store(o)){badge(true);toast('Pengaturan disimpan.')}else toast('Gagal menyimpan. Penyimpanan peramban penuh atau diblokir.');
+};
+
+$('#bTest').onclick=async()=>{
+ if(!valid())return;
+ const b=$('#bTest'),lb=b.querySelector('span');b.disabled=true;lb.textContent='Menguji…';
+ showRes('wt','Menghubungi Google Apps Script…','Biasanya selesai dalam beberapa detik.');
+ const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),25000);
+ try{
+  const u=new URL(iS.value.trim());u.searchParams.set('folderId',folderId(iF.value));if(iT.value)u.searchParams.set('token',iT.value);
+  const r=await fetch(u.toString(),{signal:ctl.signal});
+  const d=await r.json();
+  if(d.ok)showRes('ok','Terhubung ke folder “'+d.folderName+'”','Berkas yang diunggah akan masuk ke folder ini.');
+  else{
+   let m=d.error||'Script menolak permintaan.';
+   if(/kunci/i.test(m))m='Kunci rahasia tidak cocok dengan TOKEN di script.';
+   else if(/getFolderById|not found|tidak ditemukan|permission|akses|access/i.test(m))m='Folder tidak ditemukan atau akun pemilik script tidak punya akses. Pastikan folder milik akun yang menerapkan script, atau bagikan ke akun itu sebagai Editor.';
+   showRes('er','Koneksi gagal',m);
+  }
+ }catch(e){
+  showRes('er','Web App tidak dapat dihubungi',e.name==='AbortError'?'Waktu tunggu habis. Coba lagi.':'Periksa URL /exec, pastikan akses diatur ke Siapa saja (Anyone), dan buat Penerapan baru setelah mengubah kode.');
+ }finally{clearTimeout(tm);b.disabled=false;lb.textContent='Uji koneksi'}
+};
+
+$('#bReset').onclick=()=>{
+ if(!confirm('Hapus pengaturan lokasi simpan dari perangkat ini?'))return;
+ try{localStorage.removeItem(K)}catch(e){}
+ iF.value=iS.value=iT.value='';checkF();checkS();hideRes();badge(false);toast('Pengaturan dihapus.');
+};
+$('#bOpen').addEventListener('click',e=>{if(e.currentTarget.getAttribute('aria-disabled')==='true')e.preventDefault()});
+
+$('#bCopy').onclick=async()=>{
+ const t=$('#gs').textContent;
+ try{await navigator.clipboard.writeText(t)}catch(e){
+  const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();
+  try{document.execCommand('copy')}catch(x){}a.remove();
+ }
+ toast('Kode disalin.');
+};
+
+const s0=load();
+if(s0){iF.value=s0.folderLink||'';iS.value=s0.scriptUrl||'';iT.value=s0.token||'';badge(true)}
+else{iF.value='https://drive.google.com/drive/folders/1mI78gt8xf027FwAy3LjO_fAzaliJ2fHg?usp=sharing';iS.value='https://script.google.com/macros/s/AKfycbxTSUk3yw4JhNoX9Uq4dIkI0VwpdJvPijPBbNgAjD6S-Z7FsCBe4zohRSH-Tt9NOjLR/exec'}
+checkF();checkS();
+</script>
+</body>
+</html>
