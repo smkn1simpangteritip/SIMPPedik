@@ -297,6 +297,7 @@ li .sy.wt{background:var(--prt);color:var(--pr);animation:syb 1s ease-in-out inf
 .lk-i em{margin-left:auto;font-style:normal;font-size:11px;color:var(--mu);white-space:nowrap}
 .lk-e{padding:16px;text-align:center;font-size:13px;color:var(--mu)}
 .am-ft .am-ok:disabled{opacity:.5;cursor:not-allowed}
+.ib.edb{color:var(--pr)}.ib.edb:hover,.ib.edb:focus-visible{background:var(--prt)}
 </style>
 </head>
 <body>
@@ -321,7 +322,7 @@ li .sy.wt{background:var(--prt);color:var(--pr);animation:syb 1s ease-in-out inf
 <div id="toast" role="status"></div>
 <div class="mo" id="co" hidden><div class="mc cm" role="dialog" aria-modal="true" aria-labelledby="cname"><div class="mh"><div class="mt"><b id="cname">Kamera</b><small id="cinfo">Arahkan kamera ke dokumen, lalu ambil foto.</small></div><button class="mx" id="ccl" type="button" aria-label="Tutup kamera">✕</button></div><div class="mb"><video id="cv" autoplay playsinline muted></video></div><div class="cth" id="cth" hidden></div><div class="cf"><button class="btn" id="csh" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.8"/></svg> Ambil Foto</button><button class="btn" id="cdn" type="button">Selesai</button></div></div></div>
 <div class="mo" id="mo" hidden><div class="mc" role="dialog" aria-modal="true" aria-labelledby="mname"><div class="mh"><div class="mt"><b id="mname"></b><small id="msize"></small></div><button class="btn" id="mdl" type="button">Unduh</button><button class="mx" id="mcl" type="button" aria-label="Tutup">✕</button></div><div class="mb" id="mbody"></div></div></div>
-<div class="mo" id="ao" hidden><div class="mc am" role="dialog" aria-modal="true" aria-labelledby="aot"><div class="am-hero"><button class="mx am-x" id="aox" type="button" aria-label="Tutup">✕</button><div class="am-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h8l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M14 2v5h5"/><path d="M12 11v6M9 14h6"/></svg></div><h3 id="aot">Tambah Item Berkas</h3><p>Buat item baru untuk mengunggah berkas bukti.</p><span class="am-tab" id="aotab"></span></div><div class="am-body"><label for="ain">Nama item berkas</label><div class="am-in" id="aowrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg><input type="text" id="ain" maxlength="100" placeholder="Contoh: Berita Acara Rapat Dewan Guru" autocomplete="off"></div><div class="am-meta"><span class="am-err" id="aerr" role="alert"></span><span id="acnt">0/100</span></div></div><div class="am-ft"><button class="btn" id="aocl" type="button">Batal</button><button class="btn am-ok" id="aoOk" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Tambah Item</button></div></div></div>
+<div class="mo" id="ao" hidden><div class="mc am" role="dialog" aria-modal="true" aria-labelledby="aot"><div class="am-hero"><button class="mx am-x" id="aox" type="button" aria-label="Tutup">✕</button><div class="am-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h8l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M14 2v5h5"/><path d="M12 11v6M9 14h6"/></svg></div><h3 id="aot">Tambah Item Berkas</h3><p id="aop">Buat item baru untuk mengunggah berkas bukti.</p><span class="am-tab" id="aotab"></span></div><div class="am-body"><label for="ain">Nama item berkas</label><div class="am-in" id="aowrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg><input type="text" id="ain" maxlength="100" placeholder="Contoh: Berita Acara Rapat Dewan Guru" autocomplete="off"></div><div class="am-meta"><span class="am-err" id="aerr" role="alert"></span><span id="acnt">0/100</span></div></div><div class="am-ft"><button class="btn" id="aocl" type="button">Batal</button><button class="btn am-ok" id="aoOk" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> <span id="aoLbl">Tambah Item</span></button></div></div></div>
 <div class="mo" id="lk" hidden><div class="mc am" role="dialog" aria-modal="true" aria-labelledby="lkt"><div class="am-hero"><button class="mx am-x" id="lkx" type="button" aria-label="Tutup">✕</button><div class="am-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></div><h3 id="lkt">Tautkan ke Item Lain</h3><p>Berkas yang sama dipakai di item lain tanpa mengunggah ulang ke Google Drive.</p></div><div class="am-body"><div class="lk-f" id="lkf"></div><input type="search" class="lk-s" id="lks" placeholder="Cari item atau tab…" autocomplete="off" aria-label="Cari item"><div class="lk-l" id="lkl"></div></div><div class="am-ft"><button class="btn" id="lkcl" type="button">Batal</button><button class="btn am-ok" id="lkok" type="button" disabled>Simpan</button></div></div></div>
 <script>
 const T=[
@@ -352,7 +353,7 @@ const open=()=>new Promise((res,rej)=>{const r=indexedDB.open('pkks_berkas',1);r
 const tx=(m,fn)=>new Promise((res,rej)=>{const t=db.transaction('f',m),s=t.objectStore('f'),q=fn(s);t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error)});
 // render
 const tabs=$('#tabs'),panels=$('#panels');
-function slotHTML(s,n){return `<div class="slot" data-k="${s.k}"><div class="sh"><span class="no">${n}</span><span class="t">${esc(s.label)}</span><span class="warn" role="img" aria-label="Berkas tidak ada" title="Berkas tidak ada">!</span><span class="cnt"></span><button type="button" class="ib rmb" data-a="rm" data-k="${s.k}" data-id="${s.custom||''}" data-tip="Hapus item" aria-label="Hapus item berkas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button><div class="dd"><button type="button" class="ddb" aria-haspopup="listbox" aria-expanded="false" aria-label="Status berkas"><span class="dot"></span><span class="ddl">Pilih status</span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg></button><div class="ddm" role="listbox" hidden><button type="button" role="option" data-v="ada"><span class="ic">✓</span>Ada</button><button type="button" role="option" data-v="tidak"><span class="ic">✕</span>Tidak Ada</button><hr><button type="button" role="option" data-v=""><span class="ic">–</span>Kosongkan pilihan</button></div></div>${UP}</div>${s.mp?mpRow():''}<ul></ul></div>`}
+function slotHTML(s,n){return `<div class="slot" data-k="${s.k}"><div class="sh"><span class="no">${n}</span><span class="t">${esc(s.label)}</span><span class="warn" role="img" aria-label="Berkas tidak ada" title="Berkas tidak ada">!</span><span class="cnt"></span>${s.custom?`<button type="button" class="ib edb" data-a="ed" data-k="${s.k}" data-id="${s.custom}" data-tip="Ubah nama item" aria-label="Ubah nama item berkas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>`:''}<button type="button" class="ib rmb" data-a="rm" data-k="${s.k}" data-id="${s.custom||''}" data-tip="Hapus item" aria-label="Hapus item berkas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button><div class="dd"><button type="button" class="ddb" aria-haspopup="listbox" aria-expanded="false" aria-label="Status berkas"><span class="dot"></span><span class="ddl">Pilih status</span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg></button><div class="ddm" role="listbox" hidden><button type="button" role="option" data-v="ada"><span class="ic">✓</span>Ada</button><button type="button" role="option" data-v="tidak"><span class="ic">✕</span>Tidak Ada</button><hr><button type="button" role="option" data-v=""><span class="ic">–</span>Kosongkan pilihan</button></div></div>${UP}</div>${s.mp?mpRow():''}<ul></ul></div>`}
 function build(){
  tabs.innerHTML=T.map((t,i)=>`<button class="tab" role="tab" id="tb${i}" data-t="${i}" aria-selected="${i==cur}">${esc(t.n)} <i id="tc${i}">0/0</i></button>`).join('');
  panels.innerHTML=T.map((t,i)=>{
@@ -725,20 +726,33 @@ panels.addEventListener('dragleave',e=>{const s=e.target.closest('.slot');if(s)s
 panels.addEventListener('drop',e=>{const s=e.target.closest('.slot');if(!s)return;e.preventDefault();s.classList.remove('drag');add(s.dataset.k,[...e.dataTransfer.files])});
 
 // modal Tambah Item Berkas
-let at=0,af=null;
+let at=0,af=null,ed=null;
 const ain=$('#ain'),aw=$('#aowrap'),aerr=$('#aerr');
-function openAdd(t){at=t;af=document.activeElement;$('#aotab').textContent=T[t].n;ain.value='';$('#acnt').textContent='0/100';aerr.textContent='';aw.classList.remove('err');$('#ao').hidden=false;document.body.style.overflow='hidden';setTimeout(()=>ain.focus(),60)}
+function setAddMode(e){ed=e;$('#aot').textContent=e?'Ubah Nama Item':'Tambah Item Berkas';$('#aop').textContent=e?'Perbaiki nama item. Berkas yang sudah ada di item ini tetap terhubung.':'Buat item baru untuk mengunggah berkas bukti.';$('#aoLbl').textContent=e?'Simpan Perubahan':'Tambah Item'}
+function openEdit(k,id){
+ const t=+k.split('.')[0],sl=T[t]?slots(t).find(x=>x.k===k):null;if(!sl)return;
+ setAddMode({k,id,old:sl.label});openAdd(t,true);ain.value=sl.label;$('#acnt').textContent=sl.label.length+'/100';setTimeout(()=>{ain.focus();ain.select()},80);
+}
+function openAdd(t,keep){if(!keep)setAddMode(null);at=t;af=document.activeElement;$('#aotab').textContent=T[t].n;ain.value='';$('#acnt').textContent='0/100';aerr.textContent='';aw.classList.remove('err');$('#ao').hidden=false;document.body.style.overflow='hidden';setTimeout(()=>ain.focus(),60)}
 function closeAdd(){$('#ao').hidden=true;document.body.style.overflow='';if(af&&af.focus)af.focus()}
 async function submitAdd(){
  const l=ain.value.trim();
  if(!l){aerr.textContent='Nama item wajib diisi.';aw.classList.add('err');aw.classList.remove('shake');void aw.offsetWidth;aw.classList.add('shake');ain.focus();return}
- if(slots(at).some(x=>x.label.toLowerCase()===l.toLowerCase())){aerr.textContent='Item dengan nama ini sudah ada di tab ini.';aw.classList.add('err');ain.focus();return}
+ if(slots(at).some(x=>x.label.toLowerCase()===l.toLowerCase()&&(!ed||x.k!==ed.k))){aerr.textContent='Item dengan nama ini sudah ada di tab ini.';aw.classList.add('err');ain.focus();return}
+ if(ed&&l===ed.old){closeAdd();return}
  if(submitAdd.b)return;submitAdd.b=1;$('#aoOk').disabled=true;
  try{
+  if(ed){
+   // fungsi database: mengubah nama item DAN semua berkas yang tercatat di item itu secara bersamaan
+   await sb('rpc/ganti_nama_item',{method:'POST',headers:SBJ('return=minimal'),body:JSON.stringify({p_id:+ed.id,p_baru:l})});
+   await loadMeta();build();closeAdd();toast('Nama item diubah menjadi "'+l+'".');
+   loadRemote();
+  }else{
   await createItems([{tab:T[at].n,label:l}]);
   await loadMeta();build();closeAdd();toast('Item berkas ditambahkan dan tersimpan di database.');
   loadRemote();
- }catch(e){aerr.textContent='Gagal menyimpan item: '+errMsg(e);aw.classList.add('err')}
+  }
+ }catch(e){aerr.textContent='Gagal menyimpan item: '+errMsg(e)+(/PGRST202|ganti_nama_item/i.test(errMsg(e))?' Jalankan ulang file supabase_berkas_lengkap.sql.':'');aw.classList.add('err')}
  finally{submitAdd.b=0;$('#aoOk').disabled=false}
 }
 ain.addEventListener('input',()=>{$('#acnt').textContent=ain.value.length+'/100';aerr.textContent='';aw.classList.remove('err')});
@@ -749,6 +763,7 @@ panels.addEventListener('click',async e=>{
  const a=e.target.closest('[data-a]');if(!a)return;e.preventDefault();
  const act=a.dataset.a;
  if(act==='add'){openAdd(+a.dataset.t);return}
+ if(act==='ed'){openEdit(a.dataset.k,a.dataset.id);return}
  if(act==='restore'){
   const t=+a.dataset.t,ks=T[t].items.map((_,j)=>`${t}.p${j}`).filter(k=>M.s[k]==='hapus');
   if(!ks.length)return;
