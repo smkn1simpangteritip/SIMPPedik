@@ -333,7 +333,6 @@ function valid(){
 iF.addEventListener('input',()=>{checkF();hideRes()});
 iS.addEventListener('input',()=>{checkS();hideRes()});
 $('#eye').onclick=()=>{const s=iT.type==='password';iT.type=s?'text':'password';$('#eye').textContent=s?'Sembunyikan':'Tampilkan'};
-
 $('#bSave').onclick=()=>{
  if(!valid())return;
  const o={folderLink:iF.value.trim(),folderId:folderId(iF.value),scriptUrl:iS.value.trim().replace(/\/$/,''),token:iT.value,savedAt:Date.now()};
