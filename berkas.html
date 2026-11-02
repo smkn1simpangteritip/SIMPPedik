@@ -286,6 +286,17 @@ li .sy.wt{background:var(--prt);color:var(--pr);animation:syb 1s ease-in-out inf
 .slot:has(.ddm:not([hidden])),.slot:has(.upm:not([hidden])){z-index:60}
 .ddm,.upm{z-index:70}
 .ib.rmb{color:var(--er)}.ib.rmb:hover,.ib.rmb:focus-visible{background:var(--ert);border-color:color-mix(in srgb,var(--er) 35%,transparent)}
+.lk-f{display:flex;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--bd);border-radius:12px;background:var(--bg);font-size:13px;font-weight:600;margin-bottom:10px;min-width:0}
+.lk-f .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lk-s{width:100%;box-sizing:border-box;height:38px;padding:0 12px;border:1px solid var(--bd2);border-radius:12px;background:var(--card);color:var(--tx);font:inherit;font-size:13px;margin-bottom:8px}
+.lk-l{max-height:40vh;overflow:auto;border:1px solid var(--bd);border-radius:12px;overscroll-behavior:contain}
+.lk-g{position:sticky;top:0;z-index:1;background:var(--prt);color:var(--pr);font-size:12px;font-weight:700;padding:6px 12px}
+.lk-i{display:flex;align-items:center;gap:10px;padding:9px 12px;font-size:13px;cursor:pointer;border-top:1px solid var(--bd)}
+.lk-i:hover{background:var(--bg)}.lk-i.dis{opacity:.55;cursor:default}
+.lk-i input{width:17px;height:17px;flex:none;accent-color:var(--pr)}
+.lk-i em{margin-left:auto;font-style:normal;font-size:11px;color:var(--mu);white-space:nowrap}
+.lk-e{padding:16px;text-align:center;font-size:13px;color:var(--mu)}
+.am-ft .am-ok:disabled{opacity:.5;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -311,6 +322,7 @@ li .sy.wt{background:var(--prt);color:var(--pr);animation:syb 1s ease-in-out inf
 <div class="mo" id="co" hidden><div class="mc cm" role="dialog" aria-modal="true" aria-labelledby="cname"><div class="mh"><div class="mt"><b id="cname">Kamera</b><small id="cinfo">Arahkan kamera ke dokumen, lalu ambil foto.</small></div><button class="mx" id="ccl" type="button" aria-label="Tutup kamera">✕</button></div><div class="mb"><video id="cv" autoplay playsinline muted></video></div><div class="cth" id="cth" hidden></div><div class="cf"><button class="btn" id="csh" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.8"/></svg> Ambil Foto</button><button class="btn" id="cdn" type="button">Selesai</button></div></div></div>
 <div class="mo" id="mo" hidden><div class="mc" role="dialog" aria-modal="true" aria-labelledby="mname"><div class="mh"><div class="mt"><b id="mname"></b><small id="msize"></small></div><button class="btn" id="mdl" type="button">Unduh</button><button class="mx" id="mcl" type="button" aria-label="Tutup">✕</button></div><div class="mb" id="mbody"></div></div></div>
 <div class="mo" id="ao" hidden><div class="mc am" role="dialog" aria-modal="true" aria-labelledby="aot"><div class="am-hero"><button class="mx am-x" id="aox" type="button" aria-label="Tutup">✕</button><div class="am-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h8l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M14 2v5h5"/><path d="M12 11v6M9 14h6"/></svg></div><h3 id="aot">Tambah Item Berkas</h3><p>Buat item baru untuk mengunggah berkas bukti.</p><span class="am-tab" id="aotab"></span></div><div class="am-body"><label for="ain">Nama item berkas</label><div class="am-in" id="aowrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg><input type="text" id="ain" maxlength="100" placeholder="Contoh: Berita Acara Rapat Dewan Guru" autocomplete="off"></div><div class="am-meta"><span class="am-err" id="aerr" role="alert"></span><span id="acnt">0/100</span></div></div><div class="am-ft"><button class="btn" id="aocl" type="button">Batal</button><button class="btn am-ok" id="aoOk" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Tambah Item</button></div></div></div>
+<div class="mo" id="lk" hidden><div class="mc am" role="dialog" aria-modal="true" aria-labelledby="lkt"><div class="am-hero"><button class="mx am-x" id="lkx" type="button" aria-label="Tutup">✕</button><div class="am-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></div><h3 id="lkt">Tautkan ke Item Lain</h3><p>Berkas yang sama dipakai di item lain tanpa mengunggah ulang ke Google Drive.</p></div><div class="am-body"><div class="lk-f" id="lkf"></div><input type="search" class="lk-s" id="lks" placeholder="Cari item atau tab…" autocomplete="off" aria-label="Cari item"><div class="lk-l" id="lkl"></div></div><div class="am-ft"><button class="btn" id="lkcl" type="button">Batal</button><button class="btn am-ok" id="lkok" type="button" disabled>Simpan</button></div></div></div>
 <script>
 const T=[
 {n:"Kurikulum",items:["KSP","Program Pengembangan Sekolah","Daftar Hadir Rapat Pengembangan KSP","Berita Acara Rapat Pengembangan KSP","Notulen Rapat Pengembangan KSP","Dokumen KKTP","Juknis dan Aturan Ujian Pusat","POS Ujian Sekolah","Dokumen Rapat Kelulusan","Dokumen Arsip FotoKopi Ijazah","Prota dan Promes Mata Pelajaran","TP dan ATP Mata Pelajaran","Modul Pembelajaran","Buku Nilai","Ulangan Harian","Penilaian Jurnal","Penilaian Pengamatan","Penilaian Penugasan","Penilaian Portofolio","Penilaian Proyek","Laporan Kemajuan Hasil Belajar","Laporan Penilaian Formatif","Laporan Penilaian Akhir Semester","Penilaian Akhir Tahun","Ujian Sekolah","Ijazah Guru sesuai kualifikasi","Sertifikat Pendidik","SK Tenaga Perpustakaan","Sertifikat Pustakawan","SK Tenaga Laboran","Sertifikat kompetensi Laboran","SK Penjaga Sekolah","SK Tukang Kebun","SK Tenaga Kebersihan","SK Tenaga Keamanan"]},
@@ -360,7 +372,7 @@ function draw(k){
  if(ms)sl.querySelector('.mp').title=ms.value?'':'Pilih mata pelajaran dahulu untuk mengunggah';
  sl.classList.toggle('ok',st=='ada'||st=='tidak');sl.classList.toggle('miss',st=='tidak');
  sl.querySelector('.cnt').textContent=a.length?`✓ ${a.length} berkas`:'';
- sl.querySelector('ul').innerHTML=a.map(f=>`<li>${ftag(f.name)}<span class="n" title="${esc(f.name)}">${esc(f.name)}</span>${f.mapel?`<span class="mpc" title="Mata Pelajaran">${esc(f.mapel)}</span>`:''}${f.size!=null?`<span class="z">${sz(f.size)}</span>`:''}${sy(f)}${f.remote?'':`${f.sync==='ok'||f.sync==='pending'?'':RETRY(f.id)}<button type="button" class="ib v" data-a="v" data-id="${f.id}" data-tip="Preview" aria-label="Preview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button type="button" class="ib d" data-a="d" data-id="${f.id}" data-tip="Unduh" aria-label="Unduh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg></button><button type="button" class="ib x" data-a="x" data-id="${f.id}" data-k="${k}" data-tip="Hapus" aria-label="Hapus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></svg></button>`}</li>`).join('');
+ sl.querySelector('ul').innerHTML=a.map(f=>`<li>${ftag(f.name)}<span class="n" title="${esc(f.name)}">${esc(f.name)}</span>${f.mapel?`<span class="mpc" title="Mata Pelajaran">${esc(f.mapel)}</span>`:''}${f.size!=null?`<span class="z">${sz(f.size)}</span>`:''}${sy(f)}${f.sync==='ok'&&f.drive&&f.drive.url?`<button type="button" class="ib lk" data-a="lk" data-id="${f.id}" data-tip="Tautkan ke item lain" aria-label="Tautkan berkas ke item lain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></button>`:''}${f.remote&&f.tautan?`<button type="button" class="ib x" data-a="ul" data-id="${f.id}" data-k="${k}" data-tip="Lepas tautan" aria-label="Lepas tautan dari item ini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/><path d="M4 4l16 16"/></svg></button>`:''}${f.remote?'':`${f.sync==='ok'||f.sync==='pending'?'':RETRY(f.id)}<button type="button" class="ib v" data-a="v" data-id="${f.id}" data-tip="Preview" aria-label="Preview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button type="button" class="ib d" data-a="d" data-id="${f.id}" data-tip="Unduh" aria-label="Unduh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg></button><button type="button" class="ib x" data-a="x" data-id="${f.id}" data-k="${k}" data-tip="Hapus" aria-label="Hapus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></svg></button>`}</li>`).join('');
  prog();
 }
 function prog(){
@@ -454,17 +466,18 @@ function renderOrph(a){
 async function loadRemote(retry){
  try{
   if(await loadMeta())build();
-  const r=await fetch(SB_URL+'/'+SB_TABLE+'?select=id,nama_berkas,link_berkas,mapel,tab,item,created_at&order=created_at.asc&limit=1000',{headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}});
-  if(!r.ok){let d=null;try{d=await r.json()}catch(e){}const m=(d&&(d.message||d.hint))||('HTTP '+r.status);throw new Error(/column .*(tab|item)|42703|PGRST204/i.test(m)?'Kolom tab/item belum ada di tabel '+SB_TABLE+'. Jalankan ulang file SQL terbaru di Supabase.':m)}
+  const r=await fetch(SB_URL+'/'+SB_TABLE+'?select=id,nama_berkas,link_berkas,mapel,tab,item,tautan_dari,created_at&order=created_at.asc&limit=1000',{headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}});
+  if(!r.ok){let d=null;try{d=await r.json()}catch(e){}const m=(d&&(d.message||d.hint))||('HTTP '+r.status);throw new Error(/column .*(tab|item|tautan_dari)|42703|PGRST204/i.test(m)?'Kolom baru belum ada di tabel '+SB_TABLE+'. Jalankan ulang file supabase_berkas_lengkap.sql di Supabase.':m)}
   const rows=await r.json();
   for(const k in F)F[k]=F[k].filter(x=>!x.remote);
-  const have=new Set();for(const k in F)F[k].forEach(x=>{if(x.dbId)have.add('i'+x.dbId);if(x.drive&&x.drive.url)have.add('u'+x.drive.url)});
+  const have=new Set();for(const k in F)F[k].forEach(x=>{if(x.dbId)have.add('i'+x.dbId);if(x.drive&&x.drive.url){have.add('U'+x.drive.url);have.add('u'+x.drive.url+'|'+k)}});
   const touched=new Set(),orph=[];
   rows.forEach(w=>{
-   if(have.has('i'+w.id)||have.has('u'+w.link_berkas))return;
+   if(have.has('i'+w.id))return;
    const t=T.findIndex(x=>x.n===w.tab),sl=t<0?null:slots(t).find(x=>x.label===w.item);
+   if(sl?have.has('u'+w.link_berkas+'|'+sl.k):have.has('U'+w.link_berkas))return;
    if(!sl){orph.push(w);return}
-   (F[sl.k]=F[sl.k]||[]).push({id:'db-'+w.id,slot:sl.k,name:w.nama_berkas,size:null,mapel:w.mapel||'',at:Date.parse(w.created_at)||0,sync:'ok',drive:{url:w.link_berkas},dbId:String(w.id),remote:1});
+   (F[sl.k]=F[sl.k]||[]).push({id:'db-'+w.id,slot:sl.k,name:w.nama_berkas,size:null,mapel:w.mapel||'',at:Date.parse(w.created_at)||0,sync:'ok',drive:{url:w.link_berkas},dbId:String(w.id),remote:1,tautan:w.tautan_dari?1:0});
    touched.add(sl.k);
   });
   // berkas di database dengan item tambahan yang belum terdaftar -> daftarkan otomatis agar tampil di semua akun
@@ -551,6 +564,52 @@ $('#orph').addEventListener('click',async e=>{
  }catch(err){toast('Gagal menautkan: '+(err instanceof TypeError?'tidak dapat menghubungi Supabase.':err.message),5000)}
  finally{b.disabled=false}
 });
+
+// ===== Tautkan berkas yang sama ke item lain (tanpa unggah ulang; hanya baris baru di berkas_drive dengan link Drive yang sama) =====
+let lr=null,lf=null;const lkSel=new Set();
+function openLink(r){
+ lr=r;lf=document.activeElement;lkSel.clear();
+ $('#lkf').innerHTML=ftag(r.name)+'<span class="n" title="'+esc(r.name)+'">'+esc(r.name)+'</span>'+(r.mapel?'<span class="mpc">'+esc(r.mapel)+'</span>':'');
+ $('#lks').value='';renderLk();
+ $('#lk').hidden=false;document.body.style.overflow='hidden';setTimeout(()=>$('#lks').focus(),60);
+}
+function closeLink(){$('#lk').hidden=true;document.body.style.overflow='';lr=null;if(lf&&lf.focus)lf.focus()}
+function renderLk(){
+ if(!lr)return;
+ const q=$('#lks').value.trim().toLowerCase(),u=lr.drive.url,taken=new Set();
+ for(const k in F)F[k].forEach(x=>{if(x.drive&&x.drive.url===u)taken.add(k)});
+ let h='';
+ T.forEach((t,i)=>{
+  const it=slots(i).filter(x=>!q||x.label.toLowerCase().includes(q)||t.n.toLowerCase().includes(q));
+  if(!it.length)return;
+  h+='<div class="lk-g">'+esc(t.n)+'</div>'+it.map(x=>{
+   const tk=taken.has(x.k),nm=!tk&&x.mp&&!lr.mapel,dis=tk||nm;
+   return '<label class="lk-i'+(dis?' dis':'')+'"><input type="checkbox" value="'+x.k+'"'+(dis?' disabled':'')+(lkSel.has(x.k)?' checked':'')+'><span>'+esc(x.label)+'</span>'+(tk?'<em>Sudah terisi</em>':nm?'<em>Butuh mata pelajaran</em>':'')+'</label>'}).join('');
+ });
+ $('#lkl').innerHTML=h||'<div class="lk-e">Tidak ada item yang cocok.</div>';
+ updLk();
+}
+function updLk(){const b=$('#lkok');b.disabled=!lkSel.size||!!saveLink.b;b.lastChild.textContent=lkSel.size?' Simpan ('+lkSel.size+' item)':' Simpan'}
+async function saveLink(){
+ const r=lr;if(!r||!lkSel.size||saveLink.b)return;
+ const rows=[...lkSel].map(k=>{const t=+k.split('.')[0],sl=T[t]?slots(t).find(x=>x.k===k):null;if(!sl)return null;
+  const o={nama_berkas:r.name,link_berkas:r.drive.url,tab:T[t].n,item:sl.label};
+  if(r.mapel)o.mapel=r.mapel;
+  if(r.dbId&&/^\d+$/.test(String(r.dbId)))o.tautan_dari=+r.dbId;
+  return o}).filter(Boolean);
+ if(!rows.length)return;
+ saveLink.b=1;updLk();
+ try{
+  await sb('berkas_drive',{method:'POST',headers:SBJ('return=minimal'),body:JSON.stringify(rows)});
+  closeLink();toast(rows.length+' item berhasil ditautkan ke berkas "'+r.name+'".',4000);
+  await loadRemote();
+ }catch(e){toast('Gagal menautkan: '+errMsg(e)+(/tautan_dari|column|PGRST204/i.test(errMsg(e))?' Jalankan ulang file supabase_berkas_lengkap.sql.':''),6000)}
+ finally{saveLink.b=0;if(lr)updLk()}
+}
+$('#lks').addEventListener('input',renderLk);
+$('#lkl').addEventListener('change',e=>{const c=e.target;if(c.type!=='checkbox')return;if(c.checked)lkSel.add(c.value);else lkSel.delete(c.value);updLk()});
+$('#lkok').onclick=saveLink;$('#lkcl').onclick=closeLink;$('#lkx').onclick=closeLink;
+$('#lk').addEventListener('click',e=>{if(e.target.id==='lk')closeLink()});
 $('#bSync').onclick=async()=>{
  const list=[];for(const k in F)F[k].forEach(r=>{if(r.sync!=='ok'&&!r.busy)list.push(r)});
  let ok=0;for(const r of list)if(await sync(r))ok++;
@@ -660,7 +719,7 @@ panels.addEventListener('click',e=>{
  if(v)M.s[k]=v;else delete M.s[k];pushSlot(k);draw(k);
 });
 document.addEventListener('click',e=>{if(!e.target.closest('.dd,.up'))closeDD()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#ao').hidden)closeAdd();else if(!$('#co').hidden)closeCam();else if(!$('#mo').hidden)closeM();else closeDD()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#lk').hidden)closeLink();else if(!$('#ao').hidden)closeAdd();else if(!$('#co').hidden)closeCam();else if(!$('#mo').hidden)closeM();else closeDD()}});
 panels.addEventListener('dragover',e=>{const s=e.target.closest('.slot');if(s){e.preventDefault();s.classList.add('drag')}});
 panels.addEventListener('dragleave',e=>{const s=e.target.closest('.slot');if(s)s.classList.remove('drag')});
 panels.addEventListener('drop',e=>{const s=e.target.closest('.slot');if(!s)return;e.preventDefault();s.classList.remove('drag');add(s.dataset.k,[...e.dataTransfer.files])});
@@ -713,6 +772,16 @@ panels.addEventListener('click',async e=>{
   if(cid){delete M.s[k];M.c[t]=(M.c[t]||[]).filter(c=>c.id!=cid)}else M.s[k]='hapus';
   build();toast('Item "'+lb+'" dihapus.');return}
  const id=a.dataset.id;let r;for(const k in F){r=F[k].find(x=>x.id===id);if(r)break}
+ if(act==='lk'){if(r)openLink(r);return}
+ if(act==='ul'){
+  if(!r||!r.dbId)return;
+  if(!confirm('Lepas tautan berkas "'+r.name+'" dari item ini?\n\nBerkas asli di Google Drive dan di item lain tidak terhapus.'))return;
+  try{
+   const d=await sb('berkas_drive?id=eq.'+encodeURIComponent(r.dbId)+'&tautan_dari=not.is.null',{method:'DELETE',headers:SBH({Prefer:'return=representation'})});
+   if(!d||!d.length)throw new Error('Tidak diizinkan menghapus tautan. Jalankan ulang file supabase_berkas_lengkap.sql.');
+   const k=a.dataset.k;F[k]=(F[k]||[]).filter(x=>x.id!==r.id);draw(k);toast('Tautan dilepas.');
+  }catch(err){toast('Gagal melepas tautan: '+errMsg(err),6000)}
+  return}
  if(act==='r'){if(r&&!r.busy)sync(r).then(o=>toast(o?'Berkas tersimpan di Google Drive dan database':'Gagal: '+(r.err||'')));return}
  if(act==='x'){if(!confirm('Hapus berkas "'+r.name+'"?'+(r.drive?'\n\nBerkas di Google Drive dan data di database tidak ikut terhapus.':'')))return;await tx('readwrite',s=>s.delete(id));const k=a.dataset.k;F[k]=F[k].filter(x=>x.id!==id);draw(k);syncBar();return}
  if(act==='v'){view(r);return}
