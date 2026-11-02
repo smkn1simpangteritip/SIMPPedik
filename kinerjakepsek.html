@@ -171,7 +171,73 @@
         .ic-amber { background: linear-gradient(135deg, #f7971e, #ffb347); }
 
         /* --- Modal Kelola Berkas --- */
-        .kc { width: min(640px, 100%); height: auto; max-height: calc(100vh - 32px); }
+        .kc { width: min(720px, 100%); height: min(86vh, 720px); max-height: calc(100vh - 32px); }
+        /* Tab kategori */
+        .ktw { display: flex; align-items: center; min-width: 0; flex: none; background: #f6f7fc; border-bottom: 1px solid #eee; padding: 0 8px; gap: 4px; }
+        .ktabs { flex: 1; min-width: 0; display: flex; gap: 8px; padding: 12px 6px; overflow-x: auto; scrollbar-width: none; scroll-behavior: smooth; }
+        .ktabs::-webkit-scrollbar { display: none; }
+        .kar { flex: none; width: 32px; height: 32px; border-radius: 50%; border: 1px solid #d9dcec; background: #fff; color: #555; font-size: 0.8rem; cursor: pointer; display: grid; place-items: center; box-shadow: 0 2px 6px rgba(0,0,0,.08); transition: background .15s, color .15s, border-color .15s, opacity .15s; }
+        .kar:hover:not(:disabled) { background: var(--ka, var(--primary-color)); border-color: var(--ka, var(--primary-color)); color: #fff; }
+        .kar:focus-visible { outline: 2px solid var(--ka, var(--primary-color)); outline-offset: 2px; }
+        .kar:disabled { opacity: .35; cursor: default; box-shadow: none; }
+        .kar[hidden] { display: none; }
+        .ktab { --tc: #667eea; --tc2: #764ba2; --tl: #eef0ff; --tb: #d5daf7; --tt: #4b5bd0;
+            flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 14px; font: inherit; font-size: 0.84rem; font-weight: 600; white-space: nowrap; cursor: pointer;
+            color: var(--tt); background: var(--tl); border: 1.5px solid var(--tb); border-radius: 999px; opacity: .9;
+            transition: transform .15s, box-shadow .15s, background .15s, color .15s, border-color .15s, opacity .15s; }
+        .ktab:hover { opacity: 1; border-color: var(--tc); transform: translateY(-1px); }
+        .ktab:focus-visible { outline: 2px solid var(--tc); outline-offset: 2px; }
+        .ktab em { font-style: normal; font-size: 0.72rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: #fff; color: var(--tt); }
+        .ktab.full em::before { content: "\2713\00a0"; }
+        .ktab.on { color: #fff; opacity: 1; background: linear-gradient(135deg, var(--tc), var(--tc2)); border-color: transparent; transform: translateY(-1px);
+            box-shadow: 0 6px 14px -3px var(--tc), 0 0 0 3px rgba(255,255,255,.9); }
+        .ktab.on em { background: rgba(255,255,255,.28); color: #fff; }
+        /* Ringkasan + tambah item */
+        .kbar { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+        .kprog { flex: 1; min-width: 0; }
+        .kprog b { display: block; font-size: 0.82rem; color: #555; margin-bottom: 5px; }
+        .ktrack { height: 6px; border-radius: 99px; background: #e8eaf3; overflow: hidden; }
+        .ktrack i { display: block; height: 100%; width: 0; border-radius: 99px; background: linear-gradient(90deg, var(--ka, var(--primary-color)), var(--ka2, #10b981)); transition: width .3s; }
+        .kaddbtn { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border: 1px dashed var(--ka, var(--primary-color)); border-radius: 8px; background: #fff; color: var(--ka, var(--primary-color)); font: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+        .kaddbtn:hover { background: #eef1ff; }
+        /* Daftar item (accordion) */
+        .kitems { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .kit { border: 1px solid #e6e8f2; border-radius: 10px; background: #fff; overflow: hidden; transition: border-color .15s, box-shadow .15s; }
+        .kit:hover { border-color: #c9cffa; }
+        .kit.open { border-color: var(--ka, var(--primary-color)); box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+        .kit-h { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: none; border: 0; font: inherit; text-align: left; cursor: pointer; }
+        .kit-h:focus-visible { outline: 2px solid var(--primary-color); outline-offset: -2px; }
+        .kdot { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 0.7rem; background: #fff4d6; color: #c98a00; }
+        .kdot.ada { background: #d9f5e8; color: #0a8a52; }
+        .kdot.tidak { background: #fde4e1; color: #d63b2d; }
+        .kit-n { flex: 1; min-width: 0; font-size: 0.88rem; font-weight: 600; color: #333; line-height: 1.35; }
+        .kit-c { flex: none; font-size: 0.75rem; font-weight: 600; color: #667eea; background: #eef1ff; padding: 3px 9px; border-radius: 99px; }
+        .kit-ch { flex: none; color: #aaa; font-size: 0.75rem; transition: transform .2s; }
+        .kit.open .kit-ch { transform: rotate(180deg); color: var(--ka, var(--primary-color)); }
+        .kit-b { display: none; padding: 4px 14px 14px; border-top: 1px dashed #e6e8f2; }
+        .kit.open .kit-b { display: block; padding-top: 14px; }
+        /* Berkas yang sudah tersimpan + pratinjau */
+        .kfiles { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+        .kfi { border: 1px solid #e6e8f2; border-radius: 10px; background: #fafbff; overflow: hidden; }
+        .kfi.open { border-color: var(--primary-color); }
+        .kfi-h { display: flex; align-items: center; gap: 10px; padding: 8px 10px; font-size: 0.85rem; }
+        .kfi-h > i { color: var(--primary-color); font-size: 1.05rem; }
+        .kfi-n { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; color: #333; }
+        .kfi-n em { display: block; font-style: normal; font-weight: 500; font-size: 0.74rem; color: #888; overflow: hidden; text-overflow: ellipsis; }
+        .kfi-b { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid #d5daf7; border-radius: 7px; background: #fff; color: var(--primary-color); font: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+        .kfi-b:hover, .kfi.open .kfi-b { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+        .kfi-o { flex: none; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 7px; color: #777; text-decoration: none; font-size: 0.85rem; }
+        .kfi-o:hover { background: #eceef7; color: var(--primary-color); }
+        .kfi-p { display: none; border-top: 1px solid #e6e8f2; background: #f0f1f6; }
+        .kfi.open .kfi-p { display: block; }
+        .kfi-p iframe { display: block; width: 100%; height: 380px; border: 0; background: #fff; }
+        .kfi-h .fa-file-pdf { color: #e74c3c; } .kfi-h .fa-file-image { color: #10b981; }
+        @media (max-width: 520px) { .kfi-b span { display: none; } .kfi-p iframe { height: 300px; } }
+        .ptw { border: 1px solid #eceef7; border-radius: 12px; margin-bottom: 18px; }
+        .ptw .ktabs { padding: 10px 6px; }
+        .ktab i.pi { font-size: 0.8rem; }
+        .kempty { text-align: center; color: #888; font-size: 0.88rem; padding: 28px 10px; border: 1px dashed #dcdfee; border-radius: 10px; }
+        @media (max-width: 520px) { .kbar { flex-direction: column; align-items: stretch; gap: 10px; } .kaddbtn { justify-content: center; } .ktw { padding: 0 4px; } .kar { width: 28px; height: 28px; } }
         .kb { padding: 18px 20px; overflow-y: auto; flex: 1; min-height: 0; }
         .kgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 14px; }
         .kf { display: flex; flex-direction: column; gap: 5px; font-size: 0.8rem; font-weight: 600; color: #666; }
@@ -240,7 +306,7 @@
 
         @media print {
             body { height: auto; overflow: visible; background: #fff; display: block; }
-            .navbar, .dock, .filter-container, .mo, #toast { display: none !important; }
+            .navbar, .dock, .filter-container, .ptw, .mo, #toast { display: none !important; }
             .main-content { margin-top: 0; padding: 0; overflow: visible; }
             .card, .stat-card { box-shadow: none; border: 1px solid #ccc; transform: none !important; break-inside: avoid; }
             .card-dark { background: #fff; color: #000; }
@@ -325,7 +391,7 @@
 
             <div class="filter-container">
                 <input type="text" class="form-control" id="fNama" placeholder="Cari item / berkas..." aria-label="Cari">
-                <select class="form-control" id="fKat" aria-label="Filter kategori"><option value="">-- Semua Kategori --</option></select>
+                <select id="fKat" hidden aria-hidden="true" tabindex="-1" style="display:none"><option value="">-- Semua Kategori --</option></select>
                 <select class="form-control" id="fStatus" aria-label="Filter status">
                     <option value="">-- Semua Status --</option>
                     <option value="ada">Ada</option>
@@ -335,6 +401,11 @@
                 <button class="btn-primary" id="btnPrint" type="button" style="background-color: #ef4444;"><i class="fas fa-print"></i> Cetak</button>
             </div>
 
+            <div class="ktw ptw" id="pw">
+                <button type="button" class="kar" id="pArL" aria-label="Geser tab ke kiri" title="Geser ke kiri"><i class="fas fa-chevron-left"></i></button>
+                <div class="ktabs" id="pTabs" role="tablist" aria-label="Kategori pemberkasan"></div>
+                <button type="button" class="kar" id="pArR" aria-label="Geser tab ke kanan" title="Geser ke kanan"><i class="fas fa-chevron-right"></i></button>
+            </div>
             <div id="groups"><div class="empty">Memuat data pemberkasan...</div></div>
         </div>
 
@@ -359,42 +430,53 @@
     <div class="mo" id="ko" hidden>
         <div class="mc kc" role="dialog" aria-modal="true" aria-labelledby="kt">
             <div class="mh">
-                <div class="mt"><b id="kt"><i class="fas fa-folder-plus" style="color:var(--primary-color);margin-right:8px;"></i>Kelola Berkas PKKS</b><small>Unggah berkas bukti dan atur status item</small></div>
+                <div class="mt"><b id="kt"><i class="fas fa-folder-plus" style="color:var(--primary-color);margin-right:8px;"></i>Kelola Berkas PKKS</b><small>Pilih kategori, lalu buka item untuk unggah berkas atau ubah status</small></div>
                 <button class="mx" id="kcl" type="button" aria-label="Tutup"><i class="fas fa-times"></i></button>
             </div>
+            <div class="ktw">
+                <button type="button" class="kar" id="kArL" aria-label="Geser tab ke kiri" title="Geser ke kiri"><i class="fas fa-chevron-left"></i></button>
+                <div class="ktabs" id="kTabs" role="tablist" aria-label="Kategori berkas"></div>
+                <button type="button" class="kar" id="kArR" aria-label="Geser tab ke kanan" title="Geser ke kanan"><i class="fas fa-chevron-right"></i></button>
+            </div>
             <div class="kb">
-                <div class="kgrid">
-                    <label class="kf">Kategori<select id="kKat" class="form-control"></select></label>
-                    <label class="kf">Item Berkas<select id="kItem" class="form-control"></select></label>
+                <div class="kbar">
+                    <div class="kprog"><b id="kCap"></b><div class="ktrack"><i id="kBar"></i></div></div>
+                    <button type="button" class="kaddbtn" id="kAddT"><i class="fas fa-plus"></i> Item baru</button>
                 </div>
-                <button type="button" class="klink" id="kAddT"><i class="fas fa-plus"></i> Tambah item baru di kategori ini</button>
                 <div class="kadd" id="kAdd" hidden>
                     <input type="text" class="form-control" id="kAddIn" maxlength="100" placeholder="Nama item baru, mis. Berita Acara Rapat Dewan Guru" autocomplete="off">
                     <button type="button" class="btn-primary" id="kAddOk">Tambah</button>
                 </div>
-                <div class="kgrid">
-                    <label class="kf">Status Item
-                        <select id="kSt" class="form-control">
-                            <option value="">Belum diisi</option>
-                            <option value="ada">Ada</option>
-                            <option value="tidak">Tidak Ada</option>
-                        </select>
-                    </label>
-                    <label class="kf" id="kMpW" hidden>Mata Pelajaran<select id="kMp" class="form-control"></select></label>
-                </div>
-                <div class="kinfo" id="kInfo"></div>
-                <div class="kdrop" id="kDrop">
-                    <i class="fas fa-cloud-arrow-up"></i>
-                    <div>Seret berkas ke sini, atau pilih dari perangkat</div>
-                    <div class="kbt">
-                        <button type="button" class="btn-primary" id="kPick"><i class="fas fa-file"></i> Pilih Berkas</button>
-                        <button type="button" class="btn-primary" id="kCam" style="background-color:#10b981;"><i class="fas fa-camera"></i> Kamera</button>
+                <ul class="kitems" id="kItems" role="tabpanel"></ul>
+            </div>
+            <!-- Editor item: dipindahkan ke dalam item yang sedang dibuka -->
+            <div hidden id="kHold">
+                <div id="kEd">
+                    <div class="kgrid">
+                        <label class="kf">Status Item
+                            <select id="kSt" class="form-control">
+                                <option value="">Belum diisi</option>
+                                <option value="ada">Ada</option>
+                                <option value="tidak">Tidak Ada</option>
+                            </select>
+                        </label>
+                        <label class="kf" id="kMpW" hidden>Mata Pelajaran<select id="kMp" class="form-control"></select></label>
                     </div>
-                    <small style="display:block;margin-top:8px;font-size:.75rem;">Maksimal 25 MB per berkas. Berkas disimpan ke Google Drive sekolah.</small>
-                    <input type="file" id="kFile" multiple hidden>
-                    <input type="file" id="kFileCam" accept="image/*" capture="environment" hidden>
+                    <div class="kinfo" id="kInfo"></div>
+                    <ul class="kfiles" id="kFiles"></ul>
+                    <div class="kdrop" id="kDrop">
+                        <i class="fas fa-cloud-arrow-up"></i>
+                        <div>Seret berkas ke sini, atau pilih dari perangkat</div>
+                        <div class="kbt">
+                            <button type="button" class="btn-primary" id="kPick"><i class="fas fa-file"></i> Pilih Berkas</button>
+                            <button type="button" class="btn-primary" id="kCam" style="background-color:#10b981;"><i class="fas fa-camera"></i> Kamera</button>
+                        </div>
+                        <small style="display:block;margin-top:8px;font-size:.75rem;">Maksimal 25 MB per berkas. Berkas disimpan ke Google Drive sekolah.</small>
+                        <input type="file" id="kFile" multiple hidden>
+                        <input type="file" id="kFileCam" accept="image/*" capture="environment" hidden>
+                    </div>
+                    <ul class="kl" id="kList"></ul>
                 </div>
-                <ul class="kl" id="kList"></ul>
             </div>
             <div class="kft">
                 <button type="button" class="btn-ghost" id="kClose">Tutup</button>
@@ -431,6 +513,9 @@
             { n: "Pengembangan Profesi", items: [] },
             { n: "Supervisi", items: [] }
         ];
+        // Palet warna per kategori: [utama, gradasi, latar muda, garis, teks]
+        const KPAL = [['#667eea','#764ba2','#eef0ff','#d5daf7','#4b5bd0'], ['#0ba360','#3cba92','#e3f7ee','#bfe8d4','#0a7d4a'], ['#f7971e','#ffb347','#fff2dc','#ffdca6','#a85f00'], ['#ff5f6d','#dc2626','#ffe8ea','#ffc9ce','#c4283a'], ['#0ea5e9','#38bdf8','#e0f3fd','#b8e1f6','#0a6fa3'], ['#a855f7','#ec4899','#f6e6fd','#e3c2f6','#8a2db5']];
+        const KALL = ['#475569','#1e293b','#eef1f6','#d3d9e3','#334155'];
         const SB_URL = 'https://jnbhjmmmyqbcxaojbdlb.supabase.co/rest/v1';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpuYmhqbW1teXFiY3hhb2piZGxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNDcwMzMsImV4cCI6MjEwNzcyMzAzM30.KP1-LCQJ9MJlxFbQlqLfAtqLiv3uybRdbJ2AVLb9phw';
         const ID_URL = 'https://mjvobqfcoutazqcovtlp.supabase.co/rest/v1/identitassekolah';
@@ -516,7 +601,31 @@
                 : `<span class="muted">${x.st === 'tidak' ? 'Ditandai tidak ada' : x.st === 'ada' ? 'Ditandai ada, belum ada berkas' : 'Belum ada berkas'}</span>`;
             return `<tr><td>${n}</td><td style="font-weight:600;">${esc(x.label)}</td><td>${bg}</td><td>${files}</td></tr>`;
         }
-        function renderAll() { renderSummary(); renderGroups(); }
+        // Tab kategori untuk tabel preview
+        function pRenderTabs(center) {
+            const cur = $('#fKat').value, hadFocus = $('#pTabs').contains(document.activeElement);
+            let tot = 0, ada = 0;
+            const tabs = T.map((t, i) => { const st = stat(i); tot += st.tot; ada += st.ada; return { v: String(i), n: t.n, ada: st.ada, tot: st.tot, c: KPAL[i % KPAL.length] }; });
+            tabs.unshift({ v: '', n: 'Semua', ada, tot, c: KALL, ic: 'fa-layer-group' });
+            $('#pTabs').innerHTML = tabs.map(x => `<button type="button" role="tab" class="ktab${x.v === cur ? ' on' : ''}${x.tot && x.ada === x.tot ? ' full' : ''}" data-v="${x.v}" aria-selected="${x.v === cur}" tabindex="${x.v === cur ? 0 : -1}" style="--tc:${x.c[0]};--tc2:${x.c[1]};--tl:${x.c[2]};--tb:${x.c[3]};--tt:${x.c[4]}">${x.ic ? `<i class="fas ${x.ic} pi"></i>` : ''}<span>${esc(x.n)}</span><em>${x.ada}/${x.tot}</em></button>`).join('');
+            const act = cur === '' ? KALL : KPAL[+cur % KPAL.length];
+            $('#pw').style.setProperty('--ka', act[0]); $('#pw').style.setProperty('--ka2', act[1]);
+            if (center) {
+                const bx = $('#pTabs'), on = bx.querySelector('.on');
+                if (on) bx.scrollBy({ left: on.getBoundingClientRect().left - bx.getBoundingClientRect().left - (bx.clientWidth - on.offsetWidth) / 2 });
+            }
+            if (hadFocus) { const f = bx0(); if (f) f.focus({ preventScroll: true }); }
+            pArrows();
+        }
+        const bx0 = () => $('#pTabs .ktab.on');
+        function pArrows() {
+            const t = $('#pTabs'), over = t.scrollWidth > t.clientWidth + 1;
+            $('#pArL').hidden = $('#pArR').hidden = !over;
+            $('#pArL').disabled = t.scrollLeft <= 1;
+            $('#pArR').disabled = t.scrollLeft + t.clientWidth >= t.scrollWidth - 1;
+        }
+        function pPick(v) { $('#fKat').value = v; pRenderTabs(true); renderGroups(); }
+        function renderAll() { renderSummary(); pRenderTabs(); renderGroups(); }
 
         // Preview berkas (Google Drive)
         function drivePrev(u) {
@@ -574,11 +683,22 @@
         // Event
         T.forEach((t, i) => { const o = document.createElement('option'); o.value = i; o.textContent = t.n; $('#fKat').appendChild(o); });
         $('#fNama').addEventListener('input', renderGroups);
-        $('#fKat').addEventListener('change', renderGroups);
+        $('#pTabs').addEventListener('click', e => { const b = e.target.closest('.ktab'); if (b) pPick(b.dataset.v); });
+        $('#pTabs').addEventListener('keydown', e => {
+            const tabs = [...$('#pTabs').querySelectorAll('.ktab')], i = tabs.findIndex(b => b.classList.contains('on'));
+            const n = e.key === 'ArrowRight' ? (i + 1) % tabs.length : e.key === 'ArrowLeft' ? (i - 1 + tabs.length) % tabs.length : e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : -1;
+            if (n < 0) return; e.preventDefault();
+            pPick(tabs[n].dataset.v); const b = $('#pTabs').querySelectorAll('.ktab')[n]; if (b) b.focus();
+        });
+        $('#pArL').addEventListener('click', () => $('#pTabs').scrollBy({ left: -$('#pTabs').clientWidth * 0.6, behavior: 'smooth' }));
+        $('#pArR').addEventListener('click', () => $('#pTabs').scrollBy({ left: $('#pTabs').clientWidth * 0.6, behavior: 'smooth' }));
+        $('#pTabs').addEventListener('scroll', pArrows, { passive: true });
+        window.addEventListener('resize', pArrows);
+        if (window.ResizeObserver) new ResizeObserver(pArrows).observe($('#pTabs'));
         $('#fStatus').addEventListener('change', renderGroups);
         $('#sumBody').addEventListener('click', e => {
             const tr = e.target.closest('tr[data-i]'); if (!tr) return;
-            $('#fKat').value = tr.dataset.i; renderGroups();
+            pPick(tr.dataset.i);
             $('#groups').scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
         $('#groups').addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) view(c.dataset.id); });
@@ -644,16 +764,55 @@
             if (!v) await sbx('berkas_status?slot_key=eq.' + encodeURIComponent(k), { method: 'DELETE', headers: H });
             else await sbx('berkas_status?on_conflict=slot_key', { method: 'POST', headers: J('resolution=merge-duplicates,return=minimal'), body: JSON.stringify({ slot_key: k, status: v, updated_at: new Date().toISOString() }) });
         }
-        const kSlot = () => { const t = +$('#kKat').value; return slots(t).find(x => x.k === $('#kItem').value) || null; };
+        let kT = 0, kSel = '', kPrev = '';
+        const kSlot = () => slots(kT).find(x => x.k === kSel) || null;
         const kIsMp = sl => !!sl && sl.k.startsWith('0.') && MPL.includes(sl.label);
 
-        function kFillItems(sel) {
-            const t = +$('#kKat').value, s = slots(t);
-            $('#kItem').innerHTML = s.length
-                ? s.map(x => `<option value="${x.k}">${esc(x.label)}${x.st === 'ada' ? '  ✓' : x.st === 'tidak' ? '  ✕' : ''}</option>`).join('')
-                : '<option value="">Belum ada item, tambahkan dulu</option>';
-            if (sel && s.some(x => x.k === sel)) $('#kItem').value = sel;
-            kSync();
+        function kRenderTabs() {
+            const ka = KPAL[kT % KPAL.length];
+            $('#ko').style.setProperty('--ka', ka[0]); $('#ko').style.setProperty('--ka2', ka[1]);
+            $('#kTabs').innerHTML = T.map((t, i) => {
+                const st = stat(i);
+                return `<button type="button" role="tab" class="ktab${i === kT ? ' on' : ''}${st.tot && st.ada === st.tot ? ' full' : ''}" id="kTab${i}" data-i="${i}" aria-selected="${i === kT}" aria-controls="kItems" tabindex="${i === kT ? 0 : -1}" style="--tc:${KPAL[i % KPAL.length][0]};--tc2:${KPAL[i % KPAL.length][1]};--tl:${KPAL[i % KPAL.length][2]};--tb:${KPAL[i % KPAL.length][3]};--tt:${KPAL[i % KPAL.length][4]}"><span>${esc(t.n)}</span><em>${st.ada}/${st.tot}</em></button>`;
+            }).join('');
+            const on = $('#kTabs .on'); if (on) on.scrollIntoView({ block: 'nearest', inline: 'center' });
+        }
+        function kRenderItems() {
+            $('#kHold').appendChild($('#kEd'));
+            const s = slots(kT), st = stat(kT);
+            $('#kCap').textContent = st.tot ? `${st.ada} dari ${st.tot} item terpenuhi` : 'Belum ada item';
+            $('#kBar').style.width = st.pct + '%';
+            $('#kItems').setAttribute('aria-labelledby', 'kTab' + kT);
+            $('#kItems').innerHTML = s.length ? s.map(x => {
+                const cl = x.st === 'ada' ? 'ada' : x.st === 'tidak' ? 'tidak' : '', op = x.k === kSel;
+                const ic = cl === 'ada' ? 'fa-check' : cl === 'tidak' ? 'fa-xmark' : 'fa-minus';
+                const tt = cl === 'ada' ? 'Ada' : cl === 'tidak' ? 'Tidak Ada' : 'Belum diisi';
+                return `<li class="kit${op ? ' open' : ''}" data-k="${x.k}"><button type="button" class="kit-h" aria-expanded="${op}"><span class="kdot ${cl}" title="${tt}"><i class="fas ${ic}"></i></span><span class="kit-n">${esc(x.label)}</span>${x.files.length ? `<span class="kit-c"><i class="fas fa-paperclip"></i> ${x.files.length}</span>` : ''}<i class="fas fa-chevron-down kit-ch"></i></button><div class="kit-b"></div></li>`;
+            }).join('') : '<li class="kempty"><i class="fas fa-folder-open" style="font-size:1.4rem;display:block;margin-bottom:6px;color:#b9bfe6;"></i>Belum ada item di kategori ini.<br>Tambahkan lewat tombol “Item baru”.</li>';
+            const body = $('#kItems .kit.open .kit-b');
+            if (body) { body.appendChild($('#kEd')); kSync(); }
+        }
+        function kArrows() {
+            const t = $('#kTabs'), over = t.scrollWidth > t.clientWidth + 1;
+            $('#kArL').hidden = $('#kArR').hidden = !over;
+            $('#kArL').disabled = t.scrollLeft <= 1;
+            $('#kArR').disabled = t.scrollLeft + t.clientWidth >= t.scrollWidth - 1;
+        }
+        function kRefresh() { kRenderTabs(); kRenderItems(); kArrows(); }
+        function kDropPending() { if (kF.length) { kF = []; kRenderList(); } }
+        function kPickTab(i) {
+            if (i === kT) return;
+            if (kBusy) { toast('Sedang mengunggah, tunggu sebentar.'); return; }
+            kDropPending(); kT = i; kSel = ''; kPrev = '';
+            $('#kAdd').hidden = true; $('#kAddIn').value = '';
+            kRefresh();
+        }
+        function kPickItem(k) {
+            if (kBusy) { toast('Sedang mengunggah, tunggu sebentar.'); return; }
+            kDropPending(); kPrev = '';
+            kSel = kSel === k ? '' : k;
+            kRenderItems();
+            const li = $('#kItems .kit.open'); if (li) li.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         }
         function kSync() {
             const sl = kSlot();
@@ -663,6 +822,10 @@
             $('#kInfo').innerHTML = !sl ? '' : sl.files.length
                 ? `<i class="fas fa-paperclip"></i>${sl.files.length} berkas sudah tersimpan di item ini. Berkas baru akan ditambahkan.`
                 : '<span class="muted">Belum ada berkas di item ini.</span>';
+            $('#kFiles').innerHTML = !sl ? '' : sl.files.map(w => {
+                const op = String(w.id) === kPrev;
+                return `<li class="kfi${op ? ' open' : ''}" data-id="${esc(w.id)}"><div class="kfi-h"><i class="fas ${iconFor(w.nama_berkas)}"></i><div class="kfi-n" title="${esc(w.nama_berkas)}">${esc(w.nama_berkas)}${w.mapel ? `<em>${esc(w.mapel)}</em>` : ''}</div><button type="button" class="kfi-b" data-pv aria-expanded="${op}"><i class="fas ${op ? 'fa-eye-slash' : 'fa-eye'}"></i><span>${op ? 'Tutup' : 'Pratinjau'}</span></button><a class="kfi-o" href="${esc(w.link_berkas)}" target="_blank" rel="noopener" title="Buka di tab baru" aria-label="Buka di tab baru"><i class="fas fa-up-right-from-square"></i></a></div>${op ? `<div class="kfi-p"><iframe src="${esc(drivePrev(w.link_berkas))}" title="${esc(w.nama_berkas)}" allow="autoplay" loading="lazy"></iframe></div>` : ''}</li>`;
+            }).join('');
         }
         function kRenderList() {
             $('#kList').innerHTML = kF.map((f, i) => `<li class="${f.state === 'err' ? 'err' : ''}"><i class="fas ${iconFor(f.file.name)}" style="color:#667eea;"></i><span class="n" title="${esc(f.file.name)}">${esc(f.file.name)}${f.state === 'err' ? `<span class="em">${esc(f.err)}</span>` : ''}</span><span class="z">${szf(f.file.size)}</span>${f.state === 'run' ? '<i class="fas fa-spinner fa-spin" style="color:#667eea;"></i>' : f.state === 'ok' ? '<i class="fas fa-check" style="color:#10b981;"></i>' : `<button type="button" data-i="${i}" aria-label="Hapus dari daftar"><i class="fas fa-times"></i></button>`}</li>`).join('');
@@ -675,10 +838,8 @@
             kRenderList();
         }
         function openKelola() {
-            const sel = $('#kKat');
-            if (!sel.options.length) T.forEach((t, i) => { const o = document.createElement('option'); o.value = i; o.textContent = t.n; sel.appendChild(o); });
-            sel.value = $('#fKat').value || '0';
-            kF = []; kRenderList(); kMapelOpts(); kFillItems();
+            kT = +($('#fKat').value || 0); kSel = ''; kPrev = '';
+            kF = []; kRenderList(); kMapelOpts(); kRefresh();
             $('#kAdd').hidden = true; $('#kAddIn').value = '';
             $('#ko').hidden = false; document.body.style.overflow = 'hidden';
             loadMapel();
@@ -707,7 +868,7 @@
         }
         async function kSave() {
             if (kBusy) return;
-            const t = +$('#kKat').value, sl = kSlot();
+            const t = kT, sl = kSlot();
             if (!sl) { toast('Pilih item berkas terlebih dahulu.'); return; }
             const st = $('#kSt').value, mp = $('#kMp').value, btn = $('#kSave');
             if (!kF.length) {
@@ -717,7 +878,7 @@
                 try {
                     await pushStatus(sl.k, st);
                     if (st) S[sl.k] = st; else delete S[sl.k];
-                    await load(); kFillItems(sl.k);
+                    await load(); kRefresh();
                     toast('Status item disimpan.');
                 } catch (e) { toast('Gagal menyimpan status: ' + em(e), 5000); }
                 kBusy = false; btn.disabled = false; return;
@@ -735,12 +896,12 @@
             }
             kF = kF.filter(f => f.state !== 'ok');
             if (ok) { try { await pushStatus(sl.k, 'ada'); S[sl.k] = 'ada'; } catch (e) {} }
-            await load(); kFillItems(sl.k); kRenderList();
+            await load(); kRefresh(); kRenderList();
             toast(bad ? (ok ? ok + ' berkas tersimpan, ' + bad + ' gagal. ' : 'Gagal: ') + le : ok + ' berkas tersimpan di Google Drive dan database.', 5000);
             kBusy = false; btn.disabled = false; btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Simpan';
         }
         async function kAddItem() {
-            const t = +$('#kKat').value, l = $('#kAddIn').value.trim();
+            const t = kT, l = $('#kAddIn').value.trim();
             if (!l) { toast('Nama item wajib diisi.'); return; }
             if (slots(t).some(x => x.label.toLowerCase() === l.toLowerCase())) { toast('Item dengan nama ini sudah ada di kategori ini.'); return; }
             const b = $('#kAddOk'); b.disabled = true;
@@ -748,14 +909,30 @@
                 await sbx('berkas_item?on_conflict=tab,label', { method: 'POST', headers: J('resolution=ignore-duplicates,return=minimal'), body: JSON.stringify([{ tab: T[t].n, label: l }]) });
                 await load();
                 const c = (C[t] || []).find(x => x.l === l);
-                kFillItems(c ? `${t}.c${c.id}` : '');
+                kSel = c ? `${t}.c${c.id}` : ''; kDropPending(); kRefresh();
                 $('#kAdd').hidden = true; $('#kAddIn').value = '';
                 toast('Item berkas ditambahkan.');
             } catch (e) { toast('Gagal menambah item: ' + em(e), 5000); }
             b.disabled = false;
         }
-        $('#kKat').addEventListener('change', () => kFillItems());
-        $('#kItem').addEventListener('change', kSync);
+        $('#kArL').addEventListener('click', () => $('#kTabs').scrollBy({ left: -$('#kTabs').clientWidth * 0.6, behavior: 'smooth' }));
+        $('#kArR').addEventListener('click', () => $('#kTabs').scrollBy({ left: $('#kTabs').clientWidth * 0.6, behavior: 'smooth' }));
+        $('#kTabs').addEventListener('scroll', kArrows, { passive: true });
+        window.addEventListener('resize', kArrows);
+        if (window.ResizeObserver) new ResizeObserver(kArrows).observe($('#kTabs'));
+        $('#kTabs').addEventListener('click', e => { const b = e.target.closest('.ktab'); if (b) kPickTab(+b.dataset.i); });
+        $('#kTabs').addEventListener('keydown', e => {
+            const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : e.key === 'Home' ? -99 : e.key === 'End' ? 99 : 0;
+            if (!d) return; e.preventDefault();
+            const n = Math.abs(d) === 99 ? (d < 0 ? 0 : T.length - 1) : (kT + d + T.length) % T.length;
+            kPickTab(n); const b = $('#kTab' + n); if (b) b.focus();
+        });
+        $('#kItems').addEventListener('click', e => {
+            const pv = e.target.closest('[data-pv]'); if (!pv) return;
+            const id = pv.closest('.kfi').dataset.id; kPrev = kPrev === id ? '' : id; kSync();
+            const li = $('#kFiles .kfi.open'); if (li) li.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        });
+        $('#kItems').addEventListener('click', e => { const h = e.target.closest('.kit-h'); if (h) kPickItem(h.parentElement.dataset.k); });
         $('#kAddT').addEventListener('click', () => { const a = $('#kAdd'); a.hidden = !a.hidden; if (!a.hidden) $('#kAddIn').focus(); });
         $('#kAddOk').addEventListener('click', kAddItem);
         $('#kAddIn').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); kAddItem(); } });
