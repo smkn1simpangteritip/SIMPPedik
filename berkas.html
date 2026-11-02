@@ -271,11 +271,16 @@ li .sy.wt{background:var(--prt);color:var(--pr);animation:syb 1s ease-in-out inf
 .cth img{flex:none;width:56px;height:56px;object-fit:cover;border-radius:12px;border:2px solid var(--ok);box-shadow:var(--sh)}
 .mp{display:flex;align-items:center;gap:10px;margin-top:12px}
 .mp label{flex:none;font-size:12px;font-weight:600;color:var(--mu)}
-.mps{font:inherit;font-size:13px;font-weight:600;flex:1;min-width:0;max-width:360px;height:var(--ch);padding:0 34px 0 12px;border:1px solid var(--bd2);border-radius:12px;background:var(--card);color:var(--tx);cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236b778f' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;background-size:14px;transition:border-color .18s,box-shadow .18s}
-.mps:hover{border-color:var(--pr)}.mps:focus{border-color:var(--pr);box-shadow:0 0 0 3px var(--prt)}
+.mps,.oas{font:inherit;font-size:13px;font-weight:600;flex:1;min-width:0;max-width:360px;height:var(--ch);padding:0 34px 0 12px;border:1px solid var(--bd2);border-radius:12px;background:var(--card);color:var(--tx);cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236b778f' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;background-size:14px;transition:border-color .18s,box-shadow .18s}
+.mps:hover,.oas:hover{border-color:var(--pr)}.mps:focus,.oas:focus{border-color:var(--pr);box-shadow:0 0 0 3px var(--prt)}
 .mpc{flex:none;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--prt);color:var(--pr);line-height:1.6}
 @media(max-width:560px){.mp{flex-wrap:wrap;gap:6px}.mps{flex:1 1 100%;max-width:none}.mpc{max-width:100px}}
 @media print{.mp{display:none}}
+.orph{margin-bottom:var(--gap)}
+.orph .oh{margin:10px 0 0;font-size:12.5px;color:var(--mu)}
+.orph li{flex-wrap:wrap}
+.orph .oas{flex:1 1 170px;max-width:260px}
+.orph li .btn{flex:none;height:34px;padding:0 12px}
 </style>
 </head>
 <body>
@@ -295,7 +300,7 @@ li .sy.wt{background:var(--prt);color:var(--pr);animation:syb 1s ease-in-out inf
 </div></div>
 <div class="tabs" role="tablist" id="tabs"></div>
 </div>
-<main><div class="w" id="panels"></div></main>
+<main><div class="w" id="orph"></div><div class="w" id="panels"></div></main>
 <footer>Berkas tersimpan di peramban (browser) perangkat ini. Gunakan perangkat dan peramban yang sama saat melanjutkan pengisian.</footer>
 <div id="toast" role="status"></div>
 <div class="mo" id="co" hidden><div class="mc cm" role="dialog" aria-modal="true" aria-labelledby="cname"><div class="mh"><div class="mt"><b id="cname">Kamera</b><small id="cinfo">Arahkan kamera ke dokumen, lalu ambil foto.</small></div><button class="mx" id="ccl" type="button" aria-label="Tutup kamera">✕</button></div><div class="mb"><video id="cv" autoplay playsinline muted></video></div><div class="cth" id="cth" hidden></div><div class="cf"><button class="btn" id="csh" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.8"/></svg> Ambil Foto</button><button class="btn" id="cdn" type="button">Selesai</button></div></div></div>
@@ -349,7 +354,7 @@ function draw(k){
  if(ms)sl.querySelector('.mp').title=ms.value?'':'Pilih mata pelajaran dahulu untuk mengunggah';
  sl.classList.toggle('ok',st=='ada'||st=='tidak');sl.classList.toggle('miss',st=='tidak');
  sl.querySelector('.cnt').textContent=a.length?`✓ ${a.length} berkas`:'';
- sl.querySelector('ul').innerHTML=a.map(f=>`<li>${ftag(f.name)}<span class="n" title="${esc(f.name)}">${esc(f.name)}</span>${f.mapel?`<span class="mpc" title="Mata Pelajaran">${esc(f.mapel)}</span>`:''}<span class="z">${sz(f.size)}</span>${sy(f)}${f.sync==='ok'||f.sync==='pending'?'':RETRY(f.id)}<button type="button" class="ib v" data-a="v" data-id="${f.id}" data-tip="Preview" aria-label="Preview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button type="button" class="ib d" data-a="d" data-id="${f.id}" data-tip="Unduh" aria-label="Unduh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg></button><button type="button" class="ib x" data-a="x" data-id="${f.id}" data-k="${k}" data-tip="Hapus" aria-label="Hapus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></svg></button></li>`).join('');
+ sl.querySelector('ul').innerHTML=a.map(f=>`<li>${ftag(f.name)}<span class="n" title="${esc(f.name)}">${esc(f.name)}</span>${f.mapel?`<span class="mpc" title="Mata Pelajaran">${esc(f.mapel)}</span>`:''}${f.size!=null?`<span class="z">${sz(f.size)}</span>`:''}${sy(f)}${f.remote?'':`${f.sync==='ok'||f.sync==='pending'?'':RETRY(f.id)}<button type="button" class="ib v" data-a="v" data-id="${f.id}" data-tip="Preview" aria-label="Preview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button type="button" class="ib d" data-a="d" data-id="${f.id}" data-tip="Unduh" aria-label="Unduh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg></button><button type="button" class="ib x" data-a="x" data-id="${f.id}" data-k="${k}" data-tip="Hapus" aria-label="Hapus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></svg></button>`}</li>`).join('');
  prog();
 }
 function prog(){
@@ -381,15 +386,48 @@ async function loadLoc(){
   return true;
  }catch(e){return false}
 }
+function dbRow(r){
+ const t=+String(r.slot).split('.')[0],sl=T[t]?slots(t).find(x=>x.k===r.slot):null;
+ const o={nama_berkas:r.name,link_berkas:r.drive.url,tab:T[t]?T[t].n:null,item:sl?sl.label:null};
+ if(r.mapel)o.mapel=r.mapel;
+ return o;
+}
+// Berkas yang tercatat di database tetapi item-nya belum diketahui (diunggah sebelum kolom tab/item ada)
+const optsFor=mp=>'<option value="">Pilih item berkas…</option>'+T.map((t,i)=>{const o=slots(i).filter(x=>!mp||x.mp).map(x=>`<option value="${x.k}">${esc(x.label)}</option>`).join('');return o?`<optgroup label="${esc(t.n)}">${o}</optgroup>`:''}).join('');
+function renderOrph(a){
+ const el=$('#orph');if(!el)return;
+ if(!a.length){el.innerHTML='';return}
+ el.innerHTML=`<div class="slot orph"><div class="sh"><span class="no">${a.length}</span><span class="t">Berkas di database yang belum terhubung ke item</span></div><p class="oh">Berkas ini sudah tersimpan di Google Drive dan tercatat di database, tetapi item berkasnya belum diketahui. Pilih item yang sesuai lalu klik Tautkan agar tampil di tab-nya.</p><ul>${a.map(w=>{const can=!w.tab||!w.item;return `<li>${ftag(w.nama_berkas)}<span class="n" title="${esc(w.nama_berkas)}">${esc(w.nama_berkas)}</span>${w.mapel?`<span class="mpc" title="Mata Pelajaran">${esc(w.mapel)}</span>`:''}<a class="sy ok" href="${esc(w.link_berkas)}" target="_blank" rel="noopener" title="Buka di Google Drive">✓ Di Drive</a>${can?`<select class="oas" aria-label="Tautkan ke item">${optsFor(w.mapel)}</select><button type="button" class="btn" data-oa="${w.id}">Tautkan</button>`:`<span class="z">${esc(w.tab)} › ${esc(w.item)}</span>`}</li>`}).join('')}</ul></div>`;
+}
+// Tampilkan berkas yang sudah tercatat di database Supabase (tabel berkas_drive) pada item yang sesuai
+async function loadRemote(){
+ try{
+  const r=await fetch(SB_URL+'/'+SB_TABLE+'?select=id,nama_berkas,link_berkas,mapel,tab,item,created_at&order=created_at.asc&limit=1000',{headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}});
+  if(!r.ok){let d=null;try{d=await r.json()}catch(e){}const m=(d&&(d.message||d.hint))||('HTTP '+r.status);throw new Error(/column .*(tab|item)|42703|PGRST204/i.test(m)?'Kolom tab/item belum ada di tabel '+SB_TABLE+'. Jalankan ulang file SQL terbaru di Supabase.':m)}
+  const rows=await r.json();
+  for(const k in F)F[k]=F[k].filter(x=>!x.remote);
+  const have=new Set();for(const k in F)F[k].forEach(x=>{if(x.dbId)have.add('i'+x.dbId);if(x.drive&&x.drive.url)have.add('u'+x.drive.url)});
+  const touched=new Set(),orph=[];
+  rows.forEach(w=>{
+   if(have.has('i'+w.id)||have.has('u'+w.link_berkas))return;
+   const t=T.findIndex(x=>x.n===w.tab),sl=t<0?null:slots(t).find(x=>x.label===w.item);
+   if(!sl){orph.push(w);return}
+   (F[sl.k]=F[sl.k]||[]).push({id:'db-'+w.id,slot:sl.k,name:w.nama_berkas,size:null,mapel:w.mapel||'',at:Date.parse(w.created_at)||0,sync:'ok',drive:{url:w.link_berkas},dbId:String(w.id),remote:1});
+   touched.add(sl.k);
+  });
+  let ch=false;touched.forEach(k=>{if(M.s[k]=='tidak'){delete M.s[k];ch=true}});if(ch)saveM();
+  Object.keys(F).forEach(draw);prog();syncBar();renderOrph(orph);
+ }catch(e){toast('Belum dapat memuat berkas dari database: '+(e instanceof TypeError?'tidak dapat menghubungi Supabase.':e.message),5000)}
+}
 async function saveDb(r){
  let res,d;
  try{
-  res=await fetch(`${SB_URL}/${SB_TABLE}`,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(r.mapel?{nama_berkas:r.name,link_berkas:r.drive.url,mapel:r.mapel}:{nama_berkas:r.name,link_berkas:r.drive.url})});
+  res=await fetch(`${SB_URL}/${SB_TABLE}`,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(dbRow(r))});
   d=await res.json().catch(()=>null);
  }catch(e){throw new Error('Tidak dapat menghubungi database Supabase.')}
  if(!res.ok){
   const m=(d&&(d.message||d.hint))||('HTTP '+res.status);
-  throw new Error(/'mapel'|column .*mapel|PGRST204/i.test(m)?'Kolom mapel belum ada di tabel '+SB_TABLE+'. Jalankan ulang file SQL terbaru di Supabase.':/does not exist|relation|PGRST205|schema cache/i.test(m)?'Tabel '+SB_TABLE+' belum dibuat di Supabase. Jalankan file supabase_berkas_drive.sql.':/row-level security|permission denied|42501/i.test(m)?'Akses ditolak (RLS). Jalankan ulang bagian kebijakan pada file SQL.':m);
+  throw new Error(/PGRST204|column .*(mapel|tab|item)/i.test(m)?'Kolom baru (mapel/tab/item) belum ada di tabel '+SB_TABLE+'. Jalankan ulang file SQL terbaru di Supabase.':/does not exist|relation|PGRST205|schema cache/i.test(m)?'Tabel '+SB_TABLE+' belum dibuat di Supabase. Jalankan file supabase_berkas_drive.sql.':/row-level security|permission denied|42501/i.test(m)?'Akses ditolak (RLS). Jalankan ulang bagian kebijakan pada file SQL.':m);
  }
  return String(d&&d[0]&&d[0].id!=null?d[0].id:'ok');
 }
@@ -439,6 +477,22 @@ async function add(k,files){
  if(bad)toast((ok?`${ok} berkas terkirim, ${bad} gagal. `:'Gagal: ')+(le||'Klik ikon Kirim ulang.'));
  else if(ok)toast(ok>1?`${ok} berkas tersimpan di Google Drive dan database`:'Berkas tersimpan di Google Drive dan database');
 }
+$('#orph').addEventListener('click',async e=>{
+ const b=e.target.closest('[data-oa]');if(!b)return;
+ const v=b.closest('li').querySelector('.oas').value;
+ if(!v){toast('Pilih item berkas terlebih dahulu.');return}
+ const t=+v.split('.')[0],sl=slots(t).find(x=>x.k===v);if(!sl)return;
+ b.disabled=true;
+ try{
+  const r=await fetch(SB_URL+'/'+SB_TABLE+'?id=eq.'+encodeURIComponent(b.dataset.oa),{method:'PATCH',headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify({tab:T[t].n,item:sl.label})});
+  const d=await r.json().catch(()=>null);
+  if(!r.ok)throw new Error((d&&(d.message||d.hint))||('HTTP '+r.status));
+  if(!d||!d.length)throw new Error('Tidak diizinkan memperbarui data. Jalankan ulang file SQL terbaru di Supabase.');
+  toast('Berkas ditautkan ke item “'+sl.label+'”.');
+  await loadRemote();
+ }catch(err){toast('Gagal menautkan: '+(err instanceof TypeError?'tidak dapat menghubungi Supabase.':err.message),5000)}
+ finally{b.disabled=false}
+});
 $('#bSync').onclick=async()=>{
  const list=[];for(const k in F)F[k].forEach(r=>{if(r.sync!=='ok'&&!r.busy)list.push(r)});
  let ok=0;for(const r of list)if(await sync(r))ok++;
@@ -585,6 +639,8 @@ build();loadMapel();loadLoc();
  try{db=await open();const all=await tx('readonly',s=>s.getAll());(all||[]).sort((a,b)=>a.at-b.at).forEach(r=>{if(r.sync==='pending'){r.sync='err';r.err='Pengiriman terputus'}else if(r.sync==='ok'&&!r.dbId){r.sync='err';r.err='Sudah di Google Drive, belum tercatat di database'}(F[r.slot]=F[r.slot]||[]).push(r)});Object.keys(F).forEach(draw);prog();syncBar()}
  catch(e){toast('Penyimpanan peramban tidak tersedia; berkas tidak akan tersimpan.')}
  syncBar();
+ loadRemote();
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadRemote()});
 })();
 </script>
 </body>
