@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Laporan Pemberkasan PKKS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary-color: #667eea; --secondary-color: #764ba2; --header-height: 60px; --bg-light: #f4f6f9; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-light); display: flex; flex-direction: column; height: 100vh; width: 100%; overflow: hidden; }
+
+        /* Navbar: hanya logo, nama sekolah, dan tombol Close */
+        .navbar { height: var(--header-height); background: #fff; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 1002; position: fixed; top: 0; left: 0; right: 0; }
+        .navbar-brand { display: flex; align-items: center; gap: 10px; color: #333; min-width: 0; }
+        .navbar-brand img { height: 40px; width: auto; }
+        .navbar-brand span { font-weight: 700; font-size: 1.1rem; color: var(--secondary-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .btn-close { flex: none; display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border: 0; border-radius: 999px; background: linear-gradient(135deg, #ff5f6d, #dc2626); color: #fff; font: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 10px rgba(220,38,38,.3); transition: transform .15s, box-shadow .15s; }
+        .btn-close:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(220,38,38,.4); }
+        .btn-close:focus-visible { outline: 2px solid #dc2626; outline-offset: 2px; }
+
+        .main-content { margin-top: var(--header-height); padding: 2rem; flex: 1; overflow-y: auto; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid transparent; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .card-header h2, .card-header h3 { font-size: 1.2rem; color: #333; }
+        .card-header small { color: #888; font-size: 0.85rem; font-weight: 600; }
+        .id-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+        .id-grid small { display: block; color: #888; font-size: 0.8rem; margin-bottom: 2px; }
+        .id-grid b { color: #333; font-size: 1rem; word-break: break-word; }
+
+        .filter-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 20px; align-items: center; }
+        .form-control { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; width: 100%; background: #fff; }
+        .form-control:focus { outline: none; border-color: var(--primary-color); }
+
+        .table-responsive { overflow-x: auto; }
+        .custom-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .custom-table th, .custom-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #f1f1f1; vertical-align: top; }
+        .custom-table th { background-color: #f8f9fa; color: #555; font-weight: 600; }
+        .custom-table tr:hover { background-color: #f9f9f9; }
+        .text-center { text-align: center !important; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; color: white; display: inline-block; white-space: nowrap; }
+        .bg-success { background-color: #2ecc71; } .bg-warning { background-color: #f1c40f; color: #333; } .bg-danger { background-color: #e74c3c; }
+        .count-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-weight: 600; font-size: 0.85rem; min-width: 40px; }
+        .bg-hadir-light { background-color: #d1fae5; color: #065f46; } .bg-izin-light { background-color: #fef3c7; color: #92400e; } .bg-alpha-light { background-color: #fee2e2; color: #991b1b; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; border: 1px solid #f3f4f6; border-left: 5px solid #ccc; }
+        .stat-card.total { border-left-color: #667eea; } .stat-card.hadir { border-left-color: #10b981; } .stat-card.alpa { border-left-color: #ef4444; } .stat-card.ijin { border-left-color: #f59e0b; }
+        .stat-info h3 { font-size: 1.8rem; margin: 0; color: #333; font-weight: 700; }
+        .stat-info p { margin: 5px 0 0 0; color: #666; font-size: 0.9rem; font-weight: 600; }
+        .stat-icon { font-size: 2.5rem; opacity: 0.3; }
+
+        .progress { height: 10px; background: #eef0f4; border-radius: 99px; overflow: hidden; }
+        .progress i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)); border-radius: 99px; transition: width .5s; }
+        .pct-row { display: flex; align-items: center; gap: 12px; }
+        .pct-row .progress { flex: 1; min-width: 80px; }
+        .pct-row b { font-size: 0.85rem; color: #e5e7eb; min-width: 46px; text-align: right; }
+
+        .card-dark { background: #1f2937; color: #f3f4f6; border: 1px solid #374151; }
+        .card-dark .card-header { border-bottom-color: #374151; }
+        .card-dark .card-header h3 { color: #f3f4f6; }
+        .card-dark .custom-table th { background-color: #111827; color: #9ca3af; border-bottom-color: #374151; }
+        .card-dark .custom-table td { border-bottom-color: #374151; color: #e5e7eb; }
+        .card-dark .custom-table tr:hover { background-color: rgba(255,255,255,0.05); }
+        .card-dark .progress { background: #374151; }
+        .card-dark tbody tr { cursor: pointer; }
+
+        .files { display: flex; flex-wrap: wrap; gap: 6px; }
+        .chip { display: inline-flex; align-items: center; gap: 7px; max-width: 100%; padding: 4px 10px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f8f9fa; color: #333; font-size: 0.82rem; }
+        .chip i.fa-file-pdf { color: #ef4444; } .chip i.fa-file-image { color: #3b82f6; } .chip i.fa-file { color: #888; }
+        .chip .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 280px; }
+        .chip em { font-style: normal; font-size: 0.72rem; color: var(--primary-color); background: #eef1ff; padding: 0 7px; border-radius: 99px; white-space: nowrap; }
+        .muted { color: #999; font-size: 0.85rem; }
+        .empty { text-align: center; color: #888; padding: 30px 10px; }
+        .upd { text-align: right; color: #888; font-size: 0.8rem; margin: -8px 0 16px; }
+
+        /* Tab kategori */
+        .ktw { display: flex; align-items: center; min-width: 0; background: #f6f7fc; border: 1px solid #eceef7; border-radius: 12px; padding: 0 8px; gap: 4px; margin-bottom: 18px; }
+        .ktabs { flex: 1; min-width: 0; display: flex; gap: 8px; padding: 10px 6px; overflow-x: auto; scrollbar-width: none; scroll-behavior: smooth; }
+        .ktabs::-webkit-scrollbar { display: none; }
+        .kar { flex: none; width: 32px; height: 32px; border-radius: 50%; border: 1px solid #d9dcec; background: #fff; color: #555; font-size: 0.8rem; cursor: pointer; display: grid; place-items: center; box-shadow: 0 2px 6px rgba(0,0,0,.08); transition: background .15s, color .15s, opacity .15s; }
+        .kar:hover:not(:disabled) { background: var(--ka, var(--primary-color)); border-color: var(--ka, var(--primary-color)); color: #fff; }
+        .kar:disabled { opacity: .35; cursor: default; box-shadow: none; }
+        .kar[hidden] { display: none; }
+        .ktab { --tc: #667eea; --tc2: #764ba2; --tl: #eef0ff; --tb: #d5daf7; --tt: #4b5bd0; flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 14px; font: inherit; font-size: 0.84rem; font-weight: 600; white-space: nowrap; cursor: pointer; color: var(--tt); background: var(--tl); border: 1.5px solid var(--tb); border-radius: 999px; opacity: .9; transition: transform .15s, box-shadow .15s, background .15s, color .15s, border-color .15s, opacity .15s; }
+        .ktab:hover { opacity: 1; border-color: var(--tc); transform: translateY(-1px); }
+        .ktab:focus-visible { outline: 2px solid var(--tc); outline-offset: 2px; }
+        .ktab em { font-style: normal; font-size: 0.72rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: #fff; color: var(--tt); }
+        .ktab.full em::before { content: "\2713\00a0"; }
+        .ktab.on { color: #fff; opacity: 1; background: linear-gradient(135deg, var(--tc), var(--tc2)); border-color: transparent; transform: translateY(-1px); box-shadow: 0 6px 14px -3px var(--tc), 0 0 0 3px rgba(255,255,255,.9); }
+        .ktab.on em { background: rgba(255,255,255,.28); color: #fff; }
+        .ktab i.pi { font-size: 0.8rem; }
+
+        #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px 18px; border-radius: 999px; font-size: 0.85rem; opacity: 0; pointer-events: none; transition: opacity .25s; max-width: 90vw; z-index: 2000; text-align: center; }
+        #toast.on { opacity: 1; }
+        .main-footer { text-align: center; padding: 20px; color: #888; font-size: 0.85rem; border-top: 1px solid #eee; margin-top: 20px; }
+
+        @media (max-width: 768px) {
+            .navbar-brand span { font-size: 1rem; }
+            .main-content { padding: 1rem; }
+            .card { padding: 15px; }
+            .chip .t { max-width: 160px; }
+        }
+        @media (max-width: 420px) { .btn-close span { display: none; } .btn-close { padding: 9px 12px; } }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <img src="" alt="Logo Sekolah" style="display: none;">
+            <span id="nSch">Laporan Pemberkasan PKKS</span>
+        </div>
+        <button type="button" class="btn-close" id="bClose" aria-label="Tutup halaman"><i class="fas fa-times"></i><span>Close</span></button>
+    </nav>
+
+    <main class="main-content">
+
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-id-card" style="color: var(--primary-color); margin-right: 10px;"></i> Identitas Kepala Sekolah</h2>
+                <small>Laporan Pemberkasan PKKS · Tahun Ajaran 2026</small>
+            </div>
+            <div class="id-grid">
+                <div><small>Nama Kepala Sekolah</small><b id="idKepsek">-</b></div>
+                <div><small>NIP Kepala Sekolah</small><b id="idNip">-</b></div>
+                <div><small>Nama Sekolah</small><b id="idSekolah">-</b></div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card total"><div class="stat-info"><h3 id="sTot">0</h3><p>Total Dokumen</p></div><i class="fas fa-folder-open stat-icon" style="color: #667eea;"></i></div>
+            <div class="stat-card hadir"><div class="stat-info"><h3 id="sAda">0</h3><p>Total Ada</p></div><i class="fas fa-check-circle stat-icon" style="color: #10b981;"></i></div>
+            <div class="stat-card alpa"><div class="stat-info"><h3 id="sTdk">0</h3><p>Total Tidak Ada</p></div><i class="fas fa-times-circle stat-icon" style="color: #ef4444;"></i></div>
+            <div class="stat-card ijin"><div class="stat-info"><h3 id="sBel">0</h3><p>Belum Diisi</p></div><i class="fas fa-hourglass-half stat-icon" style="color: #f59e0b;"></i></div>
+        </div>
+
+        <div class="card card-dark">
+            <div class="card-header">
+                <h3><i class="fas fa-chart-bar" style="color: var(--primary-color); margin-right: 10px;"></i> Ringkasan Pemberkasan per Kategori</h3>
+                <small style="color:#9ca3af;">Klik baris untuk memfilter</small>
+            </div>
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead><tr><th>Kategori</th><th class="text-center">Total</th><th class="text-center">Ada</th><th class="text-center">Tidak Ada</th><th class="text-center">Belum</th><th style="min-width:170px;">Ketercapaian</th></tr></thead>
+                    <tbody id="sumBody"><tr><td colspan="6" class="text-center">Memuat data...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-folder-tree" style="color: var(--primary-color); margin-right: 10px;"></i> Perkembangan Pengisian Berkas PKKS</h2>
+            </div>
+            <div class="upd" id="upd"></div>
+            <div class="filter-container">
+                <input type="text" class="form-control" id="fNama" placeholder="Cari item / berkas..." aria-label="Cari">
+                <select class="form-control" id="fStatus" aria-label="Filter status">
+                    <option value="">-- Semua Status --</option>
+                    <option value="ada">Ada</option>
+                    <option value="tidak">Tidak Ada</option>
+                    <option value="bel">Belum Diisi</option>
+                </select>
+            </div>
+            <div class="ktw" id="pw">
+                <button type="button" class="kar" id="pArL" aria-label="Geser tab ke kiri"><i class="fas fa-chevron-left"></i></button>
+                <div class="ktabs" id="pTabs" role="tablist" aria-label="Kategori pemberkasan"></div>
+                <button type="button" class="kar" id="pArR" aria-label="Geser tab ke kanan"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div id="groups"><div class="empty">Memuat data pemberkasan...</div></div>
+        </div>
+
+        <footer class="main-footer">
+            <p>&copy; 2026 SMKN 1 SIMPANG TERITIP.</p>
+            <p>CopyRight Kenji Studio Developer.</p>
+        </footer>
+    </main>
+
+    <div id="toast" role="status"></div>
+
+    <script>
+        const T = [
+            { n: "Kurikulum", items: ["KSP","Program Pengembangan Sekolah","Daftar Hadir Rapat Pengembangan KSP","Berita Acara Rapat Pengembangan KSP","Notulen Rapat Pengembangan KSP","Dokumen KKTP","Juknis dan Aturan Ujian Pusat","POS Ujian Sekolah","Dokumen Rapat Kelulusan","Dokumen Arsip FotoKopi Ijazah","Prota dan Promes Mata Pelajaran","TP dan ATP Mata Pelajaran","Modul Pembelajaran","Buku Nilai","Ulangan Harian","Penilaian Jurnal","Penilaian Pengamatan","Penilaian Penugasan","Penilaian Portofolio","Penilaian Proyek","Laporan Kemajuan Hasil Belajar","Laporan Penilaian Formatif","Laporan Penilaian Akhir Semester","Penilaian Akhir Tahun","Ujian Sekolah","Ijazah Guru sesuai kualifikasi","Sertifikat Pendidik","SK Tenaga Perpustakaan","Sertifikat Pustakawan","SK Tenaga Laboran","Sertifikat kompetensi Laboran","SK Penjaga Sekolah","SK Tukang Kebun","SK Tenaga Kebersihan","SK Tenaga Keamanan"] },
+            { n: "Sarana Prasarana", items: [] },
+            { n: "Visi Misi, RKJM, RKT dan Pembelajaran", items: [] },
+            { n: "Kewirausahaan", items: [] },
+            { n: "Pengembangan Profesi", items: [] },
+            { n: "Supervisi", items: [] }
+        ];
+        const KPAL = [['#667eea','#764ba2','#eef0ff','#d5daf7','#4b5bd0'], ['#0ba360','#3cba92','#e3f7ee','#bfe8d4','#0a7d4a'], ['#f7971e','#ffb347','#fff2dc','#ffdca6','#a85f00'], ['#ff5f6d','#dc2626','#ffe8ea','#ffc9ce','#c4283a'], ['#0ea5e9','#38bdf8','#e0f3fd','#b8e1f6','#0a6fa3'], ['#a855f7','#ec4899','#f6e6fd','#e3c2f6','#8a2db5']];
+        const KALL = ['#475569','#1e293b','#eef1f6','#d3d9e3','#334155'];
+        const SB_URL = 'https://jnbhjmmmyqbcxaojbdlb.supabase.co/rest/v1';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpuYmhqbW1teXFiY3hhb2piZGxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNDcwMzMsImV4cCI6MjEwNzcyMzAzM30.KP1-LCQJ9MJlxFbQlqLfAtqLiv3uybRdbJ2AVLb9phw';
+        const ID_URL = 'https://mjvobqfcoutazqcovtlp.supabase.co/rest/v1/identitassekolah';
+        const ID_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdm9icWZjb3V0YXpxY292dGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzEwMzYsImV4cCI6MjA4NjE0NzAzNn0.jz6JaC9mMTMhLVhXSh1OCnFWDPZ0Cy2tUnHEmWxAR8o';
+
+        const $ = s => document.querySelector(s);
+        const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+        const pc = n => n.toFixed(1).replace('.0', '').replace('.', ',') + '%';
+        const toast = (t, ms = 4000) => { const e = $('#toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('on'), ms); };
+        const H = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY };
+
+        // Tombol Close: menutup tab browser
+        function closeTab() {
+            window.close();
+            setTimeout(() => {
+                try { window.open('', '_self'); window.close(); } catch (e) {}
+                setTimeout(() => { if (!window.closed) toast('Browser tidak mengizinkan tab ini ditutup otomatis. Silakan tutup tab secara manual.'); }, 250);
+            }, 150);
+        }
+        $('#bClose').addEventListener('click', closeTab);
+
+        async function sb(path) {
+            const r = await fetch(SB_URL + '/' + path, { headers: H });
+            if (!r.ok) { let d = null; try { d = await r.json(); } catch (e) {} throw new Error((d && (d.message || d.hint)) || ('HTTP ' + r.status)); }
+            return r.json();
+        }
+
+        let C = {}, S = {}, R = [], kat = '';
+
+        function slots(t) {
+            const base = T[t].items.map((l, j) => ({ k: `${t}.p${j}`, label: l })).filter(x => S[x.k] !== 'hapus');
+            const cus = (C[t] || []).map(c => ({ k: `${t}.c${c.id}`, label: c.l }));
+            return [...base, ...cus].map(s => {
+                const files = R.filter(w => w.tab === T[t].n && w.item === s.label);
+                const st = files.length ? 'ada' : (S[s.k] === 'tidak' ? 'tidak' : (S[s.k] === 'ada' ? 'ada' : ''));
+                return Object.assign(s, { files, st });
+            });
+        }
+        function stat(t) {
+            const s = slots(t), ada = s.filter(x => x.st === 'ada').length, tdk = s.filter(x => x.st === 'tidak').length;
+            return { tot: s.length, ada, tdk, bel: s.length - ada - tdk, pct: s.length ? ada / s.length * 100 : 0, s };
+        }
+        function iconFor(n) {
+            const e = n.includes('.') ? n.split('.').pop().toLowerCase() : '';
+            if (e === 'pdf') return 'fa-file-pdf';
+            if (/^(jpe?g|png|gif|webp|bmp|svg|heic)$/.test(e)) return 'fa-file-image';
+            return 'fa-file';
+        }
+
+        function renderSummary() {
+            let tot = 0, ada = 0, tdk = 0;
+            const rows = T.map((t, i) => {
+                const s = stat(i); tot += s.tot; ada += s.ada; tdk += s.tdk;
+                return `<tr data-i="${i}"><td style="font-weight:600;">${esc(t.n)}</td>
+                    <td class="text-center">${s.tot}</td>
+                    <td class="text-center"><span class="count-badge bg-hadir-light">${s.ada}</span></td>
+                    <td class="text-center"><span class="count-badge bg-alpha-light">${s.tdk}</span></td>
+                    <td class="text-center"><span class="count-badge bg-izin-light">${s.bel}</span></td>
+                    <td><div class="pct-row"><div class="progress"><i style="width:${s.pct}%"></i></div><b>${pc(s.pct)}</b></div></td></tr>`;
+            });
+            $('#sumBody').innerHTML = rows.join('');
+            $('#sTot').textContent = tot; $('#sAda').textContent = ada; $('#sTdk').textContent = tdk; $('#sBel').textContent = tot - ada - tdk;
+        }
+
+        function rowHTML(x, n) {
+            const bg = x.st === 'ada' ? '<span class="badge bg-success">Ada</span>' : x.st === 'tidak' ? '<span class="badge bg-danger">Tidak Ada</span>' : '<span class="badge bg-warning">Belum Diisi</span>';
+            const files = x.files.length
+                ? `<div class="files">${x.files.map(w => `<span class="chip"><i class="fas ${iconFor(w.nama_berkas)}"></i><span class="t">${esc(w.nama_berkas)}</span>${w.mapel ? `<em>${esc(w.mapel)}</em>` : ''}</span>`).join('')}</div>`
+                : `<span class="muted">${x.st === 'tidak' ? 'Ditandai tidak ada' : x.st === 'ada' ? 'Ditandai ada, belum ada berkas' : 'Belum ada berkas'}</span>`;
+            return `<tr><td>${n}</td><td style="font-weight:600;">${esc(x.label)}</td><td>${bg}</td><td>${files}</td></tr>`;
+        }
+        function renderGroups() {
+            const q = $('#fNama').value.trim().toLowerCase(), fs = $('#fStatus').value;
+            let html = '';
+            T.forEach((t, i) => {
+                if (kat !== '' && +kat !== i) return;
+                const s = stat(i);
+                let list = s.s.map((x, n) => ({ x, n: n + 1 }));
+                if (fs) list = list.filter(o => (fs === 'ada' && o.x.st === 'ada') || (fs === 'tidak' && o.x.st === 'tidak') || (fs === 'bel' && !o.x.st));
+                if (q) list = list.filter(o => (o.x.label + ' ' + o.x.files.map(f => f.nama_berkas + ' ' + (f.mapel || '')).join(' ')).toLowerCase().includes(q));
+                if (!list.length) return;
+                html += `<div style="margin-bottom:26px;">
+                    <h3 style="font-size:1.05rem;color:#333;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                        <i class="fas fa-folder" style="color:var(--primary-color);"></i> ${esc(t.n)}
+                        <span class="count-badge bg-hadir-light" style="font-size:.75rem;">${s.ada}/${s.tot} terpenuhi · ${pc(s.pct)}</span>
+                    </h3>
+                    <div class="table-responsive"><table class="custom-table">
+                        <thead><tr><th style="width:50px;">No</th><th>Item Berkas</th><th style="width:120px;">Status</th><th>Berkas</th></tr></thead>
+                        <tbody>${list.map(o => rowHTML(o.x, o.n)).join('')}</tbody>
+                    </table></div></div>`;
+            });
+            $('#groups').innerHTML = html || '<div class="empty">Tidak ada item yang sesuai filter.</div>';
+        }
+
+        function pRenderTabs(center) {
+            let tot = 0, ada = 0;
+            const tabs = T.map((t, i) => { const st = stat(i); tot += st.tot; ada += st.ada; return { v: String(i), n: t.n, ada: st.ada, tot: st.tot, c: KPAL[i % KPAL.length] }; });
+            tabs.unshift({ v: '', n: 'Semua', ada, tot, c: KALL, ic: 'fa-layer-group' });
+            $('#pTabs').innerHTML = tabs.map(x => `<button type="button" role="tab" class="ktab${x.v === kat ? ' on' : ''}${x.tot && x.ada === x.tot ? ' full' : ''}" data-v="${x.v}" aria-selected="${x.v === kat}" style="--tc:${x.c[0]};--tc2:${x.c[1]};--tl:${x.c[2]};--tb:${x.c[3]};--tt:${x.c[4]}">${x.ic ? `<i class="fas ${x.ic} pi"></i>` : ''}<span>${esc(x.n)}</span><em>${x.ada}/${x.tot}</em></button>`).join('');
+            const act = kat === '' ? KALL : KPAL[+kat % KPAL.length];
+            $('#pw').style.setProperty('--ka', act[0]);
+            if (center) {
+                const bx = $('#pTabs'), on = bx.querySelector('.on');
+                if (on) bx.scrollBy({ left: on.getBoundingClientRect().left - bx.getBoundingClientRect().left - (bx.clientWidth - on.offsetWidth) / 2 });
+            }
+            pArrows();
+        }
+        function pArrows() {
+            const t = $('#pTabs'), over = t.scrollWidth > t.clientWidth + 1;
+            $('#pArL').hidden = $('#pArR').hidden = !over;
+            $('#pArL').disabled = t.scrollLeft <= 1;
+            $('#pArR').disabled = t.scrollLeft + t.clientWidth >= t.scrollWidth - 1;
+        }
+        function pPick(v) { kat = v; pRenderTabs(true); renderGroups(); }
+        function renderAll() { renderSummary(); pRenderTabs(); renderGroups(); }
+
+        async function loadId() {
+            try {
+                const r = await fetch(ID_URL + '?select=nama_sekolah,nama_kepsek,nip_kepsek::text,logo&limit=1', { headers: { apikey: ID_KEY, Authorization: 'Bearer ' + ID_KEY } });
+                if (!r.ok) throw 0;
+                const d = (await r.json())[0]; if (!d) throw 0;
+                if (d.nama_sekolah) { $('#nSch').textContent = d.nama_sekolah; document.title = 'Laporan Pemberkasan PKKS - ' + d.nama_sekolah; }
+                if (d.logo) { const img = document.querySelector('.navbar-brand img'); img.src = d.logo; img.style.display = 'block'; }
+                $('#idKepsek').textContent = d.nama_kepsek || '-';
+                $('#idNip').textContent = d.nip_kepsek == null ? '-' : String(d.nip_kepsek);
+                $('#idSekolah').textContent = d.nama_sekolah || '-';
+            } catch (e) { console.error('Gagal memuat identitas sekolah'); }
+        }
+
+        // Hanya membaca data (tanpa link berkas Drive), tidak ada fitur ubah/unggah
+        async function load() {
+            try {
+                const [it, st, rows] = await Promise.all([
+                    sb('berkas_item?select=id,tab,label&order=id.asc&limit=2000'),
+                    sb('berkas_status?select=slot_key,status&limit=5000'),
+                    sb('berkas_drive?select=id,nama_berkas,mapel,tab,item,created_at&order=created_at.asc&limit=1000')
+                ]);
+                C = {}; S = {};
+                (it || []).forEach(x => { const t = T.findIndex(y => y.n === x.tab); if (t < 0) return; (C[t] = C[t] || []).push({ id: x.id, l: x.label }); });
+                (st || []).forEach(x => { if (x.status) S[x.slot_key] = x.status; });
+                R = rows || [];
+                renderAll();
+                $('#upd').textContent = 'Diperbarui: ' + new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' });
+            } catch (e) {
+                const m = e instanceof TypeError ? 'tidak dapat menghubungi server.' : e.message;
+                $('#sumBody').innerHTML = '<tr><td colspan="6" class="text-center" style="color:#ff938c;">Gagal memuat data.</td></tr>';
+                $('#groups').innerHTML = `<div class="empty" style="color:#e74c3c;">Gagal memuat data: ${esc(m)}</div>`;
+            }
+        }
+
+        $('#fNama').addEventListener('input', renderGroups);
+        $('#fStatus').addEventListener('change', renderGroups);
+        $('#pTabs').addEventListener('click', e => { const b = e.target.closest('.ktab'); if (b) pPick(b.dataset.v); });
+        $('#pArL').addEventListener('click', () => $('#pTabs').scrollBy({ left: -$('#pTabs').clientWidth * 0.6, behavior: 'smooth' }));
+        $('#pArR').addEventListener('click', () => $('#pTabs').scrollBy({ left: $('#pTabs').clientWidth * 0.6, behavior: 'smooth' }));
+        $('#pTabs').addEventListener('scroll', pArrows, { passive: true });
+        window.addEventListener('resize', pArrows);
+        if (window.ResizeObserver) new ResizeObserver(pArrows).observe($('#pTabs'));
+        $('#sumBody').addEventListener('click', e => {
+            const tr = e.target.closest('tr[data-i]'); if (!tr) return;
+            pPick(tr.dataset.i);
+            $('#groups').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
+
+        loadId();
+        load();
+    </script>
+</body>
+</html>
