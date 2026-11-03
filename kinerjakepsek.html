@@ -169,6 +169,19 @@
         .ic-emerald { background: linear-gradient(135deg, #0ba360, #3cba92); }
         .ic-danger-dock { background: linear-gradient(135deg, #ff5f6d, #dc2626); }
         .ic-amber { background: linear-gradient(135deg, #f7971e, #ffb347); }
+        .ic-sky { background: linear-gradient(135deg, #0ea5e9, #38bdf8); }
+
+        /* --- Modal Link Laporan --- */
+        .lkc { width: min(520px, 100%); height: auto; max-height: calc(100vh - 32px); }
+        .lkb { padding: 20px; }
+        .lkb p { font-size: 0.88rem; color: #555; margin-bottom: 14px; line-height: 1.5; }
+        .lkrow { display: flex; gap: 8px; }
+        .lkrow .form-control { flex: 1; min-width: 0; background: #f8f9fc; }
+        .lkrow .btn-primary, .lkact .btn-primary { width: auto; flex: none; white-space: nowrap; }
+        .lkact { display: flex; gap: 10px; margin-top: 14px; justify-content: flex-end; flex-wrap: wrap; }
+        .lknote { margin-top: 14px; font-size: 0.78rem; color: #888; display: flex; gap: 8px; align-items: flex-start; }
+        .lknote i { color: var(--primary-color); margin-top: 2px; }
+        @media (max-width: 520px) { .lkrow { flex-direction: column; } .lkrow .btn-primary { justify-content: center; } .lkact .btn-primary { flex: 1; justify-content: center; } }
 
         /* --- Modal Kelola Berkas --- */
         .kc { width: min(720px, 100%); height: min(86vh, 720px); max-height: calc(100vh - 32px); }
@@ -484,6 +497,26 @@
             </div>
         </div>
     </div>
+    <!-- Modal Link Laporan (halaman publik hanya-lihat) -->
+    <div class="mo" id="lo" hidden>
+        <div class="mc lkc" role="dialog" aria-modal="true" aria-labelledby="lot">
+            <div class="mh">
+                <div class="mt"><b id="lot"><i class="fas fa-link" style="color:var(--primary-color);margin-right:8px;"></i>Link Laporan PKKS</b><small>Halaman publik, hanya menampilkan laporan</small></div>
+                <button class="mx" id="lcl" type="button" aria-label="Tutup"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="lkb">
+                <p>Bagikan link berikut kepada pihak yang perlu melihat perkembangan pengisian berkas PKKS (misalnya pengawas). Halaman ini tidak memerlukan login dan tidak bisa mengubah data.</p>
+                <div class="lkrow">
+                    <input type="text" class="form-control" id="lUrl" readonly aria-label="Link laporan">
+                    <button type="button" class="btn-primary" id="lCopy"><i class="fas fa-copy"></i> Salin Link</button>
+                </div>
+                <div class="lkact">
+                    <a class="btn-primary" id="lOpen" href="#" target="_blank" rel="noopener" style="background-color:#10b981;"><i class="fas fa-up-right-from-square"></i> Buka Halaman</a>
+                </div>
+                <div class="lknote"><i class="fas fa-circle-info"></i><span>Halaman laporan memakai file <b>laporanpkks.html</b>. Pastikan file tersebut diunggah satu folder dengan halaman ini agar link dapat dibuka dari luar.</span></div>
+            </div>
+        </div>
+    </div>
     <div id="toast" role="status"></div>
 
     <!-- Dock (melayang, ala macOS) -->
@@ -492,6 +525,7 @@
             <a href="adminkepsek.html" class="dock-item" data-label="Beranda" aria-label="Beranda"><span class="dock-ic ic-indigo"><i class="fas fa-home"></i></span><span class="dock-name">Beranda</span></a>
             <button type="button" class="dock-item" data-act="kelola" data-label="Kelola Berkas" aria-label="Kelola Berkas"><span class="dock-ic ic-amber"><i class="fas fa-folder-plus"></i></span><span class="dock-name">Kelola</span></button>
             <button type="button" class="dock-item" data-act="refresh" data-label="Refresh" aria-label="Refresh"><span class="dock-ic ic-emerald"><i class="fas fa-sync-alt"></i></span><span class="dock-name">Refresh</span></button>
+            <button type="button" class="dock-item" data-act="link" data-label="Link Laporan" aria-label="Link Laporan"><span class="dock-ic ic-sky"><i class="fas fa-link"></i></span><span class="dock-name">Link</span></button>
             <button type="button" class="dock-item" data-act="print" data-label="Cetak" aria-label="Cetak"><span class="dock-ic ic-danger-dock"><i class="fas fa-print"></i></span><span class="dock-name">Cetak</span></button>
         </div>
     </nav>
@@ -709,6 +743,7 @@
             if (a === 'refresh') { loadId(); load(true); }
             if (a === 'print') window.print();
             if (a === 'kelola') openKelola();
+            if (a === 'link') openLinkLap();
         });
         document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
 
@@ -967,6 +1002,26 @@
             });
             dock.addEventListener('mouseleave', () => items.forEach(i => { i.style.transform = ''; }));
         })();
+
+        // ===== Link Laporan: halaman publik (laporanpkks.html), hanya-lihat =====
+        function laporanUrl() { return new URL('laporanpkks.html', window.location.href).href; }
+        function openLinkLap() {
+            const u = laporanUrl();
+            $('#lUrl').value = u; $('#lOpen').href = u;
+            $('#lo').hidden = false; document.body.style.overflow = 'hidden';
+            setTimeout(() => { $('#lUrl').focus(); $('#lUrl').select(); }, 60);
+        }
+        function closeLinkLap() { $('#lo').hidden = true; document.body.style.overflow = ''; }
+        async function copyLinkLap() {
+            const u = $('#lUrl').value;
+            try { await navigator.clipboard.writeText(u); }
+            catch (e) { $('#lUrl').select(); try { document.execCommand('copy'); } catch (e2) { toast('Salin manual dengan menekan Ctrl+C.'); return; } }
+            toast('Link laporan disalin.');
+        }
+        $('#lCopy').addEventListener('click', copyLinkLap);
+        $('#lcl').addEventListener('click', closeLinkLap);
+        $('#lo').addEventListener('click', e => { if (e.target.id === 'lo') closeLinkLap(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#lo').hidden) closeLinkLap(); });
 
         loadId();
         load();
